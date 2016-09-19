@@ -11,17 +11,20 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.byids.hy.testpro.MyEventBus;
 import com.byids.hy.testpro.OnMainListener;
 import com.byids.hy.testpro.PullDownMenuListener;
 import com.byids.hy.testpro.R;
 import com.byids.hy.testpro.View.MyCustomViewPager;
 import com.byids.hy.testpro.adapter.MyFragmentAdapter;
 import com.byids.hy.testpro.fragment.MyFragment;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,9 +65,20 @@ public class MyMainActivity extends FragmentActivity{
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);//去掉信息栏
         setContentView(R.layout.my_main_layout);
+        EventBus.getDefault().register(this);
         initView();
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);  //反注册EventBus
+    }
+
     private void initView(){
+        //注册EventBus
+
+
         WindowManager wm = this.getWindowManager();
         int width = wm.getDefaultDisplay().getWidth();
         int height = wm.getDefaultDisplay().getHeight();
@@ -107,6 +121,15 @@ public class MyMainActivity extends FragmentActivity{
         //手势
     }
 
+    //-----------------------------接受fragment传来的消息--------------------------------
+    @Subscribe
+    public void onEventMainThread(MyEventBus event) {
+        String msg = "onEventMainThread收到了消息：" + event.getmMsg();
+        Log.i(TAG, "onEventMainThread: ##########################"+msg);
+        Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+    }
+
+
     View.OnClickListener mediaListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
@@ -126,19 +149,26 @@ public class MyMainActivity extends FragmentActivity{
         //自定义的下拉监听
         myF.setPullDownMenuListener(new PullDownMenuListener() {
             @Override
-            public void pullDown(boolean b) {
-                b1 = b;
-                if (b==false){      //下拉菜单出现时
+            public void pullDown(boolean b,boolean isIconShow) {
+                b1 = isIconShow;
+                if (b==false&&isIconShow==false){      //下拉菜单出现时
                     //隐藏桌面小控件
                     ivMusic.setVisibility(View.GONE);
                     ivMedia.setVisibility(View.GONE);
                     //设置viewpager不能滑动
                     viewPager.setCanScroll(false);
-                }else if (b==true){     //下拉菜单隐藏时
+                }else if (b==true&&isIconShow==true){     //下拉菜单隐藏时
                     ivMusic.setVisibility(View.VISIBLE);
                     ivMedia.setVisibility(View.VISIBLE);
                     viewPager.setCanScroll(true);
+                }else if (b==false&&isIconShow==true){
+                    ivMusic.setVisibility(View.VISIBLE);
+                    ivMedia.setVisibility(View.VISIBLE);
+                }else if (b==true&&isIconShow==false){
+                    ivMusic.setVisibility(View.GONE);
+                    ivMedia.setVisibility(View.GONE);
                 }
+
             }
 
             @Override

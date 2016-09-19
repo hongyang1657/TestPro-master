@@ -13,4 +13,5 @@
     <color name="colorDeepGreen">#005344</color>
     <color name="colorYellowGreen">#bed742</color>
     <color name="colorYellow">#ffc20e</color>
+    <color name="colorLoginBack">#f2f2f2</color>
 </resources>

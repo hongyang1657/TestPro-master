@@ -34,6 +34,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.byids.hy.testpro.MyEventBus;
 import com.byids.hy.testpro.OnMainListener;
 import com.byids.hy.testpro.PullDownMenuListener;
 import com.byids.hy.testpro.PullUpMenuListener;
@@ -42,6 +43,8 @@ import com.byids.hy.testpro.ScrollViewListener;
 import com.byids.hy.testpro.View.MyCustomScrollView;
 import com.byids.hy.testpro.View.MyPullUpScrollView;
 import com.byids.hy.testpro.activity.MyMainActivity;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.io.InputStream;
 import java.util.Random;
@@ -285,18 +288,18 @@ public class MyFragment extends Fragment implements OnMainListener,PullUpMenuLis
                     if (mScrollY>(btHeight_X3/2)&&mScrollY<=btHeight_X3){
                         scrollToBottom();        //滑动到隐藏头
                         isHeadShown = false;
-                        pullDown(true);
+                        pullDown(true,true);
 
                     }else if(mScrollY<=(btHeight_X3/2)){
                         scrollToTop();           //滑动到显示头
                         isHeadShown = true;
-                        pullDown(false);
+                        pullDown(false,false);
                     }
                 }else if (isInitPosition==false){
                     if(mScrollY<btHeight_X3){
                         scrollToBottom();        //滑动到隐藏头
                         isHeadShown = false;
-                        pullDown(true);
+                        pullDown(true,true);
                     }
                 }
 
@@ -695,7 +698,7 @@ public class MyFragment extends Fragment implements OnMainListener,PullUpMenuLis
         public void onClick(View view) {
             switch (view.getId()){
                 case R.id.rl_xiuxian:
-
+                    EventBus.getDefault().post(new MyEventBus("这是第几个页面"+roomIndex));
                     setScaleAnimation(rlXiuxian);
                     clickXiuxian();
                     break;
@@ -994,8 +997,8 @@ public class MyFragment extends Fragment implements OnMainListener,PullUpMenuLis
     };
 
     //自定义设置的下拉菜单监听
-    public void pullDown(boolean f){
-        pullDownMenuListener.pullDown(f);
+    public void pullDown(boolean f,boolean isIconShow){
+        pullDownMenuListener.pullDown(f,isIconShow);
     }
     public void scrollPager(){
         pullDownMenuListener.scrollPager();
@@ -1023,8 +1026,11 @@ public class MyFragment extends Fragment implements OnMainListener,PullUpMenuLis
                 btPullMenu.setVisibility(View.GONE);
             }
             //向上滑动到一大半时，隐藏桌面两个小控件，房间名。
-            if (scrollY<hideHeight){
+            if (scrollY<btHeight_X3){
                 tvRoomName.setAlpha(1f);
+            }else if (scrollY<hideHeight && scrollY>=btHeight_X3){
+                tvRoomName.setAlpha(1f);
+                pullDown(false,true);
             }else if (scrollY>=hideHeight && scrollY<hideHeight+10){
                 tvRoomName.setAlpha(0.9f);
             }else if (scrollY>=hideHeight+10 && scrollY<hideHeight+20){
@@ -1047,6 +1053,7 @@ public class MyFragment extends Fragment implements OnMainListener,PullUpMenuLis
                 tvRoomName.setAlpha(0.05f);
             }else if (scrollY>=hideHeight+100){
                 tvRoomName.setAlpha(0f);
+                pullDown(true,false);
             }
         }
 
@@ -1093,12 +1100,12 @@ public class MyFragment extends Fragment implements OnMainListener,PullUpMenuLis
             if (flag==true){
                 svPullUpMenu.smoothScrollToSlow(0,-btHeight_X3,1600);
                 flag = false;
-                pullDown(flag);
+                pullDown(false,false);
             }
             if (isInitPosition==false){
                 svPullUpMenu.smoothScrollToSlow(0,btHeight_X3,1000);
                 flag = true;
-                pullDown(flag);
+                pullDown(true,true);
             }
 
         }
@@ -1446,7 +1453,7 @@ public class MyFragment extends Fragment implements OnMainListener,PullUpMenuLis
         if (scrollY==0){
             svPullUpMenu.smoothScrollToSlow(0,btHeight_X3,600);
             flag = true;
-            pullDown(flag);
+            pullDown(true,true);
         }
     }
 
@@ -1456,7 +1463,7 @@ public class MyFragment extends Fragment implements OnMainListener,PullUpMenuLis
         if (scrollY==0){
             svPullUpMenu.smoothScrollToSlow(0,btHeight_X3,600);
             flag = true;
-            pullDown(flag);
+            pullDown(true,true);
         }
         return false;
     }
