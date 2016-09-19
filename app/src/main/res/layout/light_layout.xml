@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="@mipmap/mohu"
+    android:orientation="horizontal"
+    android:padding="4dp"
+    android:weightSum="4"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+
+    <RelativeLayout
+        android:layout_weight="3"
+        android:id="@+id/relative_light_control"
+        android:layout_marginLeft="28dp"
+        android:layout_marginRight="28dp"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/tv_light_point"
+            android:text="0"
+            android:textColor="@color/colorText"
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+        <RelativeLayout
+            android:id="@+id/relative_light_value"
+            android:layout_below="@id/tv_light_point"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <com.byids.hy.testpro.View.LightValueHsScrollView
+                android:id="@+id/hs_light_point"
+                android:scrollbars="none"
+                android:layout_centerInParent="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <include layout="@layout/light_point_layout"/>
+            </com.byids.hy.testpro.View.LightValueHsScrollView>
+
+            <ImageView
+                android:id="@+id/iv_light_point"
+                android:layout_centerInParent="true"
+                android:src="@mipmap/light_value_point_2x"
+                android:paddingBottom="6dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </RelativeLayout>
+
+        
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/relative_light_switch"
+        android:clickable="true"
+        android:gravity="center"
+        android:layout_weight="1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/iv_light_switch"
+            android:src="@mipmap/light_switch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/tv_light_kaiguan"
+            android:text="开/关"
+            android:textColor="@color/colorText"
+            android:paddingTop="4dp"
+            android:layout_alignRight="@id/iv_light_switch"
+            android:layout_alignLeft="@id/iv_light_switch"
+            android:layout_below="@id/iv_light_switch"
+            android:gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </RelativeLayout>
+
+</LinearLayout>

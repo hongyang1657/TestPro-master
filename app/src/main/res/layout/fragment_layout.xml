@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.byids.hy.testpro.View.MyCustomScrollView
+        android:clickable="false"
+        android:id="@+id/id_scroll"
+        android:scrollbars="none"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <RelativeLayout
+            android:id="@+id/linear"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:id="@+id/linear_menu"
+                android:weightSum="4"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/tv_set"
+                    android:clickable="true"
+                    android:text="设置"
+                    android:textColor="@color/colorText"
+                    android:layout_weight="1"
+                    android:drawablePadding="6dp"
+                    android:padding="10dp"
+                    android:drawableTop="@mipmap/allroomcontrol_shezhi_s"
+                    android:gravity="center"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+                <TextView
+                    android:id="@+id/tv_monitoring"
+                    android:clickable="true"
+                    android:text="监控"
+                    android:textColor="@color/colorText"
+                    android:layout_weight="1"
+                    android:drawablePadding="6dp"
+                    android:padding="10dp"
+                    android:drawableTop="@mipmap/jiankong_s"
+                    android:gravity="center"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+                <TextView
+                    android:id="@+id/tv_lock"
+                    android:clickable="true"
+                    android:text="门锁"
+                    android:textColor="@color/colorText"
+                    android:layout_weight="1"
+                    android:drawablePadding="6dp"
+                    android:padding="10dp"
+                    android:drawableTop="@mipmap/allroomcontrol_mensuo_s"
+                    android:gravity="center"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+                <TextView
+                    android:id="@+id/tv_security"
+                    android:clickable="true"
+                    android:text="布防"
+                    android:textColor="@color/colorText"
+                    android:layout_weight="1"
+                    android:drawablePadding="6dp"
+                    android:padding="10dp"
+                    android:drawableTop="@mipmap/allroomcontrol_bufang_s"
+                    android:gravity="center"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+            <ImageView
+                android:id="@+id/id_iv1"
+                android:layout_below="@id/linear_menu"
+                android:src="@mipmap/back_4"
+                android:scaleType="centerCrop"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            <ImageView
+                android:id="@+id/id_iv"
+                android:layout_below="@id/linear_menu"
+                android:src="@mipmap/back_5"
+                android:scaleType="centerCrop"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+
+        </RelativeLayout>
+    </com.byids.hy.testpro.View.MyCustomScrollView>
+
+    <com.byids.hy.testpro.View.MyPullUpScrollView
+        android:id="@+id/scroll_pull_up"
+        android:scrollbars="none"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:id="@+id/linear_pull_up_scroll"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:id="@+id/linear_up_menu_click"
+                android:orientation="horizontal"
+                android:weightSum="4"
+                android:layout_width="match_parent"
+                android:layout_height="82dp">
+
+                <Button
+                    android:id="@+id/bt_shezhi"
+                    android:background="#00000000"
+                    android:layout_weight="1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent" />
+                <Button
+                    android:id="@+id/bt_jiankong"
+                    android:background="#00000000"
+                    android:layout_weight="1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent" />
+                <Button
+                    android:id="@+id/bt_mensuo"
+                    android:background="#00000000"
+                    android:layout_weight="1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent" />
+                <Button
+                    android:id="@+id/bt_bufang"
+                    android:background="#00000000"
+                    android:layout_weight="1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tv_blank"
+                android:clickable="true"
+                android:text="客厅"
+                android:textSize="42sp"
+                android:gravity="bottom"
+                android:padding="10dp"
+                android:textColor="@color/colorWhite"
+                android:layout_width="match_parent"
+                android:layout_height="70dp" />
+
+            <TextView
+                android:id="@+id/tv_scene_name"
+                android:background="@mipmap/mohu"
+                android:text="场 景"
+                android:textColor="@color/colorText"
+                android:clickable="true"
+                android:padding="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <include layout="@layout/scene_layout"/>
+
+            <TextView
+                android:id="@+id/tv_light"
+                android:text="灯 光"
+                android:textColor="@color/colorText"
+                android:background="@mipmap/mohu"
+                android:clickable="true"
+                android:padding="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <include layout="@layout/light_layout"/>
+
+            <TextView
+                android:id="@+id/tv_curtain"
+                android:text="窗 帘"
+                android:textColor="@color/colorText"
+                android:background="@mipmap/mohu"
+                android:clickable="true"
+                android:padding="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <include layout="@layout/curtain_layout"/>
+
+            <TextView
+                android:id="@+id/tv_roller_curtain"
+                android:text="卷 帘"
+                android:textColor="@color/colorText"
+                android:background="@mipmap/mohu"
+                android:clickable="true"
+                android:padding="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <include layout="@layout/roller_curtain_layout"/>
+
+            <TextView
+                android:id="@+id/tv_air_condition"
+                android:text="空 调"
+                android:textColor="@color/colorText"
+                android:background="@mipmap/mohu"
+                android:clickable="true"
+                android:padding="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <include layout="@layout/air_condition_layout"/>
+            <include layout="@layout/air_condition_details_layout" />
+            <!--<ImageView
+                android:id="@+id/iv_bottom"
+                android:background="@mipmap/mohu"
+                android:layout_width="match_parent"
+                android:layout_height="500dp" />-->
+
+        </LinearLayout>
+    </com.byids.hy.testpro.View.MyPullUpScrollView>
+    <ImageView
+        android:id="@+id/button"
+        android:focusable="true"
+        android:clickable="true"
+        android:src="@mipmap/homeicon_s"
+        android:background="@mipmap/myhomeback_s"
+        android:layout_centerInParent="true"
+        android:layout_alignParentTop="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    <!--<TextView
+        android:id="@+id/tv_room_name"
+        android:clickable="false"
+        android:text="客厅"
+        android:textColor="@color/colorWhite"
+        android:textSize="32sp"
+        android:gravity="center"
+        android:background="@mipmap/myhomeback_s"
+        android:layout_centerInParent="true"
+        android:layout_alignParentTop="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />-->
+
+</RelativeLayout>
