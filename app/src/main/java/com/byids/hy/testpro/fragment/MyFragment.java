@@ -34,8 +34,8 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.byids.hy.testpro.Bean.RoomAttr;
 import com.byids.hy.testpro.MyEventBus;
-import com.byids.hy.testpro.OnMainListener;
 import com.byids.hy.testpro.PullDownMenuListener;
 import com.byids.hy.testpro.PullUpMenuListener;
 import com.byids.hy.testpro.R;
@@ -53,7 +53,7 @@ import java.util.Random;
  * Created by hy on 2016/8/15.
  */
 @SuppressLint({"ValidFragment", "NewApi"})
-public class MyFragment extends Fragment implements OnMainListener,PullUpMenuListener,GestureDetector.OnGestureListener {
+public class MyFragment extends Fragment implements PullUpMenuListener,GestureDetector.OnGestureListener {
     private String TAG = "result";
     private View view = null;
     
@@ -76,7 +76,15 @@ public class MyFragment extends Fragment implements OnMainListener,PullUpMenuLis
     private TextView tvScene;       //场景
     private LinearLayout linearScene;    //场景控制部分
     private TextView tvLight;           //灯光
-    //上拉菜单初始化浮现的部分（以上三个部分）的高度
+    //控制模块，灯光，窗帘
+    private LinearLayout llLight;
+    private TextView tvChuanglian;
+    private LinearLayout llChuanglian;
+    private TextView tvJuanLian;
+    private LinearLayout llJuanlian;
+    private TextView tvAirCondition;
+    private LinearLayout llAirCondition;
+    //上拉菜单初始化浮现的部分（最上面上三个部分）的高度
     private int tvSceneHeight;
     private int linearSceneHeight;
     private int tvLightHeight;
@@ -96,6 +104,7 @@ public class MyFragment extends Fragment implements OnMainListener,PullUpMenuLis
     private MyCustomScrollView scrollView;
     private int roomIndex;     //房间标示
     private String roomName;   //房间名
+    private RoomAttr roomAttr;   //房间拥有的各个产品信息
     private GestureDetector detector;
     //private MyMainActivity.MyOntouchListener listener;
     private MyMainActivity.MyOnTouchListener myOnTouchListener;
@@ -143,6 +152,7 @@ public class MyFragment extends Fragment implements OnMainListener,PullUpMenuLis
     private RelativeLayout rlLikai;
     private ImageView ivLikai;
     private TextView tvLikai;
+
 
 
     //灯光
@@ -226,10 +236,11 @@ public class MyFragment extends Fragment implements OnMainListener,PullUpMenuLis
 
 
     private int[] backList;  //背景图片组
-    public MyFragment(int roomIndex,String roomName,int[] backList) {
+    public MyFragment(int roomIndex, String roomName, int[] backList, RoomAttr roomAttr) {
         this.roomIndex = roomIndex;
         this.roomName = roomName;
         this.backList = backList;
+        this.roomAttr = roomAttr;
     }
 
 
@@ -314,9 +325,7 @@ public class MyFragment extends Fragment implements OnMainListener,PullUpMenuLis
                 }else if (i1>btHeight_X3){
                     isInitPosition = false;
                 }
-                Log.i(TAG, "onScrollChange: 一枝花冻");
                 position = i1;
-                Log.i(TAG, "onScrollChange: i="+i+"   i1="+i1+"   i2="+i2+"   i3="+i3);
             }
         });
 
@@ -415,7 +424,6 @@ public class MyFragment extends Fragment implements OnMainListener,PullUpMenuLis
         };
 
         ((MyMainActivity) getActivity()).registerMyOnTouchListener(myOnTouchListener);
-        ((MyMainActivity) getActivity()).onConnectionFragment(this);
         return view;
 
     }
@@ -567,6 +575,25 @@ public class MyFragment extends Fragment implements OnMainListener,PullUpMenuLis
         tvKongtiaoTemp = (TextView) view.findViewById(R.id.tv_kongtiao_wendu);
         ivKongtiaoMoshi = (ImageView) view.findViewById(R.id.iv_kongtiao_sleep);
         tvKongtiaoMoshi = (TextView) view.findViewById(R.id.tv_kongtiao_sleep);
+
+        //控制模块（灯，窗帘，空调等）
+        llLight = (LinearLayout) view.findViewById(R.id.ll_light);
+        llChuanglian = (LinearLayout) view.findViewById(R.id.ll_chuanglian);
+        llJuanlian = (LinearLayout) view.findViewById(R.id.ll_juanlian);
+        llAirCondition = (LinearLayout) view.findViewById(R.id.ll_air_condition);
+        tvChuanglian = (TextView) view.findViewById(R.id.tv_curtain);
+        tvJuanLian = (TextView) view.findViewById(R.id.tv_roller_curtain);
+        tvAirCondition = (TextView) view.findViewById(R.id.tv_air_condition);
+
+        if (roomAttr.getLight().getActive()==0){
+            initRoomAttr(tvLight,llLight);
+        }if (roomAttr.getCurtain().getActive()==0){
+            initRoomAttr(tvChuanglian,llChuanglian);
+            initRoomAttr(tvJuanLian,llJuanlian);
+        }if (roomAttr.getAircondition().getActive()==0){
+            initRoomAttr(tvAirCondition,llAirCondition);
+        }
+
 
 
         rlXiuxian.setOnClickListener(controlListener);
@@ -1436,6 +1463,12 @@ public class MyFragment extends Fragment implements OnMainListener,PullUpMenuLis
         }
     }
 
+    //-----------------根据不同的用户信息，使某些模块设置为GONE----------------
+    private void initRoomAttr(TextView tv,View view){
+        tv.setVisibility(View.GONE);
+        view.setVisibility(View.GONE);
+    }
+
 
     /*
      *    ----------------------------------------------------手势------------------------------------------------------
@@ -1523,13 +1556,13 @@ public class MyFragment extends Fragment implements OnMainListener,PullUpMenuLis
 
 
     //通信接口  pagerScrollState的值为viewpager滑动状态：1.开始滑动；2.松开手指；0.滑动停止
-    @Override
+    /*@Override
     public void onMainAction(int pagerScrollState) {
         Log.i(TAG, "onMainAction: hhahahahahahahahahhhhhhhhhhhhhhhhhhh"+pagerScrollState);
         this.pagerScrollState = pagerScrollState;
         if (pagerScrollState==1){
             btPullMenu.setVisibility(View.INVISIBLE);
         }
-    }
+    }*/
 
 }

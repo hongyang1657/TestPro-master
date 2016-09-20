@@ -15,8 +15,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.byids.hy.testpro.Bean.HomeAttr;
 import com.byids.hy.testpro.MyEventBus;
-import com.byids.hy.testpro.OnMainListener;
 import com.byids.hy.testpro.PullDownMenuListener;
 import com.byids.hy.testpro.R;
 import com.byids.hy.testpro.View.MyCustomViewPager;
@@ -40,7 +40,6 @@ public class MyMainActivity extends FragmentActivity{
     private List<Fragment> viewList = new ArrayList<Fragment>();
     private GestureDetector gestureDetector;
     private boolean b1 = true;       //下拉菜单隐藏为true，出现为false
-    private OnMainListener onMainListener;
     private int pagerState;
 
     //几个控件
@@ -55,7 +54,8 @@ public class MyMainActivity extends FragmentActivity{
     private int[] ivBackList = {R.mipmap.back_10,R.mipmap.back_12,R.mipmap.back_13,R.mipmap.back_14,R.mipmap.back_5,R.mipmap.back_6,R.mipmap.back_8,R.mipmap.back_9,R.mipmap.back_1,R.mipmap.back_2,R.mipmap.back_3,R.mipmap.back_4};
 
     //房间名数组
-    private String[] roomList = {"客厅","卧室","书房","测试"};
+    private String[] roomNameList = null;
+    private HomeAttr homeAttr = new HomeAttr();
 
     private MyFragment myFragment1;
 
@@ -65,6 +65,7 @@ public class MyMainActivity extends FragmentActivity{
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);//去掉信息栏
         setContentView(R.layout.my_main_layout);
+        //注册EventBus
         EventBus.getDefault().register(this);
         initView();
     }
@@ -76,8 +77,12 @@ public class MyMainActivity extends FragmentActivity{
     }
 
     private void initView(){
-        //注册EventBus
 
+        //获取房间信息
+        roomNameList = getIntent().getStringArrayExtra("roomNameList");
+        homeAttr = (HomeAttr) getIntent().getSerializableExtra("homeAttr");
+        Log.i(TAG, "initView: "+homeAttr.getRooms().get(0).getRoomAttr().getLight().getActive());
+        Log.i(TAG, "initView: "+homeAttr);
 
         WindowManager wm = this.getWindowManager();
         int width = wm.getDefaultDisplay().getWidth();
@@ -95,28 +100,17 @@ public class MyMainActivity extends FragmentActivity{
         ivMedia.setPadding(0,h1,w,0);
         viewPager = (MyCustomViewPager) findViewById(R.id.id_vp);
 
-        for (int i=0;i<4;i++){
-            myFragment1 = new MyFragment(i,roomList[i],ivBackList);
+        //初始化activity给fragment传递的数据
+        for (int i=0;i<roomNameList.length;i++){
+            myFragment1 = new MyFragment(i,roomNameList[i],ivBackList,homeAttr.getRooms().get(i).getRoomAttr());         //房间id,房间名数组，背景图片数组，活跃的控件数组
             pullMenu(myFragment1);
             viewList.add(myFragment1);
         }
 
-        /*myFragment1 = new MyFragment(0,"客厅",ivBackList1);
-        pullMenu(myFragment1);
-        viewList.add(myFragment1);
-        MyFragment myFragment2 = new MyFragment(1,"卧室",ivBackList2);
-        pullMenu(myFragment2);
-        viewList.add(myFragment2);
-        MyFragment myFragment3 = new MyFragment(2,"书房",ivBackList3);
-        pullMenu(myFragment3);
-        viewList.add(myFragment3);
-        MyFragment myFragment4 = new MyFragment(3,"测试",ivBackList1);
-        pullMenu(myFragment4);
-        viewList.add(myFragment4);*/
 
         adapter = new MyFragmentAdapter(getSupportFragmentManager(),viewList);
         viewPager.setAdapter(adapter);
-        viewPager.setOffscreenPageLimit(5);  //多设置一页
+        viewPager.setOffscreenPageLimit(roomNameList.length+1);  //多设置一页
         viewPager.addOnPageChangeListener(pagerChangeListener);
         //手势
     }
@@ -206,22 +200,9 @@ public class MyMainActivity extends FragmentActivity{
                 scrollViewPager();
             }
             if (state==0){
-                switch (roomPostion){
-                    case 0:
-                        downScrollViewPager("客厅");
-                        break;
-                    case 1:
-                        downScrollViewPager("卧室");
-                        break;
-                    case 2:
-                        downScrollViewPager("淋浴间");
-                        break;
-                    case 3:
-                        downScrollViewPager("测试");
-                        break;
-                }
+                downScrollViewPager();
             }
-            onMainListener.onMainAction(pagerState);   //Activity向Fragment通信
+            //onMainListener.onMainAction(pagerState);   //Activity向Fragment通信
         }
     };
     //滑动viewpager时，控件消失
@@ -230,7 +211,7 @@ public class MyMainActivity extends FragmentActivity{
         ivMedia.setVisibility(View.GONE);
     }
     //滑动结束后，控件显现
-    private void downScrollViewPager(String roomName){
+    private void downScrollViewPager(){
         if (b1==false){
             ivMusic.setVisibility(View.GONE);
             ivMedia.setVisibility(View.GONE);
@@ -275,17 +256,5 @@ public class MyMainActivity extends FragmentActivity{
         public boolean onTouch(MotionEvent ev);
     }
 
-    /*@Override
-    public void onAttachFragment(Fragment fragment) {
-        try {
-            onMainListener = (OnMainListener)myFragment1;
-        } catch (Exception e) {
-
-        }
-        super.onAttachFragment(fragment);
-    }*/
-    public void onConnectionFragment(MyFragment fragment){
-        onMainListener = (OnMainListener)fragment;
-    }
 
 }
