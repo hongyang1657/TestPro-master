@@ -124,6 +124,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
     private int position;    //上拉菜单滑动位置
     private int mScrollY;    //滑动停止的位置
     private int lightSVPosition;    //灯光调光模块动态值
+    private boolean isCanScroll = true;
 
     //---------------------控制部分 上---------------------
     private TextView tvRoomName;     //房间名部分
@@ -284,9 +285,11 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                 if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
                     handler.sendMessageDelayed(handler.obtainMessage(touchEventId, view), 5);
                 }
-
                 svPullUpMenu.getParent().requestDisallowInterceptTouchEvent(true);
-                return false;
+                if (isCanScroll==true){
+                    return false;
+                }else
+                return true;
             }
 
             private void handleStop(Object view) {
@@ -730,10 +733,12 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                     clickXiuxian();
                     break;
                 case R.id.rl_yule:
+                    isCanScroll = false;
                     setScaleAnimation(rlYule);
                     clickYule();
                     break;
                 case R.id.rl_juhui:
+                    isCanScroll = true;
                     setScaleAnimation(rlJuhui);
                     clickJuhui();
                     break;
@@ -777,8 +782,18 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                     clickStopJuan();
                     break;
                 case R.id.rl_kongtiao_kaiguan:
-                    setScaleAnimation(rlKongtiao);
-                    clickAirSwitch();
+                    rlKongtiao.setClickable(false);   //点击后设为不可点击
+                    ObjectAnimator.ofFloat(rlKongtiao,"scaleX",1f,0.6f,1f).setDuration(400).start();
+                    ObjectAnimator objectAnimator = new ObjectAnimator().ofFloat(rlKongtiao,"scaleY",1f,0.6f,1f).setDuration(400);
+                    objectAnimator.addListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            super.onAnimationEnd(animation);
+                            clickAirSwitch();
+                        }
+                    });
+                    objectAnimator.start();
+
                     break;
                 case R.id.rl_kongtiao_moshi:
                     setScaleAnimation(rlKongtiaoMoshi);
@@ -1012,6 +1027,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                     break;
                 case R.id.bt_jiankong:
                     Toast.makeText(getActivity(), "监控", Toast.LENGTH_SHORT).show();
+
                     break;
                 case R.id.bt_mensuo:
                     Toast.makeText(getActivity(), "门锁", Toast.LENGTH_SHORT).show();
@@ -1403,7 +1419,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
     //点击
     private int airSwitchFlag = 0;
     private void clickAirSwitch(){
-        rlKongtiao.setClickable(false);   //点击后设为不可点击
+
         if (airSwitchFlag==0){
             changeColorAirSwitch(R.mipmap.theme2_kongtiao_fan_active_3x,R.color.colorTextActive,"空调 开");
             linearAirDetails.setVisibility(View.VISIBLE);

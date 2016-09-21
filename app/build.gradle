@@ -4,10 +4,11 @@ android {
     compileSdkVersion 24
     buildToolsVersion "23.0.3"
 
+
     defaultConfig {
         applicationId "com.byids.hy.testpro"
         minSdkVersion 15
-        targetSdkVersion 24
+        targetSdkVersion 23
         versionCode 1
         versionName "1.0"
     }
@@ -15,6 +16,12 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+
+    }
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['libs']
         }
     }
 }
@@ -26,4 +33,6 @@ dependencies {
     compile 'org.greenrobot:eventbus:3.0.0'
     compile 'me.neavo:volley:2014.12.09'
     compile 'com.squareup.okhttp3:okhttp:3.4.1'
+    compile files('libs/EZOpenSDK.jar')
 }
+
