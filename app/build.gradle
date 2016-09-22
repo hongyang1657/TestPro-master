@@ -34,5 +34,6 @@ dependencies {
     compile 'me.neavo:volley:2014.12.09'
     compile 'com.squareup.okhttp3:okhttp:3.4.1'
     compile files('libs/EZOpenSDK.jar')
+    compile 'com.squareup.picasso:picasso:2.5.2'
 }
 

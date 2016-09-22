@@ -43,6 +43,7 @@ import com.byids.hy.testpro.ScrollViewListener;
 import com.byids.hy.testpro.View.MyCustomScrollView;
 import com.byids.hy.testpro.View.MyPullUpScrollView;
 import com.byids.hy.testpro.activity.MyMainActivity;
+import com.videogo.openapi.EZOpenSDK;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -224,6 +225,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
+            //isCanScroll = true;   //动画结束后设置为可操作
             switch (msg.what){
                 case 1:
                     linearAirDetails.setVisibility(View.GONE);
@@ -297,7 +299,6 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                 mScrollY = scroller.getScrollY();
                 Log.i(TAG, "handleStop: ----------mScrollY----------"+mScrollY);
 
-
                 if (isInitPosition==true){
                     if (mScrollY>(btHeight_X3/2)&&mScrollY<=btHeight_X3){
                         scrollToBottom();        //滑动到隐藏头
@@ -309,15 +310,14 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                         isHeadShown = true;
                         pullDown(false,false);
                     }
-                }else if (isInitPosition==false){
+                }else if (isInitPosition==false){        //弹簧效果
                     if(mScrollY<btHeight_X3){
                         scrollToBottom();        //滑动到隐藏头
                         isHeadShown = false;
                         pullDown(true,true);
                     }
                 }
-
-
+                isCanScroll = true;  //滑动动画停止后才能用手操作
             }
         });
         svPullUpMenu.setOnScrollChangeListener(new View.OnScrollChangeListener() {
@@ -743,6 +743,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                     clickJuhui();
                     break;
                 case R.id.rl_likai:
+
                     setScaleAnimation(rlLikai);
                     clickLikai();
                     break;
@@ -1027,7 +1028,8 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                     break;
                 case R.id.bt_jiankong:
                     Toast.makeText(getActivity(), "监控", Toast.LENGTH_SHORT).show();
-
+                    //EventBus.getDefault().post(new MyEventBus("jiankong"));
+                    EZOpenSDK.getInstance().openLoginPage();
                     break;
                 case R.id.bt_mensuo:
                     Toast.makeText(getActivity(), "门锁", Toast.LENGTH_SHORT).show();
@@ -1136,6 +1138,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
     View.OnClickListener pullMenuListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
+            isCanScroll = false;
             //隐藏button
             btPullMenu.setVisibility(View.GONE);
 
@@ -1173,7 +1176,8 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
     //滑动到隐藏头
     private void scrollToBottom(){
         isInitPosition = true;
-        svPullUpMenu.smoothScrollToSlow(0,btHeight_X3,800);
+        svPullUpMenu.smoothScrollToSlow(0,btHeight_X3,400);
+        //svPullUpMenu.smoothScrollTo(0,btHeight_X3);
         flag = true;
         btPullMenu.setVisibility(View.VISIBLE);
 
@@ -1419,7 +1423,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
     //点击
     private int airSwitchFlag = 0;
     private void clickAirSwitch(){
-
+        isCanScroll = false;    //点击后设置为不可触摸滑动scrollView
         if (airSwitchFlag==0){
             changeColorAirSwitch(R.mipmap.theme2_kongtiao_fan_active_3x,R.color.colorTextActive,"空调 开");
             linearAirDetails.setVisibility(View.VISIBLE);
@@ -1429,6 +1433,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
             AirConditionHeight = linearAirDetails.getMeasuredHeight();         //空调控制部分的高度
             Log.i(TAG, "onClick: ---------------------------"+AirConditionHeight);
             svPullUpMenu.smoothScrollBySlow(0,AirConditionHeight,2000);
+
             /*Handler handler = new Handler();
             handler.post(new Runnable() {
                 @Override

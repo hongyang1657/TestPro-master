@@ -1,6 +1,7 @@
 package com.byids.hy.testpro;
 
 import android.app.Application;
+import android.util.Log;
 
 import com.videogo.openapi.EZOpenSDK;
 
@@ -15,6 +16,7 @@ public class ByidsApplication extends Application{
     public void onCreate() {
         super.onCreate();
         //初始化
-        EZOpenSDK.initLib(this,APP_KEY,"");
+        boolean a = EZOpenSDK.initLib(this,APP_KEY,"");
+        Log.i("result", "onCreate: 是否初始化成功"+a);
     }
 }

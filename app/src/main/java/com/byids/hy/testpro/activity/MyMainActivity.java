@@ -1,6 +1,7 @@
 package com.byids.hy.testpro.activity;
 
 import android.animation.ObjectAnimator;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -22,6 +23,7 @@ import com.byids.hy.testpro.R;
 import com.byids.hy.testpro.View.MyCustomViewPager;
 import com.byids.hy.testpro.adapter.MyFragmentAdapter;
 import com.byids.hy.testpro.fragment.MyFragment;
+import com.videogo.openapi.EZOpenSDK;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -119,8 +121,11 @@ public class MyMainActivity extends FragmentActivity{
     @Subscribe
     public void onEventMainThread(MyEventBus event) {
         String msg = "onEventMainThread收到了消息：" + event.getmMsg();
-        Log.i(TAG, "onEventMainThread: ##########################"+msg);
         Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+        if (msg=="jiankong"){
+            /*Intent intent = new Intent(MyMainActivity.this,CameraActivity.class);
+            startActivity(intent);*/
+        }
     }
 
 
