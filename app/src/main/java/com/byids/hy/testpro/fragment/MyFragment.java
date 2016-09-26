@@ -110,8 +110,10 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
     //private MyMainActivity.MyOntouchListener listener;
     private MyMainActivity.MyOnTouchListener myOnTouchListener;
     private Activity activity;
-    private ImageView btPullMenu;
+    private RelativeLayout btPullMenu;
     private RelativeLayout linear;
+    private ImageView ivHomeIcon;
+    private TextView tvRoomNameTop;
 
     //上拉菜单
     MyPullUpScrollView svPullUpMenu;
@@ -247,7 +249,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
     }
 
 
-    @TargetApi(Build.VERSION_CODES.M)
+    //@TargetApi(Build.VERSION_CODES.M)
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -410,6 +412,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         linearClick.setLayoutParams(layoutParams);
 
         tvRoomName.setText(roomName);    //设置房间名
+        tvRoomNameTop.setText(roomName);
         ViewGroup.LayoutParams layoutParams1 = tvRoomName.getLayoutParams();
         layoutParams1.height = height-initFloatHeight+btHeight*2;     //设置房间textview的高度 = 屏幕高 - 浮出部分高 + 上部控件的高*2
         tvRoomName.setLayoutParams(layoutParams1);
@@ -447,7 +450,9 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         ivBackGround = (ImageView) view.findViewById(R.id.id_iv);
         ivBackGroundTrans = (ImageView) view.findViewById(R.id.id_iv1);
 
-        btPullMenu = (ImageView) view.findViewById(R.id.button);
+        ivHomeIcon = (ImageView) view.findViewById(R.id.iv_home_icon);
+        tvRoomNameTop = (TextView) view.findViewById(R.id.tv_room_name);
+        btPullMenu = (RelativeLayout) view.findViewById(R.id.rl_bt_menu);
         tvSet = (TextView) view.findViewById(R.id.tv_set);
         tvMonitoring = (TextView) view.findViewById(R.id.tv_monitoring);
         tvLock = (TextView) view.findViewById(R.id.tv_lock);
@@ -1073,31 +1078,58 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
             //向上滑动到一大半时，隐藏桌面两个小控件，房间名。
             if (scrollY<btHeight_X3){
                 tvRoomName.setAlpha(1f);
+                ivHomeIcon.setAlpha(1f);
+                tvRoomNameTop.setAlpha(0f);
+                //pullDown(false,true);
             }else if (scrollY<hideHeight && scrollY>=btHeight_X3){
                 tvRoomName.setAlpha(1f);
+                ivHomeIcon.setAlpha(1f);
+                tvRoomNameTop.setAlpha(0f);
                 pullDown(false,true);
             }else if (scrollY>=hideHeight && scrollY<hideHeight+10){
                 tvRoomName.setAlpha(0.9f);
+                ivHomeIcon.setAlpha(0.9f);
+                tvRoomNameTop.setAlpha(0.1f);
             }else if (scrollY>=hideHeight+10 && scrollY<hideHeight+20){
                 tvRoomName.setAlpha(0.8f);
+                ivHomeIcon.setAlpha(0.8f);
+                tvRoomNameTop.setAlpha(0.2f);
             }else if (scrollY>=hideHeight+20 && scrollY<hideHeight+30){
                 tvRoomName.setAlpha(0.7f);
+                ivHomeIcon.setAlpha(0.7f);
+                tvRoomNameTop.setAlpha(0.3f);
             }else if (scrollY>=hideHeight+30 && scrollY<hideHeight+40){
                 tvRoomName.setAlpha(0.6f);
+                ivHomeIcon.setAlpha(0.6f);
+                tvRoomNameTop.setAlpha(0.4f);
             }else if (scrollY>=hideHeight+40 && scrollY<hideHeight+50){
                 tvRoomName.setAlpha(0.5f);
+                ivHomeIcon.setAlpha(0.5f);
+                tvRoomNameTop.setAlpha(0.5f);
             }else if (scrollY>=hideHeight+50 && scrollY<hideHeight+60){
                 tvRoomName.setAlpha(0.4f);
+                ivHomeIcon.setAlpha(0.4f);
+                tvRoomNameTop.setAlpha(0.6f);
             }else if (scrollY>=hideHeight+60 && scrollY<hideHeight+70){
                 tvRoomName.setAlpha(0.3f);
+                ivHomeIcon.setAlpha(0.3f);
+                tvRoomNameTop.setAlpha(0.7f);
             }else if (scrollY>=hideHeight+70 && scrollY<hideHeight+80){
                 tvRoomName.setAlpha(0.2f);
+                ivHomeIcon.setAlpha(0.2f);
+                tvRoomNameTop.setAlpha(0.8f);
             }else if (scrollY>=hideHeight+80 && scrollY<hideHeight+90){
                 tvRoomName.setAlpha(0.1f);
+                ivHomeIcon.setAlpha(0.1f);
+                tvRoomNameTop.setAlpha(0.9f);
             }else if (scrollY>=hideHeight+90 && scrollY<hideHeight+100){
                 tvRoomName.setAlpha(0.05f);
+                ivHomeIcon.setAlpha(0.05f);
+                tvRoomNameTop.setAlpha(0.95f);
             }else if (scrollY>=hideHeight+100){
                 tvRoomName.setAlpha(0f);
+                ivHomeIcon.setAlpha(0f);
+                tvRoomNameTop.setAlpha(1f);
                 pullDown(true,false);
             }
         }

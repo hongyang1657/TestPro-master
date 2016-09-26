@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <HorizontalScrollView
+        android:id="@+id/hs_bg"
+        android:scrollbars="none"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:id="@+id/iv_login_bg"
+            android:scaleType="centerCrop"
+            android:src="@mipmap/login_bg_3x"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </HorizontalScrollView>
+
+    <com.byids.hy.testpro.View.LoginHScrollView
+        android:id="@+id/hs_login"
+        android:scrollbars="none"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <RelativeLayout
+            android:id="@+id/rl_login"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:id="@+id/iv_tiyan"
+                android:gravity="center"
+                android:src="@mipmap/tiyan_3x"
+                android:layout_marginBottom="60dp"
+                android:layout_marginLeft="36dp"
+                android:layout_alignParentBottom="true"
+                android:paddingTop="8dp"
+                android:clickable="true"
+                android:onClick="loginClick"
+                android:paddingBottom="8dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <ImageView
+                android:id="@+id/iv_denglu"
+                android:gravity="center"
+                android:src="@mipmap/denglu_3x"
+                android:layout_above="@id/iv_tiyan"
+                android:layout_marginLeft="36dp"
+                android:clickable="true"
+                android:onClick="loginClick"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:id="@+id/tv_hehe"
+                android:layout_width="50dp"
+                android:layout_height="50dp" />
+
+            <RelativeLayout
+                android:id="@+id/ll_android"
+                android:layout_below="@id/tv_hehe"
+                android:layout_toRightOf="@id/tv_hehe"
+                android:gravity="center_horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <RelativeLayout
+                    android:id="@+id/iv_android_model"
+                    android:clickable="true"
+                    android:onClick="loginClick"
+                    android:background="@mipmap/android_model_blank_3x"
+                    android:gravity="center_horizontal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+<!--用于测量假手机屏幕的四个控件-->
+                    <TextView
+                        android:id="@+id/tv_top_height"
+                        android:layout_centerHorizontal="true"
+                        android:layout_width="10dp"
+                        android:layout_height="66dp" />
+                    <TextView
+                        android:id="@+id/tv_bottom_height"
+                        android:layout_centerHorizontal="true"
+                        android:layout_alignParentBottom="true"
+                        android:layout_width="10dp"
+                        android:layout_height="66dp" />
+                    <TextView
+                        android:id="@+id/tv_left_width"
+                        android:layout_centerVertical="true"
+                        android:layout_width="30dp"
+                        android:layout_height="10dp" />
+                    <TextView
+                        android:id="@+id/tv_right_width"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:layout_width="30dp"
+                        android:layout_height="10dp" />
+
+                    <ImageView
+                        android:id="@+id/iv_login_page_main"
+                        android:src="@mipmap/login_pager_1_3x"
+                        android:scaleType="centerCrop"
+                        android:layout_below="@id/tv_top_height"
+                        android:layout_above="@id/tv_bottom_height"
+                        android:layout_toRightOf="@id/tv_left_width"
+                        android:layout_toLeftOf="@id/tv_right_width"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+                    <include layout="@layout/litter_login_layout"
+                        android:layout_below="@id/tv_top_height"
+                        android:layout_above="@id/tv_bottom_height"
+                        android:layout_toRightOf="@id/tv_left_width"
+                        android:layout_toLeftOf="@id/tv_right_width"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+
+
+
+                </RelativeLayout>
+
+
+
+            </RelativeLayout>
+        </RelativeLayout>
+    </com.byids.hy.testpro.View.LoginHScrollView>
+
+    <ImageView
+        android:id="@+id/iv_logo"
+        android:src="@mipmap/logo_3x"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    <ImageView
+        android:id="@+id/iv_video"
+        android:src="@mipmap/video_3x"
+        android:onClick="loginClick"
+        android:clickable="true"
+        android:padding="12dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    <ImageView
+        android:id="@+id/iv_phone"
+        android:onClick="loginClick"
+        android:clickable="true"
+        android:src="@mipmap/phone_3x"
+        android:paddingBottom="12dp"
+        android:layout_toLeftOf="@id/iv_video"
+        android:layout_alignParentBottom="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    <ImageView
+        android:id="@+id/iv_login_back"
+        android:src="@mipmap/back_3x"
+        android:clickable="true"
+        android:onClick="loginClick"
+        android:padding="12dp"
+        android:layout_alignParentBottom="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+</RelativeLayout>

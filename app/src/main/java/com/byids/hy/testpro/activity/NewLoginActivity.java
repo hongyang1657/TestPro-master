@@ -1,16 +1,27 @@
 package com.byids.hy.testpro.activity;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.Intent;
+import android.media.Image;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Button;
+import android.view.animation.LinearInterpolator;
 import android.widget.EditText;
+import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,6 +52,7 @@ import com.byids.hy.testpro.Bean.Rooms;
 import com.byids.hy.testpro.Bean.Securityalarm;
 import com.byids.hy.testpro.Bean.Sence;
 import com.byids.hy.testpro.R;
+import com.byids.hy.testpro.View.LoginHScrollView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -53,21 +65,40 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by gqgz2 on 2016/9/19.
+ * Created by gqgz2 on 2016/9/23.
+ * 登录页面
  */
-public class LoginActivity extends Activity{
-    private String TAG = "result";
+public class NewLoginActivity extends Activity{
 
+    private String TAG = "result";
+    private ImageView ivBackground;
+    private HorizontalScrollView horizontalScrollView;
+    private LoginHScrollView loginHScrollView;
+    private ImageView ivLogo;
+    private ImageView ivPhone;
+    private ImageView ivVideo;
+    private ImageView tvDenglu;
+    private ImageView tvTiyan;
+    private ImageView ivLoginBack;
+    private TextView tvHehe;
+    private RelativeLayout llAndroid;
+    private RelativeLayout ivAndroidModel;
     private EditText etUserName;
     private EditText etPassword;
-    private Button btLogin;
-    private ImageView ivLogo;
-    private TextView tvLoginQuestion;
-    private TextView tvRegister;
+    private TextView tvTopHeight;    //假手机上边框高度
+    private TextView tvBottomHeight;    //下边框高度
+    private TextView tvLeftWidth;
+    private TextView tvRightWidth;
+    private LinearLayout llLitterLogin;  //小登录页面
+    private ImageView ivLoginPageMain;
+
+    private boolean isSecondPage = false;
+    private int width;
+    private int height;   //屏幕宽高
+    private float ivWidth;
 
     private String userName;
     private String password;
-
     private RequestQueue requestQueue;
     HomeAttr homeAttrBean;
     Rooms rs;
@@ -79,44 +110,194 @@ public class LoginActivity extends Activity{
         super.onCreate(savedInstanceState);
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);//去掉信息栏
-        setContentView(R.layout.login_layout);
-        requestQueue = Volley.newRequestQueue(LoginActivity.this);
+        setContentView(R.layout.login_1_layout);
+        requestQueue = Volley.newRequestQueue(NewLoginActivity.this);
         initView();
     }
+
     private void initView(){
+        //获取屏幕宽高，设置图片大小一致
+        WindowManager wm = this.getWindowManager();
+        width = wm.getDefaultDisplay().getWidth();
+        height = wm.getDefaultDisplay().getHeight();
+
+        ivBackground = (ImageView) findViewById(R.id.iv_login_bg);
+        horizontalScrollView = (HorizontalScrollView) findViewById(R.id.hs_bg);
+        loginHScrollView = (LoginHScrollView) findViewById(R.id.hs_login);
+        ivLogo = (ImageView) findViewById(R.id.iv_logo);
+        ivPhone = (ImageView) findViewById(R.id.iv_phone);
+        ivVideo = (ImageView) findViewById(R.id.iv_video);
+        tvDenglu = (ImageView) findViewById(R.id.iv_denglu);
+        tvTiyan = (ImageView) findViewById(R.id.iv_tiyan);
+        ivLoginBack = (ImageView) findViewById(R.id.iv_login_back);
+        tvHehe = (TextView) findViewById(R.id.tv_hehe);
+        llAndroid = (RelativeLayout) findViewById(R.id.ll_android);
+        ivAndroidModel = (RelativeLayout) findViewById(R.id.iv_android_model);
         etUserName = (EditText) findViewById(R.id.et_username);
         etPassword = (EditText) findViewById(R.id.et_password);
-        btLogin = (Button) findViewById(R.id.bt_login);
-        ivLogo = (ImageView) findViewById(R.id.iv_login_logo);
-        tvLoginQuestion = (TextView) findViewById(R.id.tv_login_question);
-        tvRegister = (TextView) findViewById(R.id.tv_register);
+        tvTopHeight = (TextView) findViewById(R.id.tv_top_height);
+        tvBottomHeight = (TextView) findViewById(R.id.tv_bottom_height);
+        tvLeftWidth = (TextView) findViewById(R.id.tv_left_width);
+        tvRightWidth = (TextView) findViewById(R.id.tv_right_width);
+        llLitterLogin = (LinearLayout) findViewById(R.id.ll_litter_login);
+        ivLoginPageMain = (ImageView) findViewById(R.id.iv_login_page_main);
 
+
+        ivLogo.setPadding((int) (height*0.015),(int) (height*0.015),0,0);
+        //初始化控件位置
+        ivLoginBack.setVisibility(View.GONE);  //初始化设为不可见
+        ViewGroup.LayoutParams params0 = tvHehe.getLayoutParams();
+        params0.height = (int) (height*0.029);   //手机距离顶部的距离
+        params0.width = (int) (width*0.7);     //手机距离左边的距离
+        tvHehe.setLayoutParams(params0);
+
+        //设置假手机全屏
+        ViewGroup.LayoutParams params = llAndroid.getLayoutParams();
+        params.height = height;
+        params.width = width;
+        llAndroid.setLayoutParams(params);
+
+        //设置假手机大小
+        ViewGroup.LayoutParams params1 = ivAndroidModel.getLayoutParams();
+        params1.height = (int) (height*0.88);
+        params1.width = (int)(height*0.88*0.486);
+        ivAndroidModel.setLayoutParams(params1);
+
+        //四个边距
+        ViewGroup.LayoutParams params2 = tvTopHeight.getLayoutParams();
+        params2.height = (int) (height*0.88*0.122);
+        params2.width = 1;
+        tvTopHeight.setLayoutParams(params2);
+
+        ViewGroup.LayoutParams params3 = tvBottomHeight.getLayoutParams();
+        params3.height = (int) (height*0.88*0.099);
+        params3.width = 1;
+        tvBottomHeight.setLayoutParams(params3);
+
+        ViewGroup.LayoutParams params4 = tvLeftWidth.getLayoutParams();
+        params4.height = 1;
+        params4.width = (int)(height*0.88*0.486*0.066);
+        tvLeftWidth.setLayoutParams(params4);
+
+        ViewGroup.LayoutParams params5 = tvRightWidth.getLayoutParams();
+        params5.height = 1;
+        params5.width = (int)(height*0.88*0.486*0.072);
+        tvRightWidth.setLayoutParams(params5);
+
+        //获取控件宽度
+        int w = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+        int h = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+        ivBackground.measure(w, h);
+        ivWidth = ivBackground.getMeasuredWidth();
+
+        LinearInterpolator ll = new LinearInterpolator();
+        float a = width-ivWidth;
+        ObjectAnimator objectAnimator = new ObjectAnimator().ofFloat(ivBackground,"translationX",0f,a,0f).setDuration(70000);
+        objectAnimator.setInterpolator(ll);
+        objectAnimator.setRepeatCount(-1);
+        objectAnimator.start();
+
+        horizontalScrollView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                //设置不可滑动
+                return true;
+            }
+        });
+        loginHScrollView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                //设置不可滑动
+                return true;
+            }
+        });
     }
-
-
-    public void click(View v){
+    public void loginClick(View v){
         switch (v.getId()){
-            case R.id.bt_login:
-                userName = etUserName.getText().toString().trim();
-                password = etPassword.getText().toString().trim();    //获取用户名和密码
-                Toast.makeText(LoginActivity.this, "用户名"+userName+","+"密码"+password, Toast.LENGTH_SHORT).show();
-                if (TextUtils.isEmpty(userName)|| TextUtils.isEmpty(password)) {
-                    Toast.makeText(this, "用户名或密码不能为空", Toast.LENGTH_SHORT).show();
-                    return;
-                }else {
-                    postAndInitData();
-                }
+            case R.id.iv_denglu:   //滑到第二页
+                ivLoginBack.setAlpha(0f);
+                ivLoginBack.setVisibility(View.VISIBLE);  //返回按钮设为可见
+                llLitterLogin.setAlpha(0f);
+                llLitterLogin.setVisibility(View.VISIBLE);
+                fadeOutAnimation(ivLoginBack,0f,1f,500,ivLoginBack,false);
+                fadeOutAnimation(llLitterLogin,0f,1f,500,llLitterLogin,false);
+                fadeOutAnimation(ivLoginPageMain,1f,0f,500,ivLoginPageMain,true);
+                loginHScrollView.smoothScrollTo(1000,0);
+                isSecondPage = true;
+                break;
+            case R.id.iv_tiyan:
+                break;
+            case R.id.iv_phone:
 
-                /*Intent intent = new Intent(LoginActivity.this,MyMainActivity.class);
-                startActivity(intent);*/
                 break;
-            case R.id.tv_login_question:
-                Toast.makeText(LoginActivity.this, "1", Toast.LENGTH_SHORT).show();
+            case R.id.iv_video:
                 break;
-            case R.id.tv_register:
-                Toast.makeText(LoginActivity.this, "2", Toast.LENGTH_SHORT).show();
+            case R.id.iv_login_back:
+                ivLoginPageMain.setAlpha(0f);
+                ivLoginPageMain.setVisibility(View.VISIBLE);
+                fadeOutAnimation(ivLoginBack,1f,0f,500,ivLoginBack,true);
+                fadeOutAnimation(ivLoginPageMain,0f,1f,500,ivLoginPageMain,false);
+                fadeOutAnimation(llLitterLogin,1f,0f,500,llLitterLogin,true);
+                loginHScrollView.smoothScrollTo(0,0);
+                isSecondPage = false;
+                break;
+            case R.id.iv_android_model:
+                if (isSecondPage==true){
+                    break;
+                }else {
+                    ivLoginBack.setAlpha(0f);
+                    ivLoginBack.setVisibility(View.VISIBLE);  //返回按钮设为可见
+                    llLitterLogin.setAlpha(0f);
+                    llLitterLogin.setVisibility(View.VISIBLE);
+                    fadeOutAnimation(ivLoginBack,0f,1f,500,ivLoginBack,false);
+                    fadeOutAnimation(llLitterLogin,0f,1f,500,llLitterLogin,false);
+                    fadeOutAnimation(ivLoginPageMain,1f,0f,500,ivLoginPageMain,true);
+                    loginHScrollView.smoothScrollTo(1000,0);
+                    isSecondPage = true;
+                }
+                break;
+            case R.id.bt_login:
+                doLogin();  //登录
+
+                break;
+            case R.id.tv_cant_login:
+                Intent intent = new Intent(NewLoginActivity.this,LoginExplainActivity.class);
+                startActivity(intent);
+                break;
+            default:
                 break;
         }
+    }
+
+    //登录页面的渐隐渐现动画
+    private void fadeOutAnimation(View view, float from, float to, long duration, final View v, final boolean b){
+        ObjectAnimator objectAnimator = new ObjectAnimator().ofFloat(view,"alpha",from,to).setDuration(duration);
+        objectAnimator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                if (b==true){
+                    v.setVisibility(View.GONE);
+                }else if (b==false){
+                    v.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+        objectAnimator.start();
+    }
+
+    //-----------------------------登录----------------------------
+    private void doLogin(){
+        userName = etUserName.getText().toString().trim();
+        password = etPassword.getText().toString().trim();    //获取用户名和密码
+        Toast.makeText(NewLoginActivity.this, "用户名"+userName+","+"密码"+password, Toast.LENGTH_SHORT).show();
+        if (TextUtils.isEmpty(userName)|| TextUtils.isEmpty(password)) {
+            Toast.makeText(this, "用户名或密码不能为空", Toast.LENGTH_SHORT).show();
+            return;
+        }else {
+            postAndInitData();
+        }
+
     }
 
     //根据用户名密码，返回用户家庭的json数据
@@ -130,7 +311,7 @@ public class LoginActivity extends Activity{
             @Override
             public void onResponse(JSONObject response) {
                 Log.i(TAG, "onResponse:--- "+response.toString());
-                Toast.makeText(LoginActivity.this, "返回的json："+response.toString(), Toast.LENGTH_SHORT).show();
+                //Toast.makeText(NewLoginActivity.this, "返回的json："+response.toString(), Toast.LENGTH_SHORT).show();
                 doJsonParse(response.toString());
 
             }
@@ -138,7 +319,7 @@ public class LoginActivity extends Activity{
             @Override
             public void onErrorResponse(VolleyError error) {
                 Log.i(TAG, "onErrorResponse: --"+error.getMessage());
-                Toast.makeText(LoginActivity.this, "错误信息:"+error.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(NewLoginActivity.this, "错误信息:"+error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
         requestQueue.add(request);
@@ -257,7 +438,7 @@ public class LoginActivity extends Activity{
                 String roomName = roomsObj.getString("roomName");
                 roomNameList[i] = roomName;
             }
-            Intent intent = new Intent(LoginActivity.this, MyMainActivity.class);
+            Intent intent = new Intent(NewLoginActivity.this, MyMainActivity.class);
             intent.putExtra("roomNameList",roomNameList);
             intent.putExtra("roomAttr",roomAttr);
             intent.putExtra("hid",hid);
@@ -271,6 +452,7 @@ public class LoginActivity extends Activity{
             intent.putExtras(bundle);
             startActivity(intent);
             finish();        //结束此activity，下一个activity返回时，直接退出
+            //overridePendingTransition(R.anim.zoom_in,R.anim.zoom_out);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -401,5 +583,21 @@ public class LoginActivity extends Activity{
             Log.i(TAG, "doParseRooms: "+e);
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        Log.i("result", "onKeyDown: ------------------");
+        if(keyCode == KeyEvent.KEYCODE_BACK && isSecondPage==true){
+            ivLoginPageMain.setAlpha(0f);
+            ivLoginPageMain.setVisibility(View.VISIBLE);
+            fadeOutAnimation(ivLoginBack,1f,0f,500,ivLoginBack,true);
+            fadeOutAnimation(ivLoginPageMain,0f,1f,500,ivLoginPageMain,false);
+            fadeOutAnimation(llLitterLogin,1f,0f,500,llLitterLogin,true);
+            loginHScrollView.smoothScrollTo(0,0);
+            isSecondPage = false;
+            return false;
+        }
+        return super.onKeyDown(keyCode, event);
     }
 }

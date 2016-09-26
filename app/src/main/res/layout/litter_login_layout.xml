@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:id="@+id/ll_litter_login"
+    android:visibility="gone"
+    android:gravity="center_horizontal"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+    <TextView
+        android:id="@+id/tv_top_height_in"
+        android:background="@color/colorBule"
+        android:layout_width="1dp"
+        android:layout_height="100dp" />
+    <ImageView
+        android:id="@+id/iv_login_logo"
+        android:src="@mipmap/byids_icon_s_3x"
+        android:layout_marginBottom="16dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    <EditText
+        android:id="@+id/et_username"
+        android:maxLength="16"
+        android:background="@null"
+        android:textSize="16sp"
+        android:gravity="center"
+        android:hint="账号"
+        android:textColorHint="#a1a3a6"
+        android:text="byidsoffice"
+        android:padding="12dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    <EditText
+        android:id="@+id/et_password"
+        android:inputType="textPassword"
+        android:maxLength="16"
+        android:background="@null"
+        android:textSize="16sp"
+        android:gravity="center"
+        android:hint="密码"
+        android:textColorHint="#a1a3a6"
+        android:text="admin123"
+        android:padding="12dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <ImageView
+        android:id="@+id/bt_login"
+        android:onClick="loginClick"
+        android:clickable="true"
+        android:layout_marginLeft="50dp"
+        android:layout_marginRight="50dp"
+        android:src="@mipmap/denglu_icon_3x"
+        android:background="@drawable/bt_login_shape"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    <TextView
+        android:id="@+id/tv_cant_login"
+        android:gravity="center"
+        android:layout_margin="18dp"
+        android:clickable="true"
+        android:onClick="loginClick"
+        android:text="无法登陆？"
+        android:textColor="@color/colorText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    <TextView
+        android:id="@+id/tv_bottom_height_in"
+        android:layout_below="@id/tv_cant_login"
+        android:background="@color/colorAccent"
+        android:layout_width="1dp"
+        android:layout_height="60dp" />
+</LinearLayout>
+
