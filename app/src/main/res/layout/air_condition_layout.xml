@@ -26,8 +26,9 @@
         <TextView
             android:id="@+id/tv_kongtiao_kaiguan"
             android:text="空调 关"
+            android:textSize="12sp"
             android:textColor="@color/colorText"
-            android:paddingTop="4dp"
+            android:paddingTop="6dp"
             android:layout_below="@id/iv_kongtiao_kaiguan"
             android:gravity="center"
             android:layout_width="match_parent"
@@ -42,7 +43,7 @@
         android:textColor="@color/colorText"
         android:textSize="30sp"
         android:gravity="center"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="match_parent" />
 
     <!--睡眠-->
@@ -62,8 +63,9 @@
         <TextView
             android:id="@+id/tv_kongtiao_sleep"
             android:text="睡眠 关"
+            android:textSize="12sp"
             android:textColor="@color/colorText"
-            android:paddingTop="4dp"
+            android:paddingTop="6dp"
             android:layout_below="@id/iv_kongtiao_sleep"
             android:gravity="center"
             android:layout_width="match_parent"

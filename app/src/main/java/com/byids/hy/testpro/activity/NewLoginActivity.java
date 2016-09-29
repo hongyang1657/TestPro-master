@@ -5,7 +5,9 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.media.Image;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
@@ -58,11 +60,16 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
 
 /**
  * Created by gqgz2 on 2016/9/23.
@@ -81,6 +88,7 @@ public class NewLoginActivity extends Activity{
     private ImageView tvTiyan;
     private ImageView ivLoginBack;
     private TextView tvHehe;
+    private TextView tvCantLogin;
     private RelativeLayout llAndroid;
     private RelativeLayout ivAndroidModel;
     private EditText etUserName;
@@ -89,13 +97,22 @@ public class NewLoginActivity extends Activity{
     private TextView tvBottomHeight;    //下边框高度
     private TextView tvLeftWidth;
     private TextView tvRightWidth;
+    private TextView tvTopHeight1;
+    private TextView tvBottomHeight1;
+    private TextView tvLeftWidth1;
+    private TextView tvRightWidth1;
     private LinearLayout llLitterLogin;  //小登录页面
     private ImageView ivLoginPageMain;
+    private ImageView ivLoginMap;
+    private ImageView ivLoginPhoneNumber;
+    private TextView tvTopHeightIn;
 
     private boolean isSecondPage = false;
+    private boolean isPhonePage = false;
     private int width;
     private int height;   //屏幕宽高
     private float ivWidth;
+    private int scrollWidth;   //可滑动的距离
 
     private String userName;
     private String password;
@@ -131,6 +148,8 @@ public class NewLoginActivity extends Activity{
         tvTiyan = (ImageView) findViewById(R.id.iv_tiyan);
         ivLoginBack = (ImageView) findViewById(R.id.iv_login_back);
         tvHehe = (TextView) findViewById(R.id.tv_hehe);
+        tvCantLogin = (TextView) findViewById(R.id.tv_cant_login);
+
         llAndroid = (RelativeLayout) findViewById(R.id.ll_android);
         ivAndroidModel = (RelativeLayout) findViewById(R.id.iv_android_model);
         etUserName = (EditText) findViewById(R.id.et_username);
@@ -139,8 +158,15 @@ public class NewLoginActivity extends Activity{
         tvBottomHeight = (TextView) findViewById(R.id.tv_bottom_height);
         tvLeftWidth = (TextView) findViewById(R.id.tv_left_width);
         tvRightWidth = (TextView) findViewById(R.id.tv_right_width);
+        tvTopHeight1 = (TextView) findViewById(R.id.tv_top_height_phone);
+        tvBottomHeight1 = (TextView) findViewById(R.id.tv_bottom_height_phone);
+        tvLeftWidth1 = (TextView) findViewById(R.id.tv_left_width_phone);
+        tvRightWidth1 = (TextView) findViewById(R.id.tv_right_width_phone);
         llLitterLogin = (LinearLayout) findViewById(R.id.ll_litter_login);
         ivLoginPageMain = (ImageView) findViewById(R.id.iv_login_page_main);
+        ivLoginMap = (ImageView) findViewById(R.id.iv_login_map);
+        ivLoginPhoneNumber = (ImageView) findViewById(R.id.iv_login_phonenumber);
+        tvTopHeightIn = (TextView) findViewById(R.id.tv_top_height_in);
 
 
         ivLogo.setPadding((int) (height*0.015),(int) (height*0.015),0,0);
@@ -150,6 +176,7 @@ public class NewLoginActivity extends Activity{
         params0.height = (int) (height*0.029);   //手机距离顶部的距离
         params0.width = (int) (width*0.7);     //手机距离左边的距离
         tvHehe.setLayoutParams(params0);
+        scrollWidth = (int) (width*0.7);
 
         //设置假手机全屏
         ViewGroup.LayoutParams params = llAndroid.getLayoutParams();
@@ -184,6 +211,34 @@ public class NewLoginActivity extends Activity{
         params5.width = (int)(height*0.88*0.486*0.072);
         tvRightWidth.setLayoutParams(params5);
 
+        //安放地址信息
+        ViewGroup.LayoutParams params6 = tvTopHeight1.getLayoutParams();
+        params6.height = (int) (height*0.88*0.52);
+        params6.width = 1;
+        tvTopHeight1.setLayoutParams(params6);
+
+        ViewGroup.LayoutParams params7 = tvBottomHeight1.getLayoutParams();
+        params7.height = (int) (height*0.88*0.28);
+        params7.width = 1;
+        tvBottomHeight1.setLayoutParams(params7);
+
+        ViewGroup.LayoutParams params8 = tvLeftWidth1.getLayoutParams();
+        params8.height = 1;
+        params8.width = (int)(height*0.88*0.486*0.090);
+        tvLeftWidth1.setLayoutParams(params8);
+
+        ViewGroup.LayoutParams params9 = tvRightWidth1.getLayoutParams();
+        params9.height = 1;
+        params9.width = (int)(height*0.88*0.486*0.107);
+        tvRightWidth1.setLayoutParams(params9);
+
+        //内部logo距离顶部高度
+        ViewGroup.LayoutParams params10 = tvTopHeightIn.getLayoutParams();
+        params10.height = (int) (height*0.88*0.19);
+        params10.width = 1;
+        tvTopHeightIn.setLayoutParams(params10);
+
+
         //获取控件宽度
         int w = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
         int h = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
@@ -192,7 +247,7 @@ public class NewLoginActivity extends Activity{
 
         LinearInterpolator ll = new LinearInterpolator();
         float a = width-ivWidth;
-        ObjectAnimator objectAnimator = new ObjectAnimator().ofFloat(ivBackground,"translationX",0f,a,0f).setDuration(70000);
+        ObjectAnimator objectAnimator = new ObjectAnimator().ofFloat(ivBackground,"translationX",0f,a,0f).setDuration(120000);
         objectAnimator.setInterpolator(ll);
         objectAnimator.setRepeatCount(-1);
         objectAnimator.start();
@@ -212,9 +267,12 @@ public class NewLoginActivity extends Activity{
             }
         });
     }
+
     public void loginClick(View v){
         switch (v.getId()){
             case R.id.iv_denglu:   //滑到第二页
+                setScaleAnimation(tvDenglu);
+                loginHScrollView.smoothScrollToSlow(scrollWidth,0,700);
                 ivLoginBack.setAlpha(0f);
                 ivLoginBack.setVisibility(View.VISIBLE);  //返回按钮设为可见
                 llLitterLogin.setAlpha(0f);
@@ -222,29 +280,62 @@ public class NewLoginActivity extends Activity{
                 fadeOutAnimation(ivLoginBack,0f,1f,500,ivLoginBack,false);
                 fadeOutAnimation(llLitterLogin,0f,1f,500,llLitterLogin,false);
                 fadeOutAnimation(ivLoginPageMain,1f,0f,500,ivLoginPageMain,true);
-                loginHScrollView.smoothScrollTo(1000,0);
                 isSecondPage = true;
                 break;
             case R.id.iv_tiyan:
+                setScaleAnimation(tvTiyan);
                 break;
             case R.id.iv_phone:
+                setScaleAnimation(ivPhone);
+                if (isPhonePage==false){
+                    loginHScrollView.smoothScrollToSlow(scrollWidth,0,700);
+                    ivLoginBack.setAlpha(0f);
+                    ivLoginBack.setVisibility(View.VISIBLE);  //返回按钮设为可见
+                    ivLoginMap.setAlpha(0f);
+                    ivLoginMap.setVisibility(View.VISIBLE);
+                    ivLoginPhoneNumber.setAlpha(0f);
+                    ivLoginPhoneNumber.setVisibility(View.VISIBLE);
+                    fadeOutAnimation(ivLoginBack,0f,1f,500,ivLoginBack,false);
+                    fadeOutAnimation(ivLoginPageMain,1f,0f,500,ivLoginPageMain,true);
+                    //fadeOutAnimation(ivLoginMap,0f,1f,500,ivLoginMap,false);
+                    ObjectAnimator objectAnimator = new ObjectAnimator().ofFloat(ivLoginMap,"alpha",0f,1f).setDuration(500);
+                    objectAnimator.addListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            super.onAnimationEnd(animation);
+                            scaleMap();
+                        }
+                    });
+                    objectAnimator.start();
+                    ivLoginMap.setVisibility(View.VISIBLE);
+                    isSecondPage = true;
+                    isPhonePage = true;
+                    break;
+                }else if (isPhonePage==true){
+                    break;
+                }
 
-                break;
             case R.id.iv_video:
+                setScaleAnimation(ivVideo);
                 break;
             case R.id.iv_login_back:
+                setScaleAnimation(ivLoginBack);
+                loginHScrollView.smoothScrollToSlow(0,0,700);
                 ivLoginPageMain.setAlpha(0f);
                 ivLoginPageMain.setVisibility(View.VISIBLE);
                 fadeOutAnimation(ivLoginBack,1f,0f,500,ivLoginBack,true);
                 fadeOutAnimation(ivLoginPageMain,0f,1f,500,ivLoginPageMain,false);
                 fadeOutAnimation(llLitterLogin,1f,0f,500,llLitterLogin,true);
-                loginHScrollView.smoothScrollTo(0,0);
+                fadeOutAnimation(ivLoginMap,1f,0f,500,ivLoginMap,true);
+                fadeOutAnimation(ivLoginPhoneNumber,1f,0f,500,ivLoginPhoneNumber,true);
                 isSecondPage = false;
+                isPhonePage = false;
                 break;
             case R.id.iv_android_model:
                 if (isSecondPage==true){
                     break;
                 }else {
+                    loginHScrollView.smoothScrollToSlow(scrollWidth,0,700);
                     ivLoginBack.setAlpha(0f);
                     ivLoginBack.setVisibility(View.VISIBLE);  //返回按钮设为可见
                     llLitterLogin.setAlpha(0f);
@@ -252,7 +343,6 @@ public class NewLoginActivity extends Activity{
                     fadeOutAnimation(ivLoginBack,0f,1f,500,ivLoginBack,false);
                     fadeOutAnimation(llLitterLogin,0f,1f,500,llLitterLogin,false);
                     fadeOutAnimation(ivLoginPageMain,1f,0f,500,ivLoginPageMain,true);
-                    loginHScrollView.smoothScrollTo(1000,0);
                     isSecondPage = true;
                 }
                 break;
@@ -264,9 +354,57 @@ public class NewLoginActivity extends Activity{
                 Intent intent = new Intent(NewLoginActivity.this,LoginExplainActivity.class);
                 startActivity(intent);
                 break;
+            case R.id.iv_login_phonenumber:
+                //跳转到拨号界面
+                Intent intentCall = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:02787743339"));
+                intentCall.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intentCall);
+                break;
             default:
                 break;
         }
+    }
+
+    //网络操作，获取地址，获取天气信息
+    private void getLocationFromNet(){
+        String url = "";
+        OkHttpClient client = new OkHttpClient();
+        okhttp3.Request request = new okhttp3.Request.Builder().url(url).build();
+        Call call = client.newCall(request);
+        call.enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                Toast.makeText(NewLoginActivity.this, "网络获取失败", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onResponse(Call call, okhttp3.Response response) throws IOException {
+                String[] nameList;//菜谱名数组
+                String[] imageUrlList;//菜谱图片url数组
+                String[] ingredientsList;//菜谱用料数组
+                try {
+                    JSONObject jsonObject = new JSONObject(response.body().string());
+                    JSONObject result = jsonObject.getJSONObject("result");
+                    JSONArray data = result.getJSONArray("data");
+                    nameList = new String[data.length()];
+                    imageUrlList = new String[data.length()];
+                    ingredientsList = new String[data.length()];
+                    for (int i=0;i<data.length();i++){
+                        JSONObject obj = data.getJSONObject(i);
+                        String name = obj.getString("title");//获取菜谱名字
+                        String content = obj.getString("ingredients");//获取菜谱用料
+                        String image = obj.getString("albums");//获取菜谱图片
+                        image = image.replaceAll("\\]|\"|\\[|\\\\","");//去掉图片uri中的多余字符
+                        nameList[i] = name;
+                        imageUrlList[i] = image;
+                        ingredientsList[i] = content;
+                    }
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     //登录页面的渐隐渐现动画
@@ -284,6 +422,19 @@ public class NewLoginActivity extends Activity{
             }
         });
         objectAnimator.start();
+    }
+
+    //地图缩放动画
+    private void scaleMap(){
+        ObjectAnimator.ofFloat(ivLoginMap,"scaleX",1f,0.9f,1f).setDuration(400).start();
+        ObjectAnimator.ofFloat(ivLoginMap,"scaleY",1f,0.9f,1f).setDuration(400).start();
+        ObjectAnimator.ofFloat(ivLoginPhoneNumber,"alpha",0f,1f).setDuration(400).start();
+    }
+
+    //按钮点击缩放
+    private void setScaleAnimation(View view){
+        ObjectAnimator.ofFloat(view,"scaleX",1f,0.6f,1f).setDuration(400).start();
+        ObjectAnimator.ofFloat(view,"scaleY",1f,0.6f,1f).setDuration(400).start();
     }
 
     //-----------------------------登录----------------------------
@@ -589,13 +740,16 @@ public class NewLoginActivity extends Activity{
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         Log.i("result", "onKeyDown: ------------------");
         if(keyCode == KeyEvent.KEYCODE_BACK && isSecondPage==true){
+            loginHScrollView.smoothScrollToSlow(0,0,700);
             ivLoginPageMain.setAlpha(0f);
             ivLoginPageMain.setVisibility(View.VISIBLE);
             fadeOutAnimation(ivLoginBack,1f,0f,500,ivLoginBack,true);
             fadeOutAnimation(ivLoginPageMain,0f,1f,500,ivLoginPageMain,false);
             fadeOutAnimation(llLitterLogin,1f,0f,500,llLitterLogin,true);
-            loginHScrollView.smoothScrollTo(0,0);
+            fadeOutAnimation(ivLoginMap,1f,0f,500,ivLoginMap,true);
+            fadeOutAnimation(ivLoginPhoneNumber,1f,0f,500,ivLoginPhoneNumber,true);
             isSecondPage = false;
+            isPhonePage = false;
             return false;
         }
         return super.onKeyDown(keyCode, event);

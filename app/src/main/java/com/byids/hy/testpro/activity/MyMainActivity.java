@@ -1,18 +1,25 @@
 package com.byids.hy.testpro.activity;
 
 import android.animation.ObjectAnimator;
+import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.GestureDetector;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,6 +29,7 @@ import com.byids.hy.testpro.PullDownMenuListener;
 import com.byids.hy.testpro.R;
 import com.byids.hy.testpro.View.MyCustomViewPager;
 import com.byids.hy.testpro.adapter.MyFragmentAdapter;
+import com.byids.hy.testpro.adapter.RoomNameBaseAdapter;
 import com.byids.hy.testpro.fragment.MyFragment;
 import com.videogo.openapi.EZOpenSDK;
 
@@ -36,6 +44,7 @@ import java.util.List;
  */
 public class MyMainActivity extends FragmentActivity{
     private String TAG = "result";
+    private static final String SWITCH_ROOM_DIALOG = "1";
 
     private MyCustomViewPager viewPager;
     private MyFragmentAdapter adapter;
@@ -43,11 +52,20 @@ public class MyMainActivity extends FragmentActivity{
     private GestureDetector gestureDetector;
     private boolean b1 = true;       //下拉菜单隐藏为true，出现为false
     private int pagerState;
+    private int width;
+    private int height;
 
     //几个控件
     private TextView tvRoom;//房间名
     private ImageView ivMusic;
     private ImageView ivMedia;
+
+    //二级页面dialog
+    private Dialog dialogSwitchRoom;
+    private ListView lvSwitchRoom;
+    private TextView tvSwitchRoomCancel;
+    private RoomNameBaseAdapter adapterRoomName;
+
 
     //背景图片
     private int[] ivBackList1 = {R.mipmap.back_10,R.mipmap.back_12,R.mipmap.back_13,R.mipmap.back_14};
@@ -87,8 +105,8 @@ public class MyMainActivity extends FragmentActivity{
         Log.i(TAG, "initView: "+homeAttr);
 
         WindowManager wm = this.getWindowManager();
-        int width = wm.getDefaultDisplay().getWidth();
-        int height = wm.getDefaultDisplay().getHeight();
+        width = wm.getDefaultDisplay().getWidth();
+        height = wm.getDefaultDisplay().getHeight();
         Log.i(TAG, "initView: ____________________"+width+"___________________"+height);
 
         ivMusic = (ImageView) findViewById(R.id.iv_music);
@@ -114,17 +132,59 @@ public class MyMainActivity extends FragmentActivity{
         viewPager.setAdapter(adapter);
         viewPager.setOffscreenPageLimit(roomNameList.length+1);  //多设置一页
         viewPager.addOnPageChangeListener(pagerChangeListener);
-        //手势
+
+        initDialog();     //初始化dialog二级页面
     }
+
+    //初始化dialog二级页面
+    private void initDialog(){
+        Typeface typeFace = Typeface.createFromAsset(getAssets(),"fonts/xiyuanti.ttf");
+        dialogSwitchRoom = new Dialog(this,R.style.CustomDialog);
+        View view = LayoutInflater.from(this).inflate(R.layout.switch_room_dialog,null);
+        lvSwitchRoom = (ListView) view.findViewById(R.id.lv_rooms);
+        tvSwitchRoomCancel = (TextView) view.findViewById(R.id.tv_cancel_switch_room);
+        tvSwitchRoomCancel.setTypeface(typeFace);
+        tvSwitchRoomCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialogSwitchRoom.hide();
+            }
+        });
+        adapterRoomName = new RoomNameBaseAdapter(this,roomNameList);
+        lvSwitchRoom.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                viewPager.setCurrentItem(position);
+                dialogSwitchRoom.hide();
+
+            }
+        });
+        lvSwitchRoom.setAdapter(adapterRoomName);
+
+        dialogSwitchRoom.setContentView(view);
+        dialogSwitchRoom.setCanceledOnTouchOutside(true);//点击外部，弹框消失
+        WindowManager.LayoutParams params = dialogSwitchRoom.getWindow().getAttributes();
+        params.width = (int) (width*0.82);
+        //params.height = 800;   //设置dialog的宽高
+        Window mWindow = dialogSwitchRoom.getWindow();
+        mWindow.setGravity(Gravity.BOTTOM);
+        mWindow.setAttributes(params);
+    }
+
 
     //-----------------------------接受fragment传来的消息--------------------------------
     @Subscribe
     public void onEventMainThread(MyEventBus event) {
         String msg = "onEventMainThread收到了消息：" + event.getmMsg();
-        Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+        //Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
         if (msg=="jiankong"){
-            /*Intent intent = new Intent(MyMainActivity.this,CameraActivity.class);
-            startActivity(intent);*/
+            Intent intent = new Intent(MyMainActivity.this,CameraActivity.class);
+            startActivity(intent);
+        }
+        switch (event.getmMsg()){
+            case SWITCH_ROOM_DIALOG:   //选择房间dialog
+                dialogSwitchRoom.show();
+                break;
         }
     }
 
@@ -189,6 +249,7 @@ public class MyMainActivity extends FragmentActivity{
         public void onPageSelected(int position) {
             //传出position
             roomPostion = position;
+            adapterRoomName.changeSelected(position);   //传递当前的页面位置position
         }
 
         //state状态  0：无触碰；  1：拖动；   2：松手

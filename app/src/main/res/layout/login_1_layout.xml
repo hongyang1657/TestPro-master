@@ -98,6 +98,29 @@
                         android:layout_width="30dp"
                         android:layout_height="10dp" />
 
+                    <TextView
+                        android:id="@+id/tv_top_height_phone"
+                        android:layout_centerHorizontal="true"
+                        android:layout_width="10dp"
+                        android:layout_height="66dp" />
+                    <TextView
+                        android:id="@+id/tv_bottom_height_phone"
+                        android:layout_centerHorizontal="true"
+                        android:layout_alignParentBottom="true"
+                        android:layout_width="10dp"
+                        android:layout_height="66dp" />
+                    <TextView
+                        android:id="@+id/tv_left_width_phone"
+                        android:layout_centerVertical="true"
+                        android:layout_width="30dp"
+                        android:layout_height="10dp" />
+                    <TextView
+                        android:id="@+id/tv_right_width_phone"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:layout_width="30dp"
+                        android:layout_height="10dp" />
+
                     <ImageView
                         android:id="@+id/iv_login_page_main"
                         android:src="@mipmap/login_pager_1_3x"
@@ -115,7 +138,29 @@
                         android:layout_toLeftOf="@id/tv_right_width"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"/>
-
+                    <ImageView
+                        android:id="@+id/iv_login_map"
+                        android:src="@mipmap/map_3x"
+                        android:visibility="gone"
+                        android:scaleType="centerCrop"
+                        android:layout_below="@id/tv_top_height"
+                        android:layout_above="@id/tv_bottom_height"
+                        android:layout_toRightOf="@id/tv_left_width"
+                        android:layout_toLeftOf="@id/tv_right_width"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+                    <ImageView
+                        android:id="@+id/iv_login_phonenumber"
+                        android:visibility="gone"
+                        android:clickable="true"
+                        android:onClick="loginClick"
+                        android:src="@mipmap/byids_location_3x"
+                        android:layout_below="@id/tv_top_height_phone"
+                        android:layout_above="@id/tv_bottom_height_phone"
+                        android:layout_toRightOf="@id/tv_left_width_phone"
+                        android:layout_toLeftOf="@id/tv_right_width_phone"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
 
 
                 </RelativeLayout>

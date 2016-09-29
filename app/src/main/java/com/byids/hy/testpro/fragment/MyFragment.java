@@ -6,10 +6,12 @@ import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -48,6 +50,8 @@ import com.videogo.openapi.EZOpenSDK;
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -57,6 +61,7 @@ import java.util.Random;
 public class MyFragment extends Fragment implements PullUpMenuListener,GestureDetector.OnGestureListener {
     private String TAG = "result";
     private View view = null;
+    private static final String SWITCH_ROOM_DIALOG = "1";
     
     private LinearLayout linearMenu;  //下拉菜单
     private LinearLayout linearClick;        //隐藏的，代替下拉菜单点击的四个按钮
@@ -114,6 +119,8 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
     private RelativeLayout linear;
     private ImageView ivHomeIcon;
     private TextView tvRoomNameTop;
+    private RelativeLayout rlRoomName;
+    private ImageView ivXiaoJianJian;
 
     //上拉菜单
     MyPullUpScrollView svPullUpMenu;
@@ -131,6 +138,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
 
     //---------------------控制部分 上---------------------
     private TextView tvRoomName;     //房间名部分
+    private TextView tvLocalTemp;       //当地的气温
     private Button btShezhi;
     private Button btJiankong;
     private Button btMensuo;
@@ -203,6 +211,13 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
     private RelativeLayout rlAirControl1;
     private RelativeLayout rlAirControl2;
     private RelativeLayout rlAirControl3;
+    private TextView tvDetailTemp;
+    private TextView tvAirControl1;
+    private TextView tvAirControl2;
+    private TextView tvAirControl3;
+
+    private List<TextView> tvList = new ArrayList<TextView>();  //textview控件组，用于改变字体
+    private Typeface typeFace;
 
     //控制部分 下
     private LinearLayout linearAirDetails;
@@ -340,6 +355,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         linearMenu.measure(w, h);
         btHeight = linearMenu.getMeasuredHeight();         //头菜单的高度
         btHeight_X3 = btHeight*3;
+        Log.i(TAG, "onCreateView: ----------------bbbbbbbbbbbbbbbbbbbb------------------"+btHeight);
 
         //获取浮现的三个部分的高度
         tvScene.measure(w,h);
@@ -411,11 +427,15 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         layoutParams.height = btHeight;
         linearClick.setLayoutParams(layoutParams);
 
+        //设置字体
+        typeFace = Typeface.createFromAsset(getActivity().getAssets(),"fonts/xiyuanti.ttf");
+        setFonts();
         tvRoomName.setText(roomName);    //设置房间名
+
         tvRoomNameTop.setText(roomName);
-        ViewGroup.LayoutParams layoutParams1 = tvRoomName.getLayoutParams();
+        ViewGroup.LayoutParams layoutParams1 = rlRoomName.getLayoutParams();
         layoutParams1.height = height-initFloatHeight+btHeight*2;     //设置房间textview的高度 = 屏幕高 - 浮出部分高 + 上部控件的高*2
-        tvRoomName.setLayoutParams(layoutParams1);
+        rlRoomName.setLayoutParams(layoutParams1);
 
         scrollToBottomInit();   //初始化ScrollView的位置
 
@@ -452,6 +472,8 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
 
         ivHomeIcon = (ImageView) view.findViewById(R.id.iv_home_icon);
         tvRoomNameTop = (TextView) view.findViewById(R.id.tv_room_name);
+        rlRoomName = (RelativeLayout) view.findViewById(R.id.rl_room_name);
+        ivXiaoJianJian = (ImageView) view.findViewById(R.id.iv_xiaojianjian);
         btPullMenu = (RelativeLayout) view.findViewById(R.id.rl_bt_menu);
         tvSet = (TextView) view.findViewById(R.id.tv_set);
         tvMonitoring = (TextView) view.findViewById(R.id.tv_monitoring);
@@ -460,6 +482,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
 
         //控制部分  上
         tvRoomName = (TextView) view.findViewById(R.id.tv_blank);
+        tvLocalTemp = (TextView) view.findViewById(R.id.tv_local_temp);
         btShezhi = (Button) view.findViewById(R.id.bt_shezhi);
         btJiankong = (Button) view.findViewById(R.id.bt_jiankong);
         btMensuo = (Button) view.findViewById(R.id.bt_mensuo);
@@ -472,6 +495,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
 
         initControler();    //初始化控制部分  下
         initBackGround();   //初始化背景图片
+
     }
 
     private void initControler(){
@@ -498,13 +522,17 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         rlAllJuan = (RelativeLayout) view.findViewById(R.id.rl_quanguan_juanlian);
         rlStopJuan = (RelativeLayout) view.findViewById(R.id.rl_tingzhi_juanlian);
         //空调
-         rlKongtiao = (RelativeLayout) view.findViewById(R.id.rl_kongtiao_kaiguan);
-         rlKongtiaoMoshi = (RelativeLayout) view.findViewById(R.id.rl_kongtiao_moshi);
+        rlKongtiao = (RelativeLayout) view.findViewById(R.id.rl_kongtiao_kaiguan);
+        rlKongtiaoMoshi = (RelativeLayout) view.findViewById(R.id.rl_kongtiao_moshi);
         linearAirDetails = (LinearLayout) view.findViewById(R.id.linear_air_details);
-         sbTemp = (SeekBar) view.findViewById(R.id.sb_air_temp);
-         rlAirControl1 = (RelativeLayout) view.findViewById(R.id.rl_air_control_1);
-         rlAirControl2 = (RelativeLayout) view.findViewById(R.id.rl_air_control_2);
-         rlAirControl3 = (RelativeLayout) view.findViewById(R.id.rl_air_control_3);
+        sbTemp = (SeekBar) view.findViewById(R.id.sb_air_temp);
+        rlAirControl1 = (RelativeLayout) view.findViewById(R.id.rl_air_control_1);
+        rlAirControl2 = (RelativeLayout) view.findViewById(R.id.rl_air_control_2);
+        rlAirControl3 = (RelativeLayout) view.findViewById(R.id.rl_air_control_3);
+        tvDetailTemp = (TextView) view.findViewById(R.id.tv_detail_temp);
+        tvAirControl1 = (TextView) view.findViewById(R.id.tv_air_control_1);
+        tvAirControl2 = (TextView) view.findViewById(R.id.tv_air_control_2);
+        tvAirControl3 = (TextView) view.findViewById(R.id.tv_air_control_3);
 
         //---------------------------需要做动画的图片--------------------------
         //场景
@@ -593,6 +621,42 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         tvJuanLian = (TextView) view.findViewById(R.id.tv_roller_curtain);
         tvAirCondition = (TextView) view.findViewById(R.id.tv_air_condition);
 
+        //加入改字体的列表
+        tvList.add(tvSet);
+        tvList.add(tvMonitoring);
+        tvList.add(tvLock);
+        tvList.add(tvSecurity);
+        tvList.add(tvRoomNameTop);
+        tvList.add(tvRoomName);
+        tvList.add(tvXiuxian);
+        tvList.add(tvYule);
+        tvList.add(tvJuhui);
+        tvList.add(tvLikai);
+        tvList.add(tvScene);
+        tvList.add(tvLight);
+        tvList.add(tvLightSwitch);
+        tvList.add(tvLightValue);
+        tvList.add(tvChuanglian);
+        tvList.add(tvBulian);
+        tvList.add(tvShalian);
+        tvList.add(tvAll);
+        tvList.add(tvStop);
+        tvList.add(tvJuanLian);
+        tvList.add(tvJuanlian);
+        tvList.add(tvJuanlianR);
+        tvList.add(tvAllJuan);
+        tvList.add(tvStopJuan);
+        tvList.add(tvAirCondition);
+        tvList.add(tvKongtiaoSwitch);
+        tvList.add(tvKongtiaoTemp);
+        tvList.add(tvKongtiaoMoshi);
+        tvList.add(tvDetailTemp);
+        tvList.add(tvAirControl1);
+        tvList.add(tvAirControl2);
+        tvList.add(tvAirControl3);
+        //tvList.add(tvLocalTemp);
+
+
         if (roomAttr.getLight().getActive()==0){
             initRoomAttr(tvLight,llLight);
         }if (roomAttr.getCurtain().getActive()==0){
@@ -625,6 +689,8 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         rlAirControl1.setOnClickListener(controlListener);
         rlAirControl2.setOnClickListener(controlListener);
         rlAirControl3.setOnClickListener(controlListener);
+        tvRoomName.setOnClickListener(controlListener);
+
 
         sbTemp.setOnSeekBarChangeListener(tempSeekBarListener);  //空调调温SeekBar
         hsLightValue.setOnScrollChangeListener(hsChangeListener);
@@ -732,6 +798,9 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         @Override
         public void onClick(View view) {
             switch (view.getId()){
+                case R.id.tv_blank:      //点击弹出切换房间dialog
+                    clickRoomName();
+                    break;
                 case R.id.rl_xiuxian:
                     EventBus.getDefault().post(new MyEventBus("这是第几个页面"+roomIndex));
                     setScaleAnimation(rlXiuxian);
@@ -965,6 +1034,15 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         }).start();
     }
 
+
+
+    //设置字体
+    private void setFonts(){
+        for (int i=0;i<tvList.size();i++){
+            tvList.get(i).setTypeface(typeFace);
+        }
+    }
+
     //设置切换图片的动画
     private int BGPFlag = 0;
     private void setBGPAnimation(){
@@ -1033,7 +1111,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                     break;
                 case R.id.bt_jiankong:
                     Toast.makeText(getActivity(), "监控", Toast.LENGTH_SHORT).show();
-                    //EventBus.getDefault().post(new MyEventBus("jiankong"));
+                    EventBus.getDefault().post(new MyEventBus("jiankong"));
                     EZOpenSDK.getInstance().openLoginPage();
                     break;
                 case R.id.bt_mensuo:
@@ -1077,57 +1155,57 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
             }
             //向上滑动到一大半时，隐藏桌面两个小控件，房间名。
             if (scrollY<btHeight_X3){
-                tvRoomName.setAlpha(1f);
+                rlRoomName.setAlpha(1f);
                 ivHomeIcon.setAlpha(1f);
                 tvRoomNameTop.setAlpha(0f);
                 //pullDown(false,true);
             }else if (scrollY<hideHeight && scrollY>=btHeight_X3){
-                tvRoomName.setAlpha(1f);
+                rlRoomName.setAlpha(1f);
                 ivHomeIcon.setAlpha(1f);
                 tvRoomNameTop.setAlpha(0f);
                 pullDown(false,true);
             }else if (scrollY>=hideHeight && scrollY<hideHeight+10){
-                tvRoomName.setAlpha(0.9f);
+                rlRoomName.setAlpha(0.9f);
                 ivHomeIcon.setAlpha(0.9f);
                 tvRoomNameTop.setAlpha(0.1f);
             }else if (scrollY>=hideHeight+10 && scrollY<hideHeight+20){
-                tvRoomName.setAlpha(0.8f);
+                rlRoomName.setAlpha(0.8f);
                 ivHomeIcon.setAlpha(0.8f);
                 tvRoomNameTop.setAlpha(0.2f);
             }else if (scrollY>=hideHeight+20 && scrollY<hideHeight+30){
-                tvRoomName.setAlpha(0.7f);
+                rlRoomName.setAlpha(0.7f);
                 ivHomeIcon.setAlpha(0.7f);
                 tvRoomNameTop.setAlpha(0.3f);
             }else if (scrollY>=hideHeight+30 && scrollY<hideHeight+40){
-                tvRoomName.setAlpha(0.6f);
+                rlRoomName.setAlpha(0.6f);
                 ivHomeIcon.setAlpha(0.6f);
                 tvRoomNameTop.setAlpha(0.4f);
             }else if (scrollY>=hideHeight+40 && scrollY<hideHeight+50){
-                tvRoomName.setAlpha(0.5f);
+                rlRoomName.setAlpha(0.5f);
                 ivHomeIcon.setAlpha(0.5f);
                 tvRoomNameTop.setAlpha(0.5f);
             }else if (scrollY>=hideHeight+50 && scrollY<hideHeight+60){
-                tvRoomName.setAlpha(0.4f);
+                rlRoomName.setAlpha(0.4f);
                 ivHomeIcon.setAlpha(0.4f);
                 tvRoomNameTop.setAlpha(0.6f);
             }else if (scrollY>=hideHeight+60 && scrollY<hideHeight+70){
-                tvRoomName.setAlpha(0.3f);
+                rlRoomName.setAlpha(0.3f);
                 ivHomeIcon.setAlpha(0.3f);
                 tvRoomNameTop.setAlpha(0.7f);
             }else if (scrollY>=hideHeight+70 && scrollY<hideHeight+80){
-                tvRoomName.setAlpha(0.2f);
+                rlRoomName.setAlpha(0.2f);
                 ivHomeIcon.setAlpha(0.2f);
                 tvRoomNameTop.setAlpha(0.8f);
             }else if (scrollY>=hideHeight+80 && scrollY<hideHeight+90){
-                tvRoomName.setAlpha(0.1f);
+                rlRoomName.setAlpha(0.1f);
                 ivHomeIcon.setAlpha(0.1f);
                 tvRoomNameTop.setAlpha(0.9f);
             }else if (scrollY>=hideHeight+90 && scrollY<hideHeight+100){
-                tvRoomName.setAlpha(0.05f);
+                rlRoomName.setAlpha(0.05f);
                 ivHomeIcon.setAlpha(0.05f);
                 tvRoomNameTop.setAlpha(0.95f);
             }else if (scrollY>=hideHeight+100){
-                tvRoomName.setAlpha(0f);
+                rlRoomName.setAlpha(0f);
                 ivHomeIcon.setAlpha(0f);
                 tvRoomNameTop.setAlpha(1f);
                 pullDown(true,false);
@@ -1265,6 +1343,9 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         tvLikai.setTextColor(activity.getResources().getColor(colorId));
     }
     //点击事件
+    private void clickRoomName(){
+        EventBus.getDefault().post(new MyEventBus(SWITCH_ROOM_DIALOG));
+    }
     private void clickXiuxian(){
         changeColorToActive1(R.mipmap.theme2_jiating_xiuxian_active_ani_3x,R.mipmap.theme2_jiating_xiuxian_active_ani_in_3x,R.color.colorTextActive);
         changeColorToActive2(R.mipmap.theme2_jiating_yule_1_3x,R.mipmap.theme2_jiating_yule_2_3x,R.mipmap.theme2_jiating_yule_3_3x,R.color.colorText);

@@ -29,8 +29,9 @@
         <TextView
             android:id="@+id/tv_xiuxian"
             android:text="休 闲"
+            android:textSize="12sp"
             android:textColor="@color/colorText"
-            android:paddingTop="4dp"
+            android:paddingTop="6dp"
             android:layout_alignRight="@id/iv_xiuxian_in"
             android:layout_alignLeft="@id/iv_xiuxian_in"
             android:layout_below="@id/iv_xiuxian_out"
@@ -49,27 +50,25 @@
         android:layout_height="wrap_content">
         <ImageView
             android:id="@+id/iv_yule_1"
-            android:layout_below="@id/tv_scene"
             android:src="@mipmap/theme2_jiating_yule_1_3x"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
         <ImageView
             android:id="@+id/iv_yule_2"
-            android:layout_below="@id/tv_scene"
             android:src="@mipmap/theme2_jiating_yule_2_3x"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
         <ImageView
             android:id="@+id/iv_yule_3"
-            android:layout_below="@id/tv_scene"
             android:src="@mipmap/theme2_jiating_yule_3_3x"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
         <TextView
             android:id="@+id/tv_yule"
             android:text="娱 乐"
+            android:textSize="12sp"
             android:textColor="@color/colorText"
-            android:paddingTop="4dp"
+            android:paddingTop="6dp"
             android:layout_alignRight="@id/iv_yule_3"
             android:layout_alignLeft="@id/iv_yule_3"
             android:layout_below="@id/iv_yule_1"
@@ -89,13 +88,11 @@
         android:layout_height="wrap_content">
         <ImageView
             android:id="@+id/iv_juhui_1"
-            android:layout_below="@id/tv_scene"
             android:src="@mipmap/theme2_jiating_juhui_ani_3x"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
         <ImageView
             android:id="@+id/iv_juhui_2"
-            android:layout_below="@id/tv_scene"
             android:src="@mipmap/theme2_jiating_juhui_ani_in_3x"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
@@ -103,7 +100,8 @@
             android:id="@+id/tv_juhui"
             android:text="聚 会"
             android:textColor="@color/colorText"
-            android:paddingTop="4dp"
+            android:textSize="12sp"
+            android:paddingTop="6dp"
             android:layout_alignRight="@id/iv_juhui_2"
             android:layout_alignLeft="@id/iv_juhui_2"
             android:layout_below="@id/iv_juhui_2"
@@ -122,7 +120,6 @@
         android:layout_height="wrap_content">
         <ImageView
             android:id="@+id/iv_likai"
-            android:layout_below="@id/tv_scene"
             android:src="@mipmap/theme2_jiating_likai_ani_3x"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
@@ -130,7 +127,8 @@
             android:id="@+id/tv_likai"
             android:text="离 开"
             android:textColor="@color/colorText"
-            android:paddingTop="4dp"
+            android:textSize="12sp"
+            android:paddingTop="6dp"
             android:layout_alignRight="@id/iv_likai"
             android:layout_alignLeft="@id/iv_likai"
             android:layout_below="@id/iv_likai"

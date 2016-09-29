@@ -27,6 +27,7 @@
                     android:id="@+id/tv_set"
                     android:clickable="true"
                     android:text="设置"
+                    android:textSize="12sp"
                     android:textColor="@color/colorText"
                     android:layout_weight="1"
                     android:drawablePadding="6dp"
@@ -39,6 +40,7 @@
                     android:id="@+id/tv_monitoring"
                     android:clickable="true"
                     android:text="监控"
+                    android:textSize="12sp"
                     android:textColor="@color/colorText"
                     android:layout_weight="1"
                     android:drawablePadding="6dp"
@@ -51,6 +53,7 @@
                     android:id="@+id/tv_lock"
                     android:clickable="true"
                     android:text="门锁"
+                    android:textSize="12sp"
                     android:textColor="@color/colorText"
                     android:layout_weight="1"
                     android:drawablePadding="6dp"
@@ -63,6 +66,7 @@
                     android:id="@+id/tv_security"
                     android:clickable="true"
                     android:text="布防"
+                    android:textSize="12sp"
                     android:textColor="@color/colorText"
                     android:layout_weight="1"
                     android:drawablePadding="6dp"
@@ -108,7 +112,7 @@
                 android:orientation="horizontal"
                 android:weightSum="4"
                 android:layout_width="match_parent"
-                android:layout_height="82dp">
+                android:layout_height="78dp">
 
                 <Button
                     android:id="@+id/bt_shezhi"
@@ -136,16 +140,44 @@
                     android:layout_height="match_parent" />
             </LinearLayout>
 
-            <TextView
-                android:id="@+id/tv_blank"
+
+            <RelativeLayout
+                android:id="@+id/rl_room_name"
                 android:clickable="true"
-                android:text="客厅"
-                android:textSize="42sp"
-                android:gravity="bottom"
-                android:padding="10dp"
-                android:textColor="@color/colorWhite"
                 android:layout_width="match_parent"
-                android:layout_height="70dp" />
+                android:layout_height="170dp">
+                <TextView
+                    android:id="@+id/tv_blank"
+                    android:text="客厅"
+                    android:textSize="38sp"
+                    android:clickable="true"
+                    android:drawableRight="@mipmap/switch_room_3x"
+                    android:drawablePadding="4dp"
+                    android:gravity="center"
+                    android:padding="10dp"
+                    android:layout_alignParentBottom="true"
+                    android:textColor="@color/colorWhite"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+                <ImageView
+                    android:id="@+id/iv_xiaojianjian"
+                    android:src="@mipmap/xiaojianjian_3x"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignRight="@id/tv_blank"
+                    android:layout_alignLeft="@id/tv_blank"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+                <TextView
+                    android:id="@+id/tv_local_temp"
+                    android:text="27°"
+                    android:textSize="32sp"
+                    android:textColor="@color/colorWhite"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentRight="true"
+                    android:padding="10dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </RelativeLayout>
 
             <TextView
                 android:id="@+id/tv_scene_name"
@@ -214,6 +246,7 @@
     <RelativeLayout
         android:id="@+id/rl_bt_menu"
         android:focusable="true"
+        android:layout_margin="2dp"
         android:clickable="true"
         android:background="@mipmap/myhomeback_s"
         android:layout_centerInParent="true"
@@ -240,17 +273,5 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
     </RelativeLayout>
-    <!--<TextView
-        android:id="@+id/tv_room_name"
-        android:clickable="false"
-        android:text="客厅"
-        android:textColor="@color/colorWhite"
-        android:textSize="32sp"
-        android:gravity="center"
-        android:background="@mipmap/myhomeback_s"
-        android:layout_centerInParent="true"
-        android:layout_alignParentTop="true"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />-->
 
 </RelativeLayout>

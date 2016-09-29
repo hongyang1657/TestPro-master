@@ -85,8 +85,9 @@
         <TextView
             android:id="@+id/tv_juanlian"
             android:text="卷帘 左"
+            android:textSize="12sp"
             android:textColor="@color/colorText"
-            android:paddingTop="4dp"
+            android:paddingTop="6dp"
             android:gravity="center"
             android:layout_below="@id/iv_juanlian_head"
             android:layout_width="match_parent"
@@ -170,8 +171,9 @@
         <TextView
             android:id="@+id/tv_juanlian_r"
             android:text="卷帘 右"
+            android:textSize="12sp"
             android:textColor="@color/colorText"
-            android:paddingTop="4dp"
+            android:paddingTop="6dp"
             android:gravity="center"
             android:layout_below="@id/iv_juanlian_head_r"
             android:layout_width="match_parent"
@@ -195,8 +197,9 @@
         <TextView
             android:id="@+id/tv_all_juanlian"
             android:text="全 关"
+            android:textSize="12sp"
             android:textColor="@color/colorText"
-            android:paddingTop="4dp"
+            android:paddingTop="6dp"
             android:layout_alignLeft="@id/iv_chuanglian_all_juanlian"
             android:layout_alignRight="@id/iv_chuanglian_all_juanlian"
             android:layout_below="@id/iv_chuanglian_all_juanlian"
@@ -221,8 +224,9 @@
         <TextView
             android:id="@+id/tv_chuanglian_stop_juanlian"
             android:text="停 止"
+            android:textSize="12sp"
             android:textColor="@color/colorText"
-            android:paddingTop="4dp"
+            android:paddingTop="6dp"
             android:layout_alignLeft="@id/iv_chuanglian_stop_juanlian"
             android:layout_alignRight="@id/iv_chuanglian_stop_juanlian"
             android:layout_below="@id/iv_chuanglian_stop_juanlian"
