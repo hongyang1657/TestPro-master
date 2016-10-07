@@ -25,6 +25,7 @@ import android.widget.Toast;
 
 import com.byids.hy.testpro.Bean.HomeAttr;
 import com.byids.hy.testpro.MyEventBus;
+import com.byids.hy.testpro.MyEventBus2;
 import com.byids.hy.testpro.PullDownMenuListener;
 import com.byids.hy.testpro.R;
 import com.byids.hy.testpro.View.MyCustomViewPager;
@@ -45,6 +46,8 @@ import java.util.List;
 public class MyMainActivity extends FragmentActivity{
     private String TAG = "result";
     private static final String SWITCH_ROOM_DIALOG = "1";
+    private static final String SCROLL_FRAGMENT_START = "2";    //滑动viewpager
+    private static final String SCROLL_FRAGMENT_END = "3";      //结束滑动viewpager
 
     private MyCustomViewPager viewPager;
     private MyFragmentAdapter adapter;
@@ -104,6 +107,15 @@ public class MyMainActivity extends FragmentActivity{
         Log.i(TAG, "initView: "+homeAttr.getRooms().get(0).getRoomAttr().getLight().getActive());
         Log.i(TAG, "initView: "+homeAttr);
 
+
+        //初始化activity给fragment传递的数据
+        for (int i=0;i<roomNameList.length;i++){
+            myFragment1 = new MyFragment(i,roomNameList[i],ivBackList,homeAttr.getRooms().get(i).getRoomAttr());         //房间id,房间名数组，背景图片数组，活跃的控件数组
+            pullMenu(myFragment1);
+            viewList.add(myFragment1);
+        }
+
+
         WindowManager wm = this.getWindowManager();
         width = wm.getDefaultDisplay().getWidth();
         height = wm.getDefaultDisplay().getHeight();
@@ -120,13 +132,6 @@ public class MyMainActivity extends FragmentActivity{
         ivMedia.setPadding(0,h1,w,0);
         viewPager = (MyCustomViewPager) findViewById(R.id.id_vp);
 
-        //初始化activity给fragment传递的数据
-        for (int i=0;i<roomNameList.length;i++){
-            myFragment1 = new MyFragment(i,roomNameList[i],ivBackList,homeAttr.getRooms().get(i).getRoomAttr());         //房间id,房间名数组，背景图片数组，活跃的控件数组
-            pullMenu(myFragment1);
-            viewList.add(myFragment1);
-        }
-
 
         adapter = new MyFragmentAdapter(getSupportFragmentManager(),viewList);
         viewPager.setAdapter(adapter);
@@ -135,6 +140,8 @@ public class MyMainActivity extends FragmentActivity{
 
         initDialog();     //初始化dialog二级页面
     }
+
+
 
     //初始化dialog二级页面
     private void initDialog(){
@@ -154,6 +161,7 @@ public class MyMainActivity extends FragmentActivity{
         lvSwitchRoom.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                scrollViewPager();  //滑动时隐藏控件
                 viewPager.setCurrentItem(position);
                 dialogSwitchRoom.hide();
 
@@ -176,11 +184,11 @@ public class MyMainActivity extends FragmentActivity{
     @Subscribe
     public void onEventMainThread(MyEventBus event) {
         String msg = "onEventMainThread收到了消息：" + event.getmMsg();
-        //Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
-        if (msg=="jiankong"){
-            Intent intent = new Intent(MyMainActivity.this,CameraActivity.class);
+        Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+        /*if (msg=="jiankong"){
+            Intent intent = new Intent(MyMainActivity.this,EzCameraActivity.class);
             startActivity(intent);
-        }
+        }*/
         switch (event.getmMsg()){
             case SWITCH_ROOM_DIALOG:   //选择房间dialog
                 dialogSwitchRoom.show();
@@ -263,9 +271,11 @@ public class MyMainActivity extends FragmentActivity{
             }
 
             if (state==1){
+                EventBus.getDefault().post(new MyEventBus2(SCROLL_FRAGMENT_START));
                 scrollViewPager();
             }
             if (state==0){
+                EventBus.getDefault().post(new MyEventBus2(SCROLL_FRAGMENT_END));
                 downScrollViewPager();
             }
             //onMainListener.onMainAction(pagerState);   //Activity向Fragment通信

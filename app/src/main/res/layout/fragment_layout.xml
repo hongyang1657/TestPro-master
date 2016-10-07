@@ -246,7 +246,7 @@
     <RelativeLayout
         android:id="@+id/rl_bt_menu"
         android:focusable="true"
-        android:layout_margin="2dp"
+        android:layout_margin="3dp"
         android:clickable="true"
         android:background="@mipmap/myhomeback_s"
         android:layout_centerInParent="true"

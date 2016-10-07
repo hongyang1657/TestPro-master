@@ -2,12 +2,12 @@ package com.byids.hy.testpro;
 
 /**
  * Created by gqgz2 on 2016/9/19.
- * fragment向activity传递数据
+ * EventBus activity向Fragment传递数据
  */
-public class MyEventBus {
+public class MyEventBus2 {
     private String mMsg;
 
-    public MyEventBus(String msg){
+    public MyEventBus2(String msg){
         mMsg = msg;
     }
 

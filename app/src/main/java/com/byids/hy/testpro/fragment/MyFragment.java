@@ -38,6 +38,7 @@ import android.widget.Toast;
 
 import com.byids.hy.testpro.Bean.RoomAttr;
 import com.byids.hy.testpro.MyEventBus;
+import com.byids.hy.testpro.MyEventBus2;
 import com.byids.hy.testpro.PullDownMenuListener;
 import com.byids.hy.testpro.PullUpMenuListener;
 import com.byids.hy.testpro.R;
@@ -48,6 +49,7 @@ import com.byids.hy.testpro.activity.MyMainActivity;
 import com.videogo.openapi.EZOpenSDK;
 
 import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -62,6 +64,8 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
     private String TAG = "result";
     private View view = null;
     private static final String SWITCH_ROOM_DIALOG = "1";
+    private static final String SCROLL_FRAGMENT_START = "2";      //开始滑动viewpager
+    private static final String SCROLL_FRAGMENT_END = "3";      //结束滑动viewpager
     
     private LinearLayout linearMenu;  //下拉菜单
     private LinearLayout linearClick;        //隐藏的，代替下拉菜单点击的四个按钮
@@ -73,6 +77,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
     private int width;  //屏幕宽
     private int height;    //屏幕高
     private int btHeight;     //头部菜单的高度
+    private int btMenuHeight;      //顶部控件的高度
     private int btHeight_X3;  //头部菜单高度的三倍  (因为两个ScrollView的联动为3倍率)
     private int AirConditionHeight;        //空调控制部分的布局高度
     private boolean isHeadShown = false;     //头菜单是否显示
@@ -222,6 +227,9 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
     //控制部分 下
     private LinearLayout linearAirDetails;
 
+    private Thread BGPThread;      //切换背景图片的线程
+    private boolean isFragmemtFront = true;         //fragment是否可见，如果不可见了，可关闭切换背景图片的线程
+
     Random random1 = new Random();
     private Handler handler = new Handler(){
         @Override
@@ -255,6 +263,8 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
     };
 
 
+    public MyFragment(){}
+
     private int[] backList;  //背景图片组
     public MyFragment(int roomIndex, String roomName, int[] backList, RoomAttr roomAttr) {
         this.roomIndex = roomIndex;
@@ -270,6 +280,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_layout,null);
 
+        EventBus.getDefault().register(this);
         initView();
 
         btPullMenu.setOnClickListener(pullMenuListener);
@@ -356,6 +367,10 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         btHeight = linearMenu.getMeasuredHeight();         //头菜单的高度
         btHeight_X3 = btHeight*3;
         Log.i(TAG, "onCreateView: ----------------bbbbbbbbbbbbbbbbbbbb------------------"+btHeight);
+
+        //获取顶部控件的高度
+        btPullMenu.measure(w,h);
+        btMenuHeight = linearMenu.getMeasuredHeight();
 
         //获取浮现的三个部分的高度
         tvScene.measure(w,h);
@@ -458,7 +473,27 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         activity = getActivity();
         super.onActivityCreated(savedInstanceState);
+    }
 
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        isFragmemtFront = true;
+        initBackGround();   //初始化背景图片
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        isFragmemtFront = false;
+        Log.i(TAG, "onDestroyView: fragment暂停");
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);  //反注册EventBus
     }
 
     private void initView(){
@@ -494,7 +529,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
 //        linearClick.
 
         initControler();    //初始化控制部分  下
-        initBackGround();   //初始化背景图片
+
 
     }
 
@@ -793,6 +828,26 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
 
     }
 
+    //--------------------------------接受activity传来的消息---------------------------------------
+    @Subscribe
+    public void onEventMainThread(MyEventBus2 event) {
+        /*if (msg=="jiankong"){
+            Intent intent = new Intent(MyMainActivity.this,EzCameraActivity.class);
+            startActivity(intent);
+        }*/
+        switch (event.getmMsg()){
+            case SCROLL_FRAGMENT_START:          //开始切换viewpager页面
+                Log.i(TAG, "onEventMainThread: --------------onEventMainThread收到了消息--------------"+event.getmMsg());
+                btPullMenu.setVisibility(View.GONE);
+                break;
+            case SCROLL_FRAGMENT_END:          //结束切换viewpager页面
+                Log.i(TAG, "onEventMainThread: --------------onEventMainThread收到了消息--------------"+event.getmMsg());
+                btPullMenu.setVisibility(View.VISIBLE);
+                ObjectAnimator.ofFloat(btPullMenu,"translationY",-btMenuHeight,0).setDuration(600).start();
+                break;
+        }
+    }
+
     //--------------------------------------点击事件-------------------------------------------
     View.OnClickListener controlListener = new View.OnClickListener() {
         @Override
@@ -1009,20 +1064,18 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
     //初始化背景图片
     private void initBackGround(){
         //随机取出一张图片
-        //ivBackGround.setImageResource(backList[random.nextInt(backList.length)]);
-        //ivBackGroundTrans.setImageResource(backList[random.nextInt(backList.length)]);
         Bitmap bitmap = readBitMap(getActivity(),backList[random1.nextInt(backList.length)]);
         ivBackGround.setImageBitmap(bitmap);
         Bitmap bitmap1 = readBitMap(getActivity(),backList[random1.nextInt(backList.length)]);
         ivBackGroundTrans.setImageBitmap(bitmap1);
 
         //开线程  隔一段时间切换图片
-        new Thread(new Runnable() {
+        BGPThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                while (true){
+                while (isFragmemtFront==true){
                     try {
-                        Thread.sleep(50000);
+                        Thread.sleep(60000);
                         Message message = new Message();
                         message.what = 1;
                         handler.sendMessage(message);
@@ -1031,7 +1084,8 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                     }
                 }
             }
-        }).start();
+        });
+        BGPThread.start();
     }
 
 
@@ -1147,9 +1201,9 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
             //Log.i("result", "onScrollChanged:-----------x-----------"+x+"----------y---------"+y);
             Log.i(TAG, "onScrollChanged: -------scrollY--------"+scrollY);
             //判断向下滑的时候(y<控件的高度)    button消失
-            if (scrollY==btHeight_X3) {           //乘以三是因为手指移动和滑动是三倍率
+            if (scrollY>=btHeight_X3) {           //乘以三是因为手指移动和滑动是三倍率
                 btPullMenu.setVisibility(View.VISIBLE);
-                ObjectAnimator.ofFloat(btPullMenu,"alpha",0f,1f).setDuration(400).start();
+                //ObjectAnimator.ofFloat(btPullMenu,"alpha",0f,1f).setDuration(400).start();
             }else if (scrollY<btHeight_X3){
                 btPullMenu.setVisibility(View.GONE);
             }
@@ -1626,7 +1680,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
 
     @Override
     public boolean onSingleTapUp(MotionEvent motionEvent) {
-        Log.i(TAG, "onSingleTapUp: ---------");
+        //Log.i(TAG, "onSingleTapUp: ---------");
         if (scrollY==0){
             svPullUpMenu.smoothScrollToSlow(0,btHeight_X3,600);
             flag = true;

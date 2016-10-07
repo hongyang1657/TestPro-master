@@ -169,7 +169,7 @@ public class NewLoginActivity extends Activity{
         tvTopHeightIn = (TextView) findViewById(R.id.tv_top_height_in);
 
 
-        ivLogo.setPadding((int) (height*0.015),(int) (height*0.015),0,0);
+        ivLogo.setPadding((int) (height*0.008),(int) (height*0.008),0,0);
         //初始化控件位置
         ivLoginBack.setVisibility(View.GONE);  //初始化设为不可见
         ViewGroup.LayoutParams params0 = tvHehe.getLayoutParams();

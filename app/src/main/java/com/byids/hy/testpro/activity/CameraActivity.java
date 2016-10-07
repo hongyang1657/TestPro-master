@@ -153,7 +153,7 @@ public class CameraActivity extends Activity{
     private int speakFlag = 0;
     private int videoFlag = 0;
     private int talkFlag = 0;
-    public void cameraClick(View v){
+    /*public void cameraClick(View v){
         switch (v.getId()){
             case R.id.bt_room1:
                 ezPlayer = ezOpenSDK.createPlayer(CameraActivity.this,cameraId);    //视频播放
@@ -165,8 +165,8 @@ public class CameraActivity extends Activity{
                 boolean isStartPlay = ezPlayer.startRealPlay();    //开始播放
                 break;
             case R.id.bt_room2:
-                Intent intent = new Intent(CameraActivity.this,FullScreenCameraActivity.class);
-                startActivity(intent);
+                *//*Intent intent = new Intent(CameraActivity.this,FullScreenCameraActivity.class);
+                startActivity(intent);*//*
                 break;
             case R.id.bt_sound:
                 if (soundFlag==0){
@@ -231,7 +231,7 @@ public class CameraActivity extends Activity{
             default:
                 break;
         }
-    }
+    }*/
 
 
 }

@@ -50,7 +50,8 @@
             android:configChanges="orientation|keyboardHidden"
             android:screenOrientation="portrait" >
         </activity>
-        <activity android:name=".activity.CameraActivity"/>
+        <activity android:name=".activity.EzCameraActivity"
+            android:screenOrientation="landscape"/>
         <activity android:name=".activity.LoginExplainActivity"/>
 
 

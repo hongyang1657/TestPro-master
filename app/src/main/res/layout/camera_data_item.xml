@@ -4,8 +4,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <SurfaceView
-        android:id="@+id/sfv_camera_full_screen"
+    <TextView
+        android:id="@+id/tv_camera_data"
+        android:text="今天"
+        android:background="@color/colorLoginBack"
+        android:padding="10dp"
+        android:textSize="14sp"
+        android:gravity="center"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 </LinearLayout>
