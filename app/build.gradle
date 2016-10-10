@@ -35,5 +35,6 @@ dependencies {
     compile 'com.squareup.okhttp3:okhttp:3.4.1'
     compile files('libs/EZOpenSDK.jar')
     compile 'com.squareup.picasso:picasso:2.5.2'
+    compile 'com.google.android.gms:play-services-appindexing:8.1.0'
 }
 

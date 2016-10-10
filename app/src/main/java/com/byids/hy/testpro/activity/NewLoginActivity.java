@@ -10,6 +10,7 @@ import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -55,12 +56,19 @@ import com.byids.hy.testpro.Bean.Securityalarm;
 import com.byids.hy.testpro.Bean.Sence;
 import com.byids.hy.testpro.R;
 import com.byids.hy.testpro.View.LoginHScrollView;
+import com.byids.hy.testpro.utils.AES;
+import com.byids.hy.testpro.utils.ByteUtils;
+import com.byids.hy.testpro.utils.RunningTimeDialog;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -121,6 +129,30 @@ public class NewLoginActivity extends Activity{
     Rooms rs;
     List<Rooms> roomsList = new ArrayList<Rooms>();
     RoomAttr ra;
+    private RunningTimeDialog runningTimeDialog = new RunningTimeDialog();
+
+    //---------------------------udp----------------------------
+    public static final int DEFAULT_PORT = 57816;//端口号
+    public static final String LOG_TAG = "WifiBroadcastActivity";
+    private byte[] buffer = new byte[MAX_DATA_PACKET_LENGTH];
+    private static final int MAX_DATA_PACKET_LENGTH = 100;
+    private String udpCheck = "";
+    private String ip;    //接收到的ip地址
+
+    private Handler handler = new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what){
+                case 1:
+                    //runningTimeDialog.runningTimeProgressDialog(NewLoginActivity.this);
+                    runningTimeDialog.runningTimeProgressDialog1(NewLoginActivity.this);
+                    break;
+                default:
+                    break;
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -347,8 +379,17 @@ public class NewLoginActivity extends Activity{
                 }
                 break;
             case R.id.bt_login:
-                doLogin();  //登录
+                new Thread(){
+                    @Override
+                    public void run() {
+                        super.run();
+                        Message message = new Message();
+                        message.what = 1;
+                        handler.sendMessage(message);
+                    }
+                }.start();
 
+                doLogin();  //登录
                 break;
             case R.id.tv_cant_login:
                 Intent intent = new Intent(NewLoginActivity.this,LoginExplainActivity.class);
@@ -482,6 +523,7 @@ public class NewLoginActivity extends Activity{
             JSONObject obj1 = new JSONObject(jsonData);
             Iterator iterator = obj1.keys();
             String hid = (String) iterator.next();   //获取动态json的key值（hid）
+            test(hid);        //测试udp
 
             Log.i(TAG, "doJsonParse: --------------------"+hid);
             JSONObject obj2 = obj1.getJSONObject(hid);
@@ -595,9 +637,9 @@ public class NewLoginActivity extends Activity{
             intent.putExtra("hid",hid);
             intent.putExtra("uname",userName);
             intent.putExtra("pwd",password);
-            /*if (udpCheck.equals("ip")) {
+            if (udpCheck.equals("ip")) {
                 intent.putExtra("ip",ip);
-            }*/
+            }
             Bundle bundle = new Bundle();
             bundle.putSerializable("homeAttr",homeAttrBean);
             intent.putExtras(bundle);
@@ -607,7 +649,113 @@ public class NewLoginActivity extends Activity{
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        runningTimeDialog.progressDialog1.dismiss();
     }
+
+    //测试  包装发送udp
+    public void test(String hid){
+
+        String udpJson="{\"command\":\"find\",\"data\":{\"hid\":\""+hid+"\",\"loginName\":\"byids\"}}";
+        Log.i(TAG, "test: ------------------"+udpJson);
+        byte[] enByte = AES.encrpt(udpJson);//加密
+        if (enByte == null)
+            return;
+        byte[] lengthByte = ByteUtils.intToByteBigEndian(enByte.length);
+        byte[] headByte = new byte[8];
+        for (int i = 0;i<headByte.length;i++) {
+            headByte[i] = 0x50;
+        }
+        byte[] tailByte = new byte[4];
+        tailByte[0] = 0x0d;
+        tailByte[1] = 0x0a;
+        tailByte[2] = 0x0d;
+        tailByte[3] = 0x0a;
+
+        byte[] sendByte = ByteUtils.byteJoin(headByte,lengthByte,enByte,tailByte);
+        AES.byteStringLog(sendByte);
+        //发送udp广播
+        new BroadCastUdp(sendByte).start();
+    }
+
+    //发送UDP
+    public class BroadCastUdp extends Thread {
+        DatagramPacket dataPacket = null;
+        DatagramPacket receiveData= null;
+        private byte[] dataByte;
+        private DatagramSocket udpSocket;
+        public BroadCastUdp(byte[] sendByte) {
+            this.dataByte = sendByte;
+        }
+        public void run() {
+            try {
+                //udpSocket = new DatagramSocket(DEFAULT_PORT);
+                if (udpSocket==null){
+                    udpSocket = new DatagramSocket(null);
+                    udpSocket.setReuseAddress(true);
+                    udpSocket.bind(new InetSocketAddress(DEFAULT_PORT));
+                }
+                dataPacket = new DatagramPacket(buffer, MAX_DATA_PACKET_LENGTH);
+                receiveData= new DatagramPacket(buffer,MAX_DATA_PACKET_LENGTH);
+                if (this.dataByte == null){
+                    return;
+                }
+                byte[] data = this.dataByte;
+                dataPacket.setData(data);
+                dataPacket.setLength(data.length);
+                dataPacket.setPort(DEFAULT_PORT);
+
+                InetAddress broadcastAddr;
+                broadcastAddr = InetAddress.getByName("255.255.255.255");
+                dataPacket.setAddress(broadcastAddr);
+            } catch (Exception e) {
+                Log.e(LOG_TAG, e.toString());
+                udpSocket.close();
+            }
+            // while( start ){
+            try {
+                udpSocket.send(dataPacket);
+                sleep(10);
+            } catch (Exception e) {
+                Log.e(LOG_TAG, e.toString());
+                udpSocket.close();
+            }
+            try {
+                udpSocket.receive(receiveData);
+                udpSocket.receive(receiveData);
+            } catch (Exception e) {
+// TODO Auto-generated catch block
+                Log.e(LOG_TAG, e.toString());
+                udpSocket.close();
+            }
+            if (null!=receiveData){
+
+                if( 0!=receiveData.getLength() ) {
+                    String codeString = new String( buffer, 0, receiveData.getLength() );
+
+                    Log.i("result", "接收到数据为codeString: "+codeString);
+                    udpCheck = codeString.substring(2,4);
+                    Log.i("result", "接收到数据为: "+udpCheck);
+                    Log.i("result","recivedataIP地址为："+receiveData.getAddress().toString().substring(1));//此为IP地址
+                    //Log.i("result","recivedata_sock地址为："+receiveData.getAddress());//此为IP加端口号
+
+                    /*
+                    7.4    连接udp，
+                     */
+                    ip = receiveData.getAddress().toString().substring(1);   //ip地址
+                }
+            }else{
+                try {
+                    udpSocket.send(dataPacket);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            udpSocket.close();
+        }
+
+    }
+
 
     //解析房间数据
     private void doParseRooms(String mRoomAttr){

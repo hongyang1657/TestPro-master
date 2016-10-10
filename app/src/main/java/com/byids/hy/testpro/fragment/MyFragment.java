@@ -55,6 +55,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import android.support.v4.app.FragmentManager;
 
 /**
  * Created by hy on 2016/8/15.
@@ -239,7 +240,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                 case 1:
                     setBGPAnimation();
                     //svPullUpMenu.setLayoutParams(params);            //更新scrollView？
-                    Log.i(TAG, "handleMessage:切换背景图 ");
+                    //Log.i(TAG, "handleMessage:切换背景图 ");
                     break;
                 default:
                     break;
@@ -325,7 +326,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
             private void handleStop(Object view) {
                 ScrollView scroller = (ScrollView) view;
                 mScrollY = scroller.getScrollY();
-                Log.i(TAG, "handleStop: ----------mScrollY----------"+mScrollY);
+                //Log.i(TAG, "handleStop: ----------mScrollY----------"+mScrollY);
 
                 if (isInitPosition==true){
                     if (mScrollY>(btHeight_X3/2)&&mScrollY<=btHeight_X3){
@@ -366,7 +367,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         linearMenu.measure(w, h);
         btHeight = linearMenu.getMeasuredHeight();         //头菜单的高度
         btHeight_X3 = btHeight*3;
-        Log.i(TAG, "onCreateView: ----------------bbbbbbbbbbbbbbbbbbbb------------------"+btHeight);
+        //Log.i(TAG, "onCreateView: ----------------bbbbbbbbbbbbbbbbbbbb------------------"+btHeight);
 
         //获取顶部控件的高度
         btPullMenu.measure(w,h);
@@ -380,12 +381,12 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         linearSceneHeight = linearScene.getMeasuredHeight();
         tvLightHeight = tvLight.getMeasuredHeight();
         initFloatHeight = tvSceneHeight+linearSceneHeight+tvLightHeight;  //app打开时下面浮动部分的高度
-        Log.i(TAG, "onCreateView:app打开时下面浮动部分的高度 "+tvSceneHeight+"-----------"+linearSceneHeight+"-----------------"+tvLightHeight);
+        //Log.i(TAG, "onCreateView:app打开时下面浮动部分的高度 "+tvSceneHeight+"-----------"+linearSceneHeight+"-----------------"+tvLightHeight);
 
         //整个上拉菜单的高度
         svPullUpMenu.measure(w,h);
         linearPullUpScrollHeight = svPullUpMenu.getMeasuredHeight();
-        Log.i(TAG, "onCreateView: 整个上拉菜单的高度"+linearPullUpScrollHeight);
+        //Log.i(TAG, "onCreateView: 整个上拉菜单的高度"+linearPullUpScrollHeight);
 
         //获取灯光刻度条图片的长度
         ivLightValue1.measure(w,h);
@@ -404,11 +405,11 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
             public void onGlobalLayout() {
                 rlLightValue.getViewTreeObserver().removeGlobalOnLayoutListener(this);
                 rlLightValueHeight = rlLightValue.getWidth();      //数轴可显示部分的长度
-                Log.i(TAG, "onCreateView: 控件的长度？？"+rlLightValueHeight);
+                //Log.i(TAG, "onCreateView: 控件的长度？？"+rlLightValueHeight);
                 lightAxisinitValue = lightAxisExWidth - (rlLightValueHeight/2);
-                Log.i(TAG, "onCreateView: !!!!!!!!!!!!!!!!!!!!!"+lightAxisinitValue);
+                //Log.i(TAG, "onCreateView: !!!!!!!!!!!!!!!!!!!!!"+lightAxisinitValue);
                 //初始化hsScrollView的位置（指针指向0刻度）
-                Log.i(TAG, "run: ----------------------"+lightAxisinitValue);
+                //Log.i(TAG, "run: ----------------------"+lightAxisinitValue);
                 hsLightValue.scrollTo(lightAxisinitValue,0);
 
             }
@@ -480,14 +481,14 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
     public void onResume() {
         super.onResume();
         isFragmemtFront = true;
-        initBackGround();   //初始化背景图片
+        initBackGround();     //初始化背景图片
     }
 
     @Override
     public void onPause() {
         super.onPause();
         isFragmemtFront = false;
-        Log.i(TAG, "onDestroyView: fragment暂停");
+        //Log.i(TAG, "onDestroyView: fragment暂停");
     }
 
     @Override
@@ -761,8 +762,8 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
             private void handleStop(Object view) {
                 HorizontalScrollView scroller = (HorizontalScrollView) view;
                 int mScrollX = scroller.getScrollX();
-                Log.i(TAG, "handleStop: ----------mScrollX11----------"+mScrollX);
-                Log.i(TAG, "handleStop: ----------lightAxisinitValue----------"+lightAxisinitValue);
+                //Log.i(TAG, "handleStop: ----------mScrollX11----------"+mScrollX);
+                //Log.i(TAG, "handleStop: ----------lightAxisinitValue----------"+lightAxisinitValue);
 
                 if(mScrollX<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*0.5){
                     hsScrollMeasure(0);
@@ -837,11 +838,11 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         }*/
         switch (event.getmMsg()){
             case SCROLL_FRAGMENT_START:          //开始切换viewpager页面
-                Log.i(TAG, "onEventMainThread: --------------onEventMainThread收到了消息--------------"+event.getmMsg());
+                //Log.i(TAG, "onEventMainThread: --------------onEventMainThread收到了消息--------------"+event.getmMsg());
                 btPullMenu.setVisibility(View.GONE);
                 break;
             case SCROLL_FRAGMENT_END:          //结束切换viewpager页面
-                Log.i(TAG, "onEventMainThread: --------------onEventMainThread收到了消息--------------"+event.getmMsg());
+                //Log.i(TAG, "onEventMainThread: --------------onEventMainThread收到了消息--------------"+event.getmMsg());
                 btPullMenu.setVisibility(View.VISIBLE);
                 ObjectAnimator.ofFloat(btPullMenu,"translationY",-btMenuHeight,0).setDuration(600).start();
                 break;
@@ -857,61 +858,71 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                     clickRoomName();
                     break;
                 case R.id.rl_xiuxian:
-                    EventBus.getDefault().post(new MyEventBus("这是第几个页面"+roomIndex));
+                    EventBus.getDefault().post(new MyEventBus(roomName));
                     setScaleAnimation(rlXiuxian);
                     clickXiuxian();
                     break;
                 case R.id.rl_yule:
-                    isCanScroll = false;
+                    EventBus.getDefault().post(new MyEventBus(roomName+"yule"));
                     setScaleAnimation(rlYule);
                     clickYule();
                     break;
                 case R.id.rl_juhui:
-                    isCanScroll = true;
+                    EventBus.getDefault().post(new MyEventBus(roomName+"juhui"));
                     setScaleAnimation(rlJuhui);
                     clickJuhui();
                     break;
                 case R.id.rl_likai:
-
+                    EventBus.getDefault().post(new MyEventBus(roomName+"likai"));
                     setScaleAnimation(rlLikai);
                     clickLikai();
                     break;
                 case R.id.relative_light_switch:
+                    EventBus.getDefault().post(new MyEventBus(roomName+"light"));
                     setScaleAnimation(rlLight);
                     break;
                 case R.id.rl_bulian:
+                    EventBus.getDefault().post(new MyEventBus(roomName+"bulian"));
                     setScaleAnimation(rlBulian);
                     clickBulian();
                     break;
                 case R.id.rl_shalian:
+                    EventBus.getDefault().post(new MyEventBus(roomName+"shalian"));
                     setScaleAnimation(rlShalian);
                     clickShalian();
                     break;
                 case R.id.rl_quanguan:
+                    EventBus.getDefault().post(new MyEventBus(roomName+"all"));
                     setScaleAnimation(rlAll);
                     clickAll();
                     break;
                 case R.id.rl_tingzhi:
+                    EventBus.getDefault().post(new MyEventBus(roomName+"stop"));
                     setScaleAnimation(rlStop);
                     clickStop();
                     break;
                 case R.id.rl_juanlian:
+                    EventBus.getDefault().post(new MyEventBus(roomName+"juanlian"));
                     setScaleAnimation(rlJuanlian);
                     clickJuanlian();
                     break;
                 case R.id.rl_juanlian_r:
+                    EventBus.getDefault().post(new MyEventBus(roomName+"juanlian_r"));
                     setScaleAnimation(rlJuanlianR);
                     clickJuanlianR();
                     break;
                 case R.id.rl_quanguan_juanlian:
+                    EventBus.getDefault().post(new MyEventBus(roomName+"all_juanlian"));
                     setScaleAnimation(rlAllJuan);
                     clickAllJuan();
                     break;
                 case R.id.rl_tingzhi_juanlian:
+                    EventBus.getDefault().post(new MyEventBus(roomName+"stop_juanlian"));
                     setScaleAnimation(rlStopJuan);
                     clickStopJuan();
                     break;
                 case R.id.rl_kongtiao_kaiguan:
+                    EventBus.getDefault().post(new MyEventBus(roomName+"kongtiao"));
                     rlKongtiao.setClickable(false);   //点击后设为不可点击
                     ObjectAnimator.ofFloat(rlKongtiao,"scaleX",1f,0.6f,1f).setDuration(400).start();
                     ObjectAnimator objectAnimator = new ObjectAnimator().ofFloat(rlKongtiao,"scaleY",1f,0.6f,1f).setDuration(400);
@@ -926,6 +937,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
 
                     break;
                 case R.id.rl_kongtiao_moshi:
+
                     setScaleAnimation(rlKongtiaoMoshi);
                     Toast.makeText(activity, "睡眠 模式", Toast.LENGTH_SHORT).show();
                     break;
@@ -950,7 +962,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         @Override
         public void onScrollChange(View view, int i, int i1, int i2, int i3) {
             lightSVPosition = i;
-            Log.i(TAG, "onScrollChange: "+i);
+            //Log.i(TAG, "onScrollChange: "+i);
             if(lightSVPosition<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*0.5){
                 tvLightValue.setText("0");
             }else if (lightSVPosition>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*0.5 && lightSVPosition<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*1.5){
@@ -1199,7 +1211,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
             //加入手势，松开的时候 判断距离，选择菜单栏出现还是隐藏的动画
             scrollY = y;
             //Log.i("result", "onScrollChanged:-----------x-----------"+x+"----------y---------"+y);
-            Log.i(TAG, "onScrollChanged: -------scrollY--------"+scrollY);
+            //Log.i(TAG, "onScrollChanged: -------scrollY--------"+scrollY);
             //判断向下滑的时候(y<控件的高度)    button消失
             if (scrollY>=btHeight_X3) {           //乘以三是因为手指移动和滑动是三倍率
                 btPullMenu.setVisibility(View.VISIBLE);
