@@ -91,6 +91,7 @@ public class MyMainActivity extends FragmentActivity {
 
     //房间名数组
     private String[] roomNameList = null;
+    private String[] roomDBNameList  =null;
     private HomeAttr homeAttr = new HomeAttr();
 
     private MyFragment myFragment1;
@@ -130,6 +131,7 @@ public class MyMainActivity extends FragmentActivity {
         EventBus.getDefault().unregister(this);  //反注册EventBus
     }
 
+    //接收登录页面传递过来的数据
     private void reciveIntent() {
         uname = getIntent().getStringExtra("uname");
         pwd = getIntent().getStringExtra("pwd");
@@ -141,6 +143,20 @@ public class MyMainActivity extends FragmentActivity {
             Toast.makeText(MyMainActivity.this, "找到主机", Toast.LENGTH_LONG).show();
             tcplongSocket = new TcpLongSocket(new ConnectTcp());
             tcplongSocket.startConnect(ip, DEFAULT_PORT);
+            new Thread(){
+                @Override
+                public void run() {
+                    super.run();
+                    while (true){
+                        try {
+                            sleep(10000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        tcplongSocket.writeDate(Encrypt.encrypt("0"));
+                    }
+                }
+            }.start();
         }
     }
 
@@ -171,6 +187,7 @@ public class MyMainActivity extends FragmentActivity {
             Log.i("result", "---收到         数据-----");
             if ("Hello client" == buffer.toString()) {
                 Log.i("result", "心跳" + String.valueOf(tcplongSocket.getConnectStatus()));
+                Log.i(TAG, "receive: 连接状态**********"+tcplongSocket.getConnectStatus());
             }
 
         }
@@ -185,6 +202,7 @@ public class MyMainActivity extends FragmentActivity {
 
         //获取房间信息
         roomNameList = getIntent().getStringArrayExtra("roomNameList");
+        roomDBNameList = getIntent().getStringArrayExtra("roomDBNameList");
         homeAttr = (HomeAttr) getIntent().getSerializableExtra("homeAttr");
         //Log.i(TAG, "initView: " + homeAttr.getRooms().get(0).getRoomAttr().getLight().getActive());
         //Log.i(TAG, "initView: " + homeAttr);
@@ -192,7 +210,7 @@ public class MyMainActivity extends FragmentActivity {
 
         //初始化activity给fragment传递的数据
         for (int i = 0; i < roomNameList.length; i++) {
-            myFragment1 = new MyFragment(i, roomNameList[i], ivBackList, homeAttr.getRooms().get(i).getRoomAttr());         //房间id,房间名数组，背景图片数组，活跃的控件数组
+            myFragment1 = new MyFragment(i, roomNameList[i],roomDBNameList[i], ivBackList, homeAttr.getRooms().get(i).getRoomAttr(),hid,uname,pwd);         //房间id,房间名数组，房间拼音名数组，背景图片数组，活跃的控件数组,hid,uname,pwd
             pullMenu(myFragment1);
             viewList.add(myFragment1);
         }
@@ -264,7 +282,10 @@ public class MyMainActivity extends FragmentActivity {
     @Subscribe
     public void onEventMainThread(MyEventBus event) {
         String msg = event.getmMsg();
-        Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+        //Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+        Log.i(TAG, "onEventMainThread: 接收到的json"+msg);
+        //发送tcp Socket
+        tcplongSocket.writeDate(Encrypt.encrypt(msg));
 
         switch (event.getmMsg()) {
             case SWITCH_ROOM_DIALOG:     //选择房间dialog
@@ -275,61 +296,16 @@ public class MyMainActivity extends FragmentActivity {
     }
 
 
-    private int flagLight = 0;
-    private static final String CONTROL_PROTOCOL_HDL = "hdl";
-    private static final String MACHINE_NAME_LIGHT = "light";
-    private static final String LIGHT_VALUE_100 = "100";
-    private static final String LIGHT_VALUE_0 = "0";
-    private static final String IS_SERVER_AUTO = "0";
-    private static final String CONTROL_SENCE_ALL = "all";
-    private static final String HOUSE_DB_NAME_KETING = "keting";
+
     View.OnClickListener mediaListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
             switch (view.getId()) {
                 case R.id.iv_music:
                     Toast.makeText(MyMainActivity.this, "音乐", Toast.LENGTH_SHORT).show();
-                    //测试控制灯
-                    if (flagLight == 0) {
-                        JSONObject lightOnCommandData = new JSONObject();
-                        JSONObject controlData = new JSONObject();
-                        try {
-                            lightOnCommandData.put("controlProtocol", "hdl");
-                            lightOnCommandData.put("machineName", "light");
-                            lightOnCommandData.put("controlData", controlData);
-                            controlData.put("lightValue", "100");
-                            controlData.put("isServerAUTO", "0");
-                            lightOnCommandData.put("controlSence", "all");
-                            lightOnCommandData.put("houseDBName", "keting");
-                            String lightJson = CommandJsonUtils.getCommandJson(0, lightOnCommandData, hid, uname, pwd, String.valueOf(System.currentTimeMillis()));
-                            tcplongSocket.writeDate(Encrypt.encrypt(lightJson));
-                            Log.i(TAG, "onClick: ------lightjson------------------------" + lightJson);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                        flagLight = 1;
-                    } else if (flagLight == 1) {
-                        JSONObject lightOffCommandData = new JSONObject();
-                        JSONObject controlData = new JSONObject();
-                        try {
-                            lightOffCommandData.put("controlProtocol", "hdl");
-                            lightOffCommandData.put("machineName", "light");
-                            lightOffCommandData.put("controlData", controlData);
-                            controlData.put("lightValue", "0");
-                            controlData.put("isServerAUTO", "0");
-                            lightOffCommandData.put("controlSence", "all");
-                            lightOffCommandData.put("houseDBName", "keting");
-                            String lightJson = CommandJsonUtils.getCommandJson(0, lightOffCommandData, hid, uname, pwd, String.valueOf(System.currentTimeMillis()));
-                            tcplongSocket.writeDate(Encrypt.encrypt(lightJson));
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                        flagLight = 0;
-                    }
                     break;
                 case R.id.iv_media:
                     Toast.makeText(MyMainActivity.this, "媒体", Toast.LENGTH_SHORT).show();
-                    flagLight = controlOnOrOff(flagLight,CONTROL_PROTOCOL_HDL,MACHINE_NAME_LIGHT,LIGHT_VALUE_100,LIGHT_VALUE_0,IS_SERVER_AUTO,CONTROL_SENCE_ALL,HOUSE_DB_NAME_KETING);
                     break;
             }
         }
@@ -435,57 +411,6 @@ public class MyMainActivity extends FragmentActivity {
 
     }
 
-    /**
-     *    发送tcpSocket，控制部分的封装，二段开关
-     * @param flag             标记开关  0,1
-     * @param controlProtocol  产品名称  hdl..
-     * @param machineName      模块名称  light..
-     * @param value1          需要设定的值  100..
-     * @param value2          需要设定的值  0..
-     * @param isServerAUTO     是否自动   0..
-     * @param controlSence     控制信号   all..
-     * @param houseDBName      房间名，拼音  keting..
-     */
-    private int controlOnOrOff(int flag,String controlProtocol, String machineName, String value1,String value2, String isServerAUTO, String controlSence, String houseDBName) {
-        if (flag == 0) {
-            JSONObject lightOnCommandData = new JSONObject();
-            JSONObject controlData = new JSONObject();
-            try {
-                lightOnCommandData.put("controlProtocol", controlProtocol);
-                lightOnCommandData.put("machineName", machineName);
-                lightOnCommandData.put("controlData", controlData);
-                controlData.put("lightValue", value1);
-                controlData.put("isServerAUTO", isServerAUTO);
-                lightOnCommandData.put("controlSence", controlSence);
-                lightOnCommandData.put("houseDBName", houseDBName);
-                String lightJson = CommandJsonUtils.getCommandJson(0, lightOnCommandData, hid, uname, pwd, String.valueOf(System.currentTimeMillis()));
-                tcplongSocket.writeDate(Encrypt.encrypt(lightJson));
-                Log.i(TAG, "onClick: ------lightjson------------------------" + lightJson);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            flag = 1;
-            return flag;
-        } else if (flag == 1) {
-            JSONObject lightOffCommandData = new JSONObject();
-            JSONObject controlData = new JSONObject();
-            try {
-                lightOffCommandData.put("controlProtocol", controlProtocol);
-                lightOffCommandData.put("machineName", machineName);
-                lightOffCommandData.put("controlData", controlData);
-                controlData.put("lightValue", value2);
-                controlData.put("isServerAUTO", isServerAUTO);
-                lightOffCommandData.put("controlSence", controlSence);
-                lightOffCommandData.put("houseDBName", houseDBName);
-                String lightJson = CommandJsonUtils.getCommandJson(0, lightOffCommandData, hid, uname, pwd, String.valueOf(System.currentTimeMillis()));
-                tcplongSocket.writeDate(Encrypt.encrypt(lightJson));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            flag = 0;
-        }
-        return flag;
-    }
 
     private ArrayList<MyOnTouchListener> onTouchListeners = new ArrayList<MyOnTouchListener>(10);
 

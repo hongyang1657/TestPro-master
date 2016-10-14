@@ -626,13 +626,17 @@ public class NewLoginActivity extends Activity{
 
             int roomsNum = roomsList.size();//房间数量
             String[] roomNameList = new String[roomsNum];//房间名字数组
+            String[] roomDBNameList = new String[roomsNum];//房间名字数组
             for (int i=0;i<roomsNum;i++){
                 JSONObject roomsObj = rooms.getJSONObject(i);
                 String roomName = roomsObj.getString("roomName");
+                String roomDBName = roomsObj.getString("roomDBName");
                 roomNameList[i] = roomName;
+                roomDBNameList[i] = roomDBName;
             }
             Intent intent = new Intent(NewLoginActivity.this, MyMainActivity.class);
             intent.putExtra("roomNameList",roomNameList);
+            intent.putExtra("roomDBNameList",roomDBNameList);
             intent.putExtra("roomAttr",roomAttr);
             intent.putExtra("hid",hid);
             intent.putExtra("uname",userName);

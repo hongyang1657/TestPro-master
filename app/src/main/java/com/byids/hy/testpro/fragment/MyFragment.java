@@ -26,6 +26,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.RotateAnimation;
 import android.widget.Button;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
@@ -46,10 +49,14 @@ import com.byids.hy.testpro.ScrollViewListener;
 import com.byids.hy.testpro.View.MyCustomScrollView;
 import com.byids.hy.testpro.View.MyPullUpScrollView;
 import com.byids.hy.testpro.activity.MyMainActivity;
+import com.byids.hy.testpro.utils.CommandJsonUtils;
+import com.byids.hy.testpro.utils.Encrypt;
 import com.videogo.openapi.EZOpenSDK;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -116,7 +123,12 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
     private MyCustomScrollView scrollView;
     private int roomIndex;     //房间标示
     private String roomName;   //房间名
+    private String roomDBName;    //房间拼音名
     private RoomAttr roomAttr;   //房间拥有的各个产品信息
+    private String hid;
+    private String uname;
+    private String pwd;
+
     private GestureDetector detector;
     //private MyMainActivity.MyOntouchListener listener;
     private MyMainActivity.MyOnTouchListener myOnTouchListener;
@@ -263,15 +275,27 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         }
     };
 
+    private static final String CONTROL_PROTOCOL_HDL = "hdl";
+    private static final String MACHINE_NAME_LIGHT = "light";
+    private static final String MACHINE_NAME_CURTAIN = "curtain";
+    private static final String LIGHT_VALUE_100 = "100";
+    private static final String LIGHT_VALUE_0 = "0";
+    private static final String IS_SERVER_AUTO = "0";
+    private static final String CONTROL_SENCE_ALL = "all";
+
 
     public MyFragment(){}
 
     private int[] backList;  //背景图片组
-    public MyFragment(int roomIndex, String roomName, int[] backList, RoomAttr roomAttr) {
+    public MyFragment(int roomIndex, String roomName,String roomDBName, int[] backList, RoomAttr roomAttr, String hid, String uname, String pwd) {
         this.roomIndex = roomIndex;
         this.roomName = roomName;
+        this.roomDBName = roomDBName;
         this.backList = backList;
         this.roomAttr = roomAttr;
+        this.hid = hid;
+        this.uname = uname;
+        this.pwd = pwd;
     }
 
 
@@ -767,46 +791,67 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
 
                 if(mScrollX<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*0.5){
                     hsScrollMeasure(0);
+                    controlLight(CONTROL_PROTOCOL_HDL,MACHINE_NAME_LIGHT,LIGHT_VALUE_0,IS_SERVER_AUTO,CONTROL_SENCE_ALL);
                 }else if (mScrollX>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*0.5 && mScrollX<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*1.5){
                     hsScrollMeasure(1);
+                    controlLight(CONTROL_PROTOCOL_HDL,MACHINE_NAME_LIGHT,"5",IS_SERVER_AUTO,CONTROL_SENCE_ALL);
                 }else if (mScrollX>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*1.5 && mScrollX<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*2.5){
                     hsScrollMeasure(2);
+                    controlLight(CONTROL_PROTOCOL_HDL,MACHINE_NAME_LIGHT,"10",IS_SERVER_AUTO,CONTROL_SENCE_ALL);
                 }else if (mScrollX>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*2.5 && mScrollX<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*3.5){
                     hsScrollMeasure(3);
+                    controlLight(CONTROL_PROTOCOL_HDL,MACHINE_NAME_LIGHT,"15",IS_SERVER_AUTO,CONTROL_SENCE_ALL);
                 }else if (mScrollX>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*3.5 && mScrollX<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*4.5){
                     hsScrollMeasure(4);
+                    controlLight(CONTROL_PROTOCOL_HDL,MACHINE_NAME_LIGHT,"20",IS_SERVER_AUTO,CONTROL_SENCE_ALL);
                 }else if (mScrollX>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*4.5 && mScrollX<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*5.5){
                     hsScrollMeasure(5);
+                    controlLight(CONTROL_PROTOCOL_HDL,MACHINE_NAME_LIGHT,"25",IS_SERVER_AUTO,CONTROL_SENCE_ALL);
                 }else if (mScrollX>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*5.5 && mScrollX<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*6.5){
                     hsScrollMeasure(6);
+                    controlLight(CONTROL_PROTOCOL_HDL,MACHINE_NAME_LIGHT,"30",IS_SERVER_AUTO,CONTROL_SENCE_ALL);
                 }else if (mScrollX>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*6.5 && mScrollX<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*7.5){
                     hsScrollMeasure(7);
+                    controlLight(CONTROL_PROTOCOL_HDL,MACHINE_NAME_LIGHT,"35",IS_SERVER_AUTO,CONTROL_SENCE_ALL);
                 }else if (mScrollX>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*7.5 && mScrollX<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*8.5){
                     hsScrollMeasure(8);
+                    controlLight(CONTROL_PROTOCOL_HDL,MACHINE_NAME_LIGHT,"40",IS_SERVER_AUTO,CONTROL_SENCE_ALL);
                 }else if (mScrollX>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*8.5 && mScrollX<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*9.5){
                     hsScrollMeasure(9);
+                    controlLight(CONTROL_PROTOCOL_HDL,MACHINE_NAME_LIGHT,"45",IS_SERVER_AUTO,CONTROL_SENCE_ALL);
                 }else if (mScrollX>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*9.5 && mScrollX<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*10.5){
                     hsScrollMeasure(10);
+                    controlLight(CONTROL_PROTOCOL_HDL,MACHINE_NAME_LIGHT,"50",IS_SERVER_AUTO,CONTROL_SENCE_ALL);
                 }else if (mScrollX>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*10.5 && mScrollX<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*11.5){
                     hsScrollMeasure(11);
+                    controlLight(CONTROL_PROTOCOL_HDL,MACHINE_NAME_LIGHT,"55",IS_SERVER_AUTO,CONTROL_SENCE_ALL);
                 }else if (mScrollX>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*11.5 && mScrollX<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*12.5){
                     hsScrollMeasure(12);
+                    controlLight(CONTROL_PROTOCOL_HDL,MACHINE_NAME_LIGHT,"60",IS_SERVER_AUTO,CONTROL_SENCE_ALL);
                 }else if (mScrollX>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*12.5 && mScrollX<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*13.5){
                     hsScrollMeasure(13);
+                    controlLight(CONTROL_PROTOCOL_HDL,MACHINE_NAME_LIGHT,"65",IS_SERVER_AUTO,CONTROL_SENCE_ALL);
                 }else if (mScrollX>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*13.5 && mScrollX<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*14.5){
                     hsScrollMeasure(14);
+                    controlLight(CONTROL_PROTOCOL_HDL,MACHINE_NAME_LIGHT,"70",IS_SERVER_AUTO,CONTROL_SENCE_ALL);
                 }else if (mScrollX>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*14.5 && mScrollX<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*15.5){
                     hsScrollMeasure(15);
+                    controlLight(CONTROL_PROTOCOL_HDL,MACHINE_NAME_LIGHT,"75",IS_SERVER_AUTO,CONTROL_SENCE_ALL);
                 }else if (mScrollX>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*15.5 && mScrollX<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*16.5){
                     hsScrollMeasure(16);
+                    controlLight(CONTROL_PROTOCOL_HDL,MACHINE_NAME_LIGHT,"80",IS_SERVER_AUTO,CONTROL_SENCE_ALL);
                 }else if (mScrollX>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*16.5 && mScrollX<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*17.5){
                     hsScrollMeasure(17);
+                    controlLight(CONTROL_PROTOCOL_HDL,MACHINE_NAME_LIGHT,"85",IS_SERVER_AUTO,CONTROL_SENCE_ALL);
                 }else if (mScrollX>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*17.5 && mScrollX<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*18.5){
                     hsScrollMeasure(18);
+                    controlLight(CONTROL_PROTOCOL_HDL,MACHINE_NAME_LIGHT,"90",IS_SERVER_AUTO,CONTROL_SENCE_ALL);
                 }else if (mScrollX>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*18.5 && mScrollX<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*19.5){
                     hsScrollMeasure(19);
+                    controlLight(CONTROL_PROTOCOL_HDL,MACHINE_NAME_LIGHT,"95",IS_SERVER_AUTO,CONTROL_SENCE_ALL);
                 }else if (mScrollX>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*19.5){
                     hsScrollMeasure(20);
+                    controlLight(CONTROL_PROTOCOL_HDL,MACHINE_NAME_LIGHT,LIGHT_VALUE_100,IS_SERVER_AUTO,CONTROL_SENCE_ALL);
                 }
 
             }
@@ -860,6 +905,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                 case R.id.rl_xiuxian:
                     EventBus.getDefault().post(new MyEventBus(roomName));
                     setScaleAnimation(rlXiuxian);
+                    //animationXiuxian();   //特殊动画
                     clickXiuxian();
                     break;
                 case R.id.rl_yule:
@@ -878,8 +924,8 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                     clickLikai();
                     break;
                 case R.id.relative_light_switch:
-                    EventBus.getDefault().post(new MyEventBus(roomName+"light"));
                     setScaleAnimation(rlLight);
+                    clickLightSwitch();
                     break;
                 case R.id.rl_bulian:
                     EventBus.getDefault().post(new MyEventBus(roomName+"bulian"));
@@ -898,8 +944,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                     break;
                 case R.id.rl_tingzhi:
                     EventBus.getDefault().post(new MyEventBus(roomName+"stop"));
-                    setScaleAnimation(rlStop);
-                    clickStop();
+                    setCurtainStopAnimation(rlStop);
                     break;
                 case R.id.rl_juanlian:
                     EventBus.getDefault().post(new MyEventBus(roomName+"juanlian"));
@@ -918,14 +963,13 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                     break;
                 case R.id.rl_tingzhi_juanlian:
                     EventBus.getDefault().post(new MyEventBus(roomName+"stop_juanlian"));
-                    setScaleAnimation(rlStopJuan);
-                    clickStopJuan();
+                    setCurtainJuanStopAnimation(rlStopJuan);
                     break;
                 case R.id.rl_kongtiao_kaiguan:
                     EventBus.getDefault().post(new MyEventBus(roomName+"kongtiao"));
                     rlKongtiao.setClickable(false);   //点击后设为不可点击
-                    ObjectAnimator.ofFloat(rlKongtiao,"scaleX",1f,0.6f,1f).setDuration(400).start();
-                    ObjectAnimator objectAnimator = new ObjectAnimator().ofFloat(rlKongtiao,"scaleY",1f,0.6f,1f).setDuration(400);
+                    ObjectAnimator.ofFloat(rlKongtiao,"scaleX",1f,0.8f,1f).setDuration(600).start();
+                    ObjectAnimator objectAnimator = new ObjectAnimator().ofFloat(rlKongtiao,"scaleY",1f,0.8f,1f).setDuration(600);
                     objectAnimator.addListener(new AnimatorListenerAdapter() {
                         @Override
                         public void onAnimationEnd(Animator animation) {
@@ -958,6 +1002,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
     };
 
     //灯光亮度调节监听
+    private boolean isLightOpen = false;
     View.OnScrollChangeListener hsChangeListener = new View.OnScrollChangeListener() {
         @Override
         public void onScrollChange(View view, int i, int i1, int i2, int i3) {
@@ -965,46 +1010,67 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
             //Log.i(TAG, "onScrollChange: "+i);
             if(lightSVPosition<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*0.5){
                 tvLightValue.setText("0");
+                isLightOpen = false;
             }else if (lightSVPosition>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*0.5 && lightSVPosition<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*1.5){
                 tvLightValue.setText("5");
+                isLightOpen = true;
             }else if (lightSVPosition>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*1.5 && lightSVPosition<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*2.5){
                 tvLightValue.setText("10");
+                isLightOpen = true;
             }else if (lightSVPosition>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*2.5 && lightSVPosition<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*3.5){
                 tvLightValue.setText("15");
+                isLightOpen = true;
             }else if (lightSVPosition>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*3.5 && lightSVPosition<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*4.5){
                 tvLightValue.setText("20");
+                isLightOpen = true;
             }else if (lightSVPosition>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*4.5 && lightSVPosition<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*5.5){
                 tvLightValue.setText("25");
+                isLightOpen = true;
             }else if (lightSVPosition>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*5.5 && lightSVPosition<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*6.5){
                 tvLightValue.setText("30");
+                isLightOpen = true;
             }else if (lightSVPosition>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*6.5 && lightSVPosition<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*7.5){
                 tvLightValue.setText("35");
+                isLightOpen = true;
             }else if (lightSVPosition>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*7.5 && lightSVPosition<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*8.5){
                 tvLightValue.setText("40");
+                isLightOpen = true;
             }else if (lightSVPosition>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*8.5 && lightSVPosition<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*9.5){
                 tvLightValue.setText("45");
+                isLightOpen = true;
             }else if (lightSVPosition>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*9.5 && lightSVPosition<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*10.5){
                 tvLightValue.setText("50");
+                isLightOpen = true;
             }else if (lightSVPosition>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*10.5 && lightSVPosition<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*11.5){
                 tvLightValue.setText("55");
+                isLightOpen = true;
             }else if (lightSVPosition>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*11.5 && lightSVPosition<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*12.5){
                 tvLightValue.setText("60");
+                isLightOpen = true;
             }else if (lightSVPosition>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*12.5 && lightSVPosition<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*13.5){
                 tvLightValue.setText("65");
+                isLightOpen = true;
             }else if (lightSVPosition>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*13.5 && lightSVPosition<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*14.5){
                 tvLightValue.setText("70");
+                isLightOpen = true;
             }else if (lightSVPosition>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*14.5 && lightSVPosition<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*15.5){
                 tvLightValue.setText("75");
+                isLightOpen = true;
             }else if (lightSVPosition>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*15.5 && lightSVPosition<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*16.5){
                 tvLightValue.setText("80");
+                isLightOpen = true;
             }else if (lightSVPosition>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*16.5 && lightSVPosition<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*17.5){
                 tvLightValue.setText("85");
+                isLightOpen = true;
             }else if (lightSVPosition>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*17.5 && lightSVPosition<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*18.5){
                 tvLightValue.setText("90");
+                isLightOpen = true;
             }else if (lightSVPosition>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*18.5 && lightSVPosition<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*19.5){
                 tvLightValue.setText("95");
+                isLightOpen = true;
             }else if (lightSVPosition>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*19.5){
                 tvLightValue.setText("100");
+                isLightOpen = true;
             }
         }
     };
@@ -1162,10 +1228,54 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
 
     //---------------------设置点击按钮的缩放效果动画---------------------
     private void setScaleAnimation(View view){
-        ObjectAnimator.ofFloat(view,"scaleX",1f,0.6f,1f).setDuration(400).start();
-        ObjectAnimator.ofFloat(view,"scaleY",1f,0.6f,1f).setDuration(400).start();
+        ObjectAnimator.ofFloat(view,"scaleX",1f,0.8f,1f).setDuration(600).start();
+        ObjectAnimator.ofFloat(view,"scaleY",1f,0.8f,1f).setDuration(600).start();
+    }
+    private void setCurtainStopAnimation(View view){
+        controlCurtain(CONTROL_PROTOCOL_HDL,MACHINE_NAME_CURTAIN,-1,1,-1,"all_both_pause");
+        changeColorStop(R.mipmap.theme2_chuanglian_zanting_active_3x,R.color.colorTextActive);
+        ObjectAnimator.ofFloat(view,"scaleX",1f,0.8f,1f).setDuration(600).start();
+        ObjectAnimator objectAnimator =new ObjectAnimator().ofFloat(view,"scaleY",1f,0.8f,1f).setDuration(600);
+        objectAnimator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                changeColorStop(R.mipmap.theme2_chuanglian_zanting_3x,R.color.colorText);
+            }
+        });
+        objectAnimator.start();
+    }
+    private void setCurtainJuanStopAnimation(View view){
+        changeColorStopJuan(R.mipmap.theme2_chuanglian_zanting_active_3x,R.color.colorTextActive);
+        ObjectAnimator.ofFloat(view,"scaleX",1f,0.8f,1f).setDuration(600).start();
+        ObjectAnimator objectAnimator =new ObjectAnimator().ofFloat(view,"scaleY",1f,0.8f,1f).setDuration(600);
+        objectAnimator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                changeColorStopJuan(R.mipmap.theme2_chuanglian_zanting_3x,R.color.colorText);
+            }
+        });
+        objectAnimator.start();
     }
 
+    /*
+    * ----------------------------按钮的点击动画-------------------------------
+    * */
+    //场景  -----------休闲-----------
+    private void animationXiuxian(){
+        AnimationSet animationSet = new AnimationSet(true);       //true表示使用自带的interpolator，false表示使用自己的
+        RotateAnimation rotateAnimation = new RotateAnimation(0,-15,Animation.RELATIVE_TO_SELF,0f,Animation.RELATIVE_TO_SELF,1f);
+        rotateAnimation.setDuration(1000);
+        rotateAnimation.setFillAfter(true);
+        RotateAnimation rotateAnimation1 = new RotateAnimation(0,0,Animation.RELATIVE_TO_SELF,0f,Animation.RELATIVE_TO_SELF,1f);
+        rotateAnimation1.setDuration(1000);
+        rotateAnimation1.setFillAfter(true);
+        animationSet.addAnimation(rotateAnimation);
+        //animationSet
+        ivXiuxianOut.startAnimation(animationSet);
+
+    }
 
     //头部控件的点击事件
     View.OnClickListener clickListener = new View.OnClickListener() {
@@ -1408,6 +1518,8 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         ivLikai.setImageResource(imgId1);
         tvLikai.setTextColor(activity.getResources().getColor(colorId));
     }
+
+
     //点击事件
     private void clickRoomName(){
         EventBus.getDefault().post(new MyEventBus(SWITCH_ROOM_DIALOG));
@@ -1435,6 +1547,15 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         changeColorToActive2(R.mipmap.theme2_jiating_yule_1_3x,R.mipmap.theme2_jiating_yule_2_3x,R.mipmap.theme2_jiating_yule_3_3x,R.color.colorText);
         changeColorToActive3(R.mipmap.theme2_jiating_juhui_ani_3x,R.mipmap.theme2_jiating_juhui_ani_in_3x,R.color.colorText);
         changeColorToActive4(R.mipmap.theme2_jiating_likai_active_ani_3x,R.color.colorTextActive);
+    }
+    private void clickLightSwitch(){
+        if (isLightOpen==true){
+            hsLightValue.smoothScrollTo(lightAxisinitValue,0);
+            controlLight(CONTROL_PROTOCOL_HDL,MACHINE_NAME_LIGHT,LIGHT_VALUE_0,IS_SERVER_AUTO,CONTROL_SENCE_ALL);
+        }else if (isLightOpen==false){
+            hsLightValue.smoothScrollTo(lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*20,0);
+            controlLight(CONTROL_PROTOCOL_HDL,MACHINE_NAME_LIGHT,LIGHT_VALUE_100,IS_SERVER_AUTO,CONTROL_SENCE_ALL);
+        }
     }
 
     //----------------------------------窗帘-----------------------------------
@@ -1520,37 +1641,42 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
     private void clickBulian(){
         if (bulianFlag==0){
             changeColorBulian(R.mipmap.theme2_chuanglian_head_active_3x,R.mipmap.theme2_chuanglian_solidline_active_3x,R.color.colorTextActive,"布帘 开");
+            controlCurtain(CONTROL_PROTOCOL_HDL,MACHINE_NAME_CURTAIN,-1,1,-1,"1_right_open");
             bulianFlag = 1;
         }else if (bulianFlag==1){
             changeColorBulian(R.mipmap.theme2_chuanglian_head_3x,R.mipmap.chuanglian_solidline_3,R.color.colorText,"布帘 关");
+            controlCurtain(CONTROL_PROTOCOL_HDL,MACHINE_NAME_CURTAIN,-1,1,-1,"1_right_close");
             bulianFlag = 0;
         }
     }
     private void clickShalian(){
         if (shalianFlag==0){
             changeColorShalian(R.mipmap.theme2_chuanglian_head_active_3x,R.mipmap.theme2_chuanglian_viualline_active_3x,R.color.colorTextActive,"纱帘 开");
+            controlCurtain(CONTROL_PROTOCOL_HDL,MACHINE_NAME_CURTAIN,-1,1,-1,"1_left_open");
             shalianFlag = 1;
         }else if (shalianFlag==1){
             changeColorShalian(R.mipmap.theme2_chuanglian_head_3x,R.mipmap.theme2_chuanglian_viualline_3x,R.color.colorText,"纱帘 关");
+            controlCurtain(CONTROL_PROTOCOL_HDL,MACHINE_NAME_CURTAIN,-1,1,-1,"1_left_close");
             shalianFlag = 0;
         }
     }
     private void clickAll(){
         if (AllFlag==0){
+            controlCurtain(CONTROL_PROTOCOL_HDL,MACHINE_NAME_CURTAIN,-1,1,-1,"all_both_open");
             changeColorAll(R.mipmap.theme2_chuanglian_quanguan_open_3x,R.color.colorTextActive,"全 开");
+            changeColorBulian(R.mipmap.theme2_chuanglian_head_active_3x,R.mipmap.theme2_chuanglian_solidline_active_3x,R.color.colorTextActive,"布帘 开");
+            bulianFlag = 1;
+            changeColorShalian(R.mipmap.theme2_chuanglian_head_active_3x,R.mipmap.theme2_chuanglian_viualline_active_3x,R.color.colorTextActive,"纱帘 开");
+            shalianFlag = 1;
             AllFlag = 1;
         }else if (AllFlag==1){
+            controlCurtain(CONTROL_PROTOCOL_HDL,MACHINE_NAME_CURTAIN,-1,1,-1,"all_both_close");
             changeColorAll(R.mipmap.theme2_chuanglian_quanguan_close_3x,R.color.colorText,"全 关");
             AllFlag = 0;
-        }
-    }
-    private void clickStop(){
-        if (StopFlag==0){
-            changeColorStop(R.mipmap.theme2_chuanglian_zanting_active_3x,R.color.colorTextActive);
-            StopFlag = 1;
-        }else if (StopFlag==1){
-            changeColorStop(R.mipmap.theme2_chuanglian_zanting_3x,R.color.colorText);
-            StopFlag = 0;
+            changeColorBulian(R.mipmap.theme2_chuanglian_head_3x,R.mipmap.chuanglian_solidline_3,R.color.colorText,"布帘 关");
+            bulianFlag = 0;
+            changeColorShalian(R.mipmap.theme2_chuanglian_head_3x,R.mipmap.theme2_chuanglian_viualline_3x,R.color.colorText,"纱帘 关");
+            shalianFlag = 0;
         }
     }
 
@@ -1576,20 +1702,20 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         if (AllFlagJuan==0){
             changeColorAllJuan(R.mipmap.theme2_chuanglian_quanguan_open_3x,R.color.colorTextActive,"全 开");
             AllFlagJuan = 1;
+            changeColorJuanlian(R.mipmap.theme2_chuanglian_head_active_3x,R.mipmap.theme2_juanlian_solidline_active_3x,R.color.colorTextActive,"左卷帘 开");
+            juanlianFlag = 1;
+            changeColorJuanlianR(R.mipmap.theme2_chuanglian_head_active_3x,R.mipmap.theme2_juanlian_solidline_active_3x,R.color.colorTextActive,"右卷帘 开");
+            juanlianRFlag = 1;
         }else if (AllFlagJuan==1){
             changeColorAllJuan(R.mipmap.theme2_chuanglian_quanguan_close_3x,R.color.colorText,"全 关");
             AllFlagJuan = 0;
+            changeColorJuanlian(R.mipmap.theme2_chuanglian_head_3x,R.mipmap.theme2_juanlian_solidline_3x,R.color.colorText,"左卷帘 关");
+            juanlianFlag = 0;
+            changeColorJuanlianR(R.mipmap.theme2_chuanglian_head_3x,R.mipmap.theme2_juanlian_solidline_3x,R.color.colorText,"右卷帘 关");
+            juanlianRFlag = 0;
         }
     }
-    private void clickStopJuan(){
-        if (StopFlagJuan==0){
-            changeColorStopJuan(R.mipmap.theme2_chuanglian_zanting_active_3x,R.color.colorTextActive);
-            StopFlagJuan = 1;
-        }else if (StopFlagJuan==1){
-            changeColorStopJuan(R.mipmap.theme2_chuanglian_zanting_3x,R.color.colorText);
-            StopFlagJuan = 0;
-        }
-    }
+
 
 
 
@@ -1667,6 +1793,54 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
     private void initRoomAttr(TextView tv,View view){
         tv.setVisibility(View.GONE);
         view.setVisibility(View.GONE);
+    }
+
+
+    /**
+     *    发送tcpSocket，控制部分的封装
+     * @param controlProtocol  产品名称  hdl..
+     * @param machineName      模块名称  light..
+     * @param value          需要设定的值  100..
+     * @param isServerAUTO     是否自动   0..
+     * @param controlSence     控制信号   all..
+     */
+    private void controlLight(String controlProtocol, String machineName, String value, String isServerAUTO, String controlSence) {
+        JSONObject CommandData = new JSONObject();
+        JSONObject controlData = new JSONObject();
+        try {
+            CommandData.put("controlProtocol", controlProtocol);
+            CommandData.put("machineName", machineName);
+            CommandData.put("controlData", controlData);
+            controlData.put("lightValue", value);
+            controlData.put("isServerAUTO", isServerAUTO);
+            CommandData.put("controlSence", controlSence);
+            CommandData.put("houseDBName", roomDBName);
+            String lightJson = CommandJsonUtils.getCommandJson(0, CommandData, hid, uname, pwd, String.valueOf(System.currentTimeMillis()));
+            EventBus.getDefault().post(new MyEventBus(lightJson));
+            Log.i(TAG, "onClick: ------lightjson------" + lightJson);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void controlCurtain(String controlProtocol, String machineName, int pauseStauts,int salianStauts,int bulianStatus, String controlSence){
+        JSONObject CommandData = new JSONObject();
+        JSONObject controlData = new JSONObject();
+        try {
+            CommandData.put("controlProtocol", controlProtocol);
+            CommandData.put("machineName", machineName);
+            CommandData.put("controlData", controlData);
+            controlData.put("pauseStauts", pauseStauts);
+            controlData.put("salianStauts", salianStauts);
+            controlData.put("bulianStatus", bulianStatus);
+            CommandData.put("controlSence", controlSence);
+            CommandData.put("houseDBName", roomDBName);
+            String curtainJson = CommandJsonUtils.getCommandJson(0, CommandData, hid, uname, pwd, String.valueOf(System.currentTimeMillis()));
+            EventBus.getDefault().post(new MyEventBus(curtainJson));
+            Log.i(TAG, "onClick: ------lightjson------" + curtainJson);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -1755,14 +1929,6 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
     }
 
 
-    //通信接口  pagerScrollState的值为viewpager滑动状态：1.开始滑动；2.松开手指；0.滑动停止
-    /*@Override
-    public void onMainAction(int pagerScrollState) {
-        Log.i(TAG, "onMainAction: hhahahahahahahahahhhhhhhhhhhhhhhhhhh"+pagerScrollState);
-        this.pagerScrollState = pagerScrollState;
-        if (pagerScrollState==1){
-            btPullMenu.setVisibility(View.INVISIBLE);
-        }
-    }*/
+
 
 }
