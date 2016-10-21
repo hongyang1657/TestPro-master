@@ -2,7 +2,9 @@ package com.byids.hy.testpro.fragment;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.animation.TimeInterpolator;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -69,6 +71,7 @@ import android.support.v4.app.FragmentManager;
  */
 @SuppressLint({"ValidFragment", "NewApi"})
 public class MyFragment extends Fragment implements PullUpMenuListener,GestureDetector.OnGestureListener {
+    public static final int LINEAR = R.id.linear;
     private String TAG = "result";
     private View view = null;
     private static final String SWITCH_ROOM_DIALOG = "1";
@@ -519,6 +522,13 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
     public void onDestroy() {
         super.onDestroy();
         EventBus.getDefault().unregister(this);  //反注册EventBus
+        Log.i(TAG, "onDestroy: fragmentonDestroyfragmentonDestroyfragmentonDestroyfragmentonDestro");
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
     }
 
     private void initView(){
@@ -885,10 +895,12 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
             case SCROLL_FRAGMENT_START:          //开始切换viewpager页面
                 //Log.i(TAG, "onEventMainThread: --------------onEventMainThread收到了消息--------------"+event.getmMsg());
                 btPullMenu.setVisibility(View.GONE);
+                //homeButtonSetGoneAnimator();
                 break;
             case SCROLL_FRAGMENT_END:          //结束切换viewpager页面
                 //Log.i(TAG, "onEventMainThread: --------------onEventMainThread收到了消息--------------"+event.getmMsg());
                 btPullMenu.setVisibility(View.VISIBLE);
+                //homeButtonSetVisableAnimator();
                 ObjectAnimator.ofFloat(btPullMenu,"translationY",-btMenuHeight,0).setDuration(600).start();
                 break;
         }
@@ -928,6 +940,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                     clickLightSwitch();
                     break;
                 case R.id.rl_bulian:
+
                     EventBus.getDefault().post(new MyEventBus(roomName+"bulian"));
                     setScaleAnimation(rlBulian);
                     clickBulian();
@@ -1264,18 +1277,48 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
     * */
     //场景  -----------休闲-----------
     private void animationXiuxian(){
-        AnimationSet animationSet = new AnimationSet(true);       //true表示使用自带的interpolator，false表示使用自己的
-        RotateAnimation rotateAnimation = new RotateAnimation(0,-15,Animation.RELATIVE_TO_SELF,0f,Animation.RELATIVE_TO_SELF,1f);
-        rotateAnimation.setDuration(1000);
-        rotateAnimation.setFillAfter(true);
-        RotateAnimation rotateAnimation1 = new RotateAnimation(0,0,Animation.RELATIVE_TO_SELF,0f,Animation.RELATIVE_TO_SELF,1f);
-        rotateAnimation1.setDuration(1000);
-        rotateAnimation1.setFillAfter(true);
-        animationSet.addAnimation(rotateAnimation);
-        //animationSet
-        ivXiuxianOut.startAnimation(animationSet);
+        AnimatorSet set = new AnimatorSet();
+        ObjectAnimator objectAnimatorOut = new ObjectAnimator().ofFloat(ivXiuxianOut,"rotation",0,-10,0);
+        ivXiuxianOut.setPivotX(0f);
+        ivXiuxianOut.setPivotY(100f);
 
+        ObjectAnimator objectAnimatorIn = new ObjectAnimator().ofFloat(ivXiuxianIn,"rotation",0,-10,0);
+        ivXiuxianIn.setPivotX(0f);
+        ivXiuxianIn.setPivotY(100f);
+        set.playTogether(objectAnimatorIn,objectAnimatorOut);
+        set.setDuration(1500).start();
     }
+    //场景 ------------娱乐-------------
+    private void animationYule(){
+        AnimatorSet set = new AnimatorSet();
+    }
+
+    //窗帘 -------------布帘---------------
+    private void animationBulianOpen(){
+        AnimatorSet set = new AnimatorSet();
+        set.playTogether(
+                ObjectAnimator.ofFloat(ivBulian1,"translationX",0,-5),
+                ObjectAnimator.ofFloat(ivBulian2,"translationX",0,-10),
+                ObjectAnimator.ofFloat(ivBulian3,"translationX",0,-15),
+                ObjectAnimator.ofFloat(ivBulian4,"translationX",0,15),
+                ObjectAnimator.ofFloat(ivBulian5,"translationX",0,10),
+                ObjectAnimator.ofFloat(ivBulian6,"translationX",0,5)
+        );
+        set.setDuration(1000).start();
+    }
+    private void animationBulianClose(){
+        AnimatorSet set = new AnimatorSet();
+        set.playTogether(
+                ObjectAnimator.ofFloat(ivBulian1,"translationX",5,0),
+                ObjectAnimator.ofFloat(ivBulian2,"translationX",10,0),
+                ObjectAnimator.ofFloat(ivBulian3,"translationX",15,0),
+                ObjectAnimator.ofFloat(ivBulian4,"translationX",-15,0),
+                ObjectAnimator.ofFloat(ivBulian5,"translationX",-10,0),
+                ObjectAnimator.ofFloat(ivBulian6,"translationX",-5,0)
+        );
+        set.setDuration(1000).start();
+    }
+
 
     //头部控件的点击事件
     View.OnClickListener clickListener = new View.OnClickListener() {
@@ -1283,18 +1326,17 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         public void onClick(View view) {
             switch (view.getId()){
                 case R.id.bt_shezhi:
-                    Toast.makeText(getActivity(), "设置", Toast.LENGTH_SHORT).show();
+                    EventBus.getDefault().post(new MyEventBus("4"));
                     break;
                 case R.id.bt_jiankong:
-                    Toast.makeText(getActivity(), "监控", Toast.LENGTH_SHORT).show();
                     EventBus.getDefault().post(new MyEventBus("jiankong"));
                     EZOpenSDK.getInstance().openLoginPage();
                     break;
                 case R.id.bt_mensuo:
-                    Toast.makeText(getActivity(), "门锁", Toast.LENGTH_SHORT).show();
+                    EventBus.getDefault().post(new MyEventBus("5"));
                     break;
                 case R.id.bt_bufang:
-                    Toast.makeText(getActivity(), "布防", Toast.LENGTH_SHORT).show();
+                    EventBus.getDefault().post(new MyEventBus("6"));
                     break;
             }
         }
@@ -1325,9 +1367,13 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
             //判断向下滑的时候(y<控件的高度)    button消失
             if (scrollY>=btHeight_X3) {           //乘以三是因为手指移动和滑动是三倍率
                 btPullMenu.setVisibility(View.VISIBLE);
+                //homeButtonSetVisableAnimator();
+                pullDown(true,true);
                 //ObjectAnimator.ofFloat(btPullMenu,"alpha",0f,1f).setDuration(400).start();
             }else if (scrollY<btHeight_X3){
                 btPullMenu.setVisibility(View.GONE);
+                //homeButtonSetGoneAnimator();
+                pullDown(true,false);
             }
             //向上滑动到一大半时，隐藏桌面两个小控件，房间名。
             if (scrollY<btHeight_X3){
@@ -1427,7 +1473,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
             isCanScroll = false;
             //隐藏button
             btPullMenu.setVisibility(View.GONE);
-
+            //homeButtonSetGoneAnimator();
             //弹出菜单     smoothScroll
             if (flag==true){
                 svPullUpMenu.smoothScrollToSlow(0,-btHeight_X3,1600);
@@ -1466,7 +1512,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         //svPullUpMenu.smoothScrollTo(0,btHeight_X3);
         flag = true;
         btPullMenu.setVisibility(View.VISIBLE);
-
+        //homeButtonSetVisableAnimator();
     }
     //滑动到显示头
     private void scrollToTop(){
@@ -1480,7 +1526,22 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         });
     }
 
-
+    //homeButton的出现和隐藏动画
+    private void homeButtonSetVisableAnimator(){
+        btPullMenu.setVisibility(View.VISIBLE);
+        ObjectAnimator.ofFloat(btPullMenu,"alpha",0f,1f).setDuration(300).start();
+    }
+    private void homeButtonSetGoneAnimator(){
+        ObjectAnimator objectAnimator = new ObjectAnimator().ofFloat(btPullMenu,"alpha",1f,0f).setDuration(300);
+        objectAnimator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                btPullMenu.setVisibility(View.GONE);
+            }
+        });
+        objectAnimator.start();
+    }
 
     //两个ScrollView联动
     @Override
@@ -1640,10 +1701,12 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
 
     private void clickBulian(){
         if (bulianFlag==0){
+            animationBulianOpen();   //开窗动画
             changeColorBulian(R.mipmap.theme2_chuanglian_head_active_3x,R.mipmap.theme2_chuanglian_solidline_active_3x,R.color.colorTextActive,"布帘 开");
             controlCurtain(CONTROL_PROTOCOL_HDL,MACHINE_NAME_CURTAIN,-1,1,-1,"1_right_open");
             bulianFlag = 1;
         }else if (bulianFlag==1){
+            animationBulianClose();   //关窗动画
             changeColorBulian(R.mipmap.theme2_chuanglian_head_3x,R.mipmap.chuanglian_solidline_3,R.color.colorText,"布帘 关");
             controlCurtain(CONTROL_PROTOCOL_HDL,MACHINE_NAME_CURTAIN,-1,1,-1,"1_right_close");
             bulianFlag = 0;
@@ -1871,6 +1934,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
             svPullUpMenu.smoothScrollToSlow(0,btHeight_X3,600);
             flag = true;
             pullDown(true,true);
+
         }
         return false;
     }

@@ -5,6 +5,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.media.Image;
 import android.net.Uri;
@@ -164,6 +165,12 @@ public class NewLoginActivity extends Activity{
         initView();
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        setContentView(R.layout.view_null);
+    }
+
     private void initView(){
         //获取屏幕宽高，设置图片大小一致
         WindowManager wm = this.getWindowManager();
@@ -298,6 +305,11 @@ public class NewLoginActivity extends Activity{
                 return true;
             }
         });
+
+        //获取保存的用户名密码
+        SharedPreferences sp = getSharedPreferences("user_inform",MODE_PRIVATE);
+        etUserName.setText(sp.getString("userName","").toString());
+        etPassword.setText(sp.getString("password","").toString());
     }
 
     public void loginClick(View v){
@@ -482,6 +494,7 @@ public class NewLoginActivity extends Activity{
     private void doLogin(){
         userName = etUserName.getText().toString().trim();
         password = etPassword.getText().toString().trim();    //获取用户名和密码
+        saveUserInform(userName,password);
         Toast.makeText(NewLoginActivity.this, "用户名"+userName+","+"密码"+password, Toast.LENGTH_SHORT).show();
         if (TextUtils.isEmpty(userName)|| TextUtils.isEmpty(password)) {
             Toast.makeText(this, "用户名或密码不能为空", Toast.LENGTH_SHORT).show();
@@ -489,6 +502,12 @@ public class NewLoginActivity extends Activity{
         }else {
             postAndInitData();
         }
+    }
+
+    //SharedPreferences本地储存用户信息
+    private void saveUserInform(String userName,String password){
+        SharedPreferences sp = getSharedPreferences("user_inform",MODE_PRIVATE);        //文件名，文件类型
+        sp.edit().putString("userName",userName).putString("password",password).commit();
 
     }
 
@@ -903,6 +922,9 @@ public class NewLoginActivity extends Activity{
             isSecondPage = false;
             isPhonePage = false;
             return false;
+        }else {
+            Log.i(TAG, "onKeyDown: -===================毁所有内存=========================");
+            System.exit(0);      //销毁所有内存
         }
         return super.onKeyDown(keyCode, event);
     }

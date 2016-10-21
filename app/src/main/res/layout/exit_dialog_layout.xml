@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:background="@color/colorBule"
+        android:layout_width="match_parent"
+        android:layout_height="40dp" />
+    <TextView
+        android:id="@+id/tv_exit_content"
+        android:text="是否退出当前账号"
+        android:textSize="20sp"
+        android:padding="10dp"
+        android:gravity="center"
+        android:background="@color/colorWhite"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <LinearLayout
+        android:weightSum="2"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/tv_not_exit"
+            android:text="否"
+            android:clickable="true"
+            android:onClick="secondaryClick"
+            android:background="@color/colorWhite"
+            android:textSize="20sp"
+            android:padding="10dp"
+            android:gravity="center"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/tv_exit"
+            android:text="是"
+            android:clickable="true"
+            android:onClick="secondaryClick"
+            android:background="@color/colorBule"
+            android:textSize="20sp"
+            android:padding="10dp"
+            android:gravity="center"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+</LinearLayout>

@@ -68,7 +68,7 @@ public class EzCameraActivity extends Activity{
     private String cameraId;
     private String picUrl;
     private String captureUrl;
-    private String[] cameraDate = {"今天","昨天","前天","1","1","1","1","1","1","1","1","1","1","1"};
+    private String[] cameraDate = {"今天","昨天","前天","1","1","1","1"};
     private Typeface typeFace;
 
     private ListView lvJiankong;
@@ -107,6 +107,8 @@ public class EzCameraActivity extends Activity{
     private int cameraIndex = 0;   //当前播放的摄像头
     private int cameraDatePosition;    //选择的录像日期 posirion
     private LayoutInflater inflater = null;
+    private int month;
+    private int day;
 
     private Handler handler = new Handler(){
         @Override
@@ -172,6 +174,13 @@ public class EzCameraActivity extends Activity{
         setContentView(R.layout.camera_main_layout);
         initView();
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        setContentView(R.layout.view_null);
+    }
+
     private void initView(){
 
         ezOpenSDK = EZOpenSDK.getInstance();
@@ -201,18 +210,20 @@ public class EzCameraActivity extends Activity{
         tvCameraRoomName.setTypeface(typeFace);
 
         sbJiankong.setOnSeekBarChangeListener(seekBarListener);
+        //获取当前日期
+        getCurrentDate();
         cameraDataBaseAdapter = new CameraDataBaseAdapter(this,cameraDate);
         lvJiankong.setAdapter(cameraDataBaseAdapter);
         lvJiankong.setOnItemClickListener(new AdapterView.OnItemClickListener() {         //选择查看监控的日期
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                /*cameraDatePosition = position;
-
+                cameraDatePosition = position;
+                setCalendarDay(mStartTime.get(Calendar.DAY_OF_MONTH)-position);
                 ezPlayer.stopRealPlay();         //暂停播放
                 if (ezPlayerCloud!=null){
                     ezPlayerCloud.stopPlayback();
                 }
-                getCloudRecord(position);    //获取云视频记录*/
+                getCloudRecord(position);    //获取云视频记录
 
                 lvPickTime.setVisibility(View.VISIBLE);
                 pickTimeAdapter.changdata(new String[]{"a","a","a","a","a","a"});
@@ -226,20 +237,27 @@ public class EzCameraActivity extends Activity{
         ezOpenSDK.setAccessToken(pref.getString("token",""));
         initCameraPlayer(cameraIndex);  //初始化第一个摄像头
 
-        //设置Calendar时间
-        setCalendarDay();
+        //设置Calendar时间    13号
+        //setCalendarDay(13);
+        mStartTime = Calendar.getInstance();
+        mEndTime = Calendar.getInstance();
     }
 
-    private void setCalendarDay(){
+    //获取当前日期
+    private void getCurrentDate(){
+        Calendar calendar = Calendar.getInstance();
+        month = calendar.get(Calendar.MONTH)+1;
+        day = calendar.get(Calendar.DAY_OF_MONTH);
+    }
+
+    private void setCalendarDay(int dayOfMonth){
+
         //设置Calendar时间
-        mStartTime = Calendar.getInstance();
         mStartTime.set(Calendar.AM_PM, 0);
-        mStartTime.set(mStartTime.get(Calendar.YEAR), mStartTime.get(Calendar.MONTH),
-                mStartTime.get(Calendar.DAY_OF_MONTH), 0, 0, 0);
-        mEndTime = Calendar.getInstance();
+        mStartTime.set(mStartTime.get(Calendar.YEAR), mStartTime.get(Calendar.MONTH), dayOfMonth, 0, 0, 0); //设定开始时间
+
         mEndTime.set(Calendar.AM_PM, 0);
-        mEndTime.set(mEndTime.get(Calendar.YEAR), mEndTime.get(Calendar.MONTH),
-                mEndTime.get(Calendar.DAY_OF_MONTH), 23, 59, 59);
+        mEndTime.set(mEndTime.get(Calendar.YEAR), mEndTime.get(Calendar.MONTH),dayOfMonth, 23, 59, 59);   //设定结束时间
     }
 
     //初始化视频播放

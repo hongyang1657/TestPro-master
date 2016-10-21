@@ -24,7 +24,6 @@
         android:gravity="center"
         android:hint="账号"
         android:textColorHint="#a1a3a6"
-        android:text="byidsoffice"
         android:padding="12dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
@@ -37,7 +36,6 @@
         android:gravity="center"
         android:hint="密码"
         android:textColorHint="#a1a3a6"
-        android:text="admin123"
         android:padding="12dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
