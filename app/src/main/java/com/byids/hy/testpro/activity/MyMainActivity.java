@@ -103,7 +103,7 @@ public class MyMainActivity extends FragmentActivity {
     private int[] ivBackList3 = {R.mipmap.back_1, R.mipmap.back_2, R.mipmap.back_3, R.mipmap.back_4};
     private int[] ivBackList = {R.mipmap.back_10, R.mipmap.back_12, R.mipmap.back_13, R.mipmap.back_14, R.mipmap.back_5, R.mipmap.back_6, R.mipmap.back_8, R.mipmap.back_9, R.mipmap.back_1, R.mipmap.back_2, R.mipmap.back_3, R.mipmap.back_4};
 
-    //房间名数组
+    //房间名数组kk
     private String[] roomNameList = null;
     private String[] roomDBNameList = null;
     private HomeAttr homeAttr = new HomeAttr();
