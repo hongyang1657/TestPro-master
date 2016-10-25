@@ -494,7 +494,7 @@ public class NewLoginActivity extends Activity{
     private void doLogin(){
         userName = etUserName.getText().toString().trim();
         password = etPassword.getText().toString().trim();    //获取用户名和密码
-        saveUserInform(userName,password);
+        saveUserInform(userName,password);    //保存用户名密码到本地
         Toast.makeText(NewLoginActivity.this, "用户名"+userName+","+"密码"+password, Toast.LENGTH_SHORT).show();
         if (TextUtils.isEmpty(userName)|| TextUtils.isEmpty(password)) {
             Toast.makeText(this, "用户名或密码不能为空", Toast.LENGTH_SHORT).show();
@@ -508,8 +508,12 @@ public class NewLoginActivity extends Activity{
     private void saveUserInform(String userName,String password){
         SharedPreferences sp = getSharedPreferences("user_inform",MODE_PRIVATE);        //文件名，文件类型
         sp.edit().putString("userName",userName).putString("password",password).commit();
-
     }
+    private void saveHomeJson(String homeJson){
+        SharedPreferences sp = getSharedPreferences("homeJson",MODE_PRIVATE);        //文件名，文件类型
+        sp.edit().putString("homeJson",homeJson).commit();
+    }
+
 
     //根据用户名密码，返回用户家庭的json数据
     private void postAndInitData(){
@@ -524,6 +528,7 @@ public class NewLoginActivity extends Activity{
                 Log.i(TAG, "onResponse:--- "+response.toString());
                 //Toast.makeText(NewLoginActivity.this, "返回的json："+response.toString(), Toast.LENGTH_SHORT).show();
                 doJsonParse(response.toString());
+                saveHomeJson(response.toString());
 
             }
         }, new Response.ErrorListener() {
@@ -697,7 +702,10 @@ public class NewLoginActivity extends Activity{
         byte[] sendByte = ByteUtils.byteJoin(headByte,lengthByte,enByte,tailByte);
         AES.byteStringLog(sendByte);
         //发送udp广播
-        new BroadCastUdp(sendByte).start();
+        BroadCastUdp udp = new BroadCastUdp(sendByte);
+        udp.start();
+
+        Log.i(TAG, "test: 55555555555555555555555555"+ip+"------"+udpCheck);
     }
 
     //发送UDP
@@ -761,10 +769,8 @@ public class NewLoginActivity extends Activity{
                     Log.i("result","recivedataIP地址为："+receiveData.getAddress().toString().substring(1));//此为IP地址
                     //Log.i("result","recivedata_sock地址为："+receiveData.getAddress());//此为IP加端口号
 
-                    /*
-                    7.4    连接udp，
-                     */
                     ip = receiveData.getAddress().toString().substring(1);   //ip地址
+
                 }
             }else{
                 try {
@@ -773,10 +779,8 @@ public class NewLoginActivity extends Activity{
                     e.printStackTrace();
                 }
             }
-
             udpSocket.close();
         }
-
     }
 
 
@@ -922,6 +926,8 @@ public class NewLoginActivity extends Activity{
             isSecondPage = false;
             isPhonePage = false;
             return false;
+        }else if (keyCode==KeyEvent.KEYCODE_DEL){
+
         }else {
             Log.i(TAG, "onKeyDown: -===================毁所有内存=========================");
             System.exit(0);      //销毁所有内存

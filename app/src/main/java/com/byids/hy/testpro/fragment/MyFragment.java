@@ -253,7 +253,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
             super.handleMessage(msg);
             switch (msg.what){
                 case 1:
-                    setBGPAnimation();
+                    //setBGPAnimation();
                     //svPullUpMenu.setLayoutParams(params);            //更新scrollView？
                     //Log.i(TAG, "handleMessage:切换背景图 ");
                     break;
@@ -508,7 +508,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
     public void onResume() {
         super.onResume();
         isFragmemtFront = true;
-        initBackGround();     //初始化背景图片
+        //initBackGround();     //初始化背景图片
     }
 
     @Override

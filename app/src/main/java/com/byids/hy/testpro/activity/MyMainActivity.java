@@ -6,16 +6,20 @@ import android.animation.ObjectAnimator;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -42,6 +46,7 @@ import com.byids.hy.testpro.adapter.RoomNameBaseAdapter;
 import com.byids.hy.testpro.fragment.MyFragment;
 import com.byids.hy.testpro.utils.CommandJsonUtils;
 import com.byids.hy.testpro.utils.Encrypt;
+import com.byids.hy.testpro.utils.HomeJsonDataUtils;
 import com.byids.hy.testpro.utils.RunningTimeDialog;
 import com.byids.hy.testpro.utils.VibratorUtil;
 import com.google.android.gms.appindexing.Action;
@@ -118,6 +123,7 @@ public class MyMainActivity extends FragmentActivity {
     //----------------socket---------------------
     public static final int DEFAULT_PORT = 57816;
     private TcpLongSocket tcplongSocket;
+    private boolean connectTcp = true;      //为true时，不断向主机发送数据包，保持连接
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -151,7 +157,9 @@ public class MyMainActivity extends FragmentActivity {
     protected void onDestroy() {
         super.onDestroy();
         EventBus.getDefault().unregister(this);  //反注册EventBus
-        view = null;
+        //connectTcp = false;    //关闭线程
+        Log.i(TAG, "onDestroy: ----------------主界面退出--------------onDestroy---------------------------");
+        /*view = null;
         viewExit = null;
         viewList = null;
         viewLock = null;
@@ -163,7 +171,7 @@ public class MyMainActivity extends FragmentActivity {
         dialogSecurity.setContentView(R.layout.view_null);
         dialogLock.setContentView(R.layout.view_null);
         dialogExit.setContentView(R.layout.view_null);
-        setContentView(R.layout.view_null);
+        setContentView(R.layout.view_null);*/
     }
 
     //接收登录页面传递过来的数据
@@ -182,7 +190,7 @@ public class MyMainActivity extends FragmentActivity {
                 @Override
                 public void run() {
                     super.run();
-                    while (true) {
+                    while (connectTcp) {
                         try {
                             sleep(10000);
                         } catch (InterruptedException e) {
@@ -195,45 +203,6 @@ public class MyMainActivity extends FragmentActivity {
         }
     }
 
-    /*@Override
-    public void onStart() {
-        super.onStart();
-
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client.connect();
-        Action viewAction = Action.newAction(
-                Action.TYPE_VIEW, // TODO: choose an action type.
-                "MyMain Page", // TODO: Define a title for the content shown.
-                // TODO: If you have web page content that matches this app activity's content,
-                // make sure this auto-generated web page URL is correct.
-                // Otherwise, set the URL to null.
-                Uri.parse("http://host/path"),
-                // TODO: Make sure this auto-generated app URL is correct.
-                Uri.parse("android-app://com.byids.hy.testpro.activity/http/host/path")
-        );
-        AppIndex.AppIndexApi.start(client, viewAction);
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        Action viewAction = Action.newAction(
-                Action.TYPE_VIEW, // TODO: choose an action type.
-                "MyMain Page", // TODO: Define a title for the content shown.
-                // TODO: If you have web page content that matches this app activity's content,
-                // make sure this auto-generated web page URL is correct.
-                // Otherwise, set the URL to null.
-                Uri.parse("http://host/path"),
-                // TODO: Make sure this auto-generated app URL is correct.
-                Uri.parse("android-app://com.byids.hy.testpro.activity/http/host/path")
-        );
-        AppIndex.AppIndexApi.end(client, viewAction);
-        client.disconnect();
-    }*/
 
 
     private class ConnectTcp implements TCPLongSocketCallback {
@@ -520,6 +489,8 @@ public class MyMainActivity extends FragmentActivity {
             case R.id.tv_exit:
                 Toast.makeText(MyMainActivity.this, "退出该账号", Toast.LENGTH_SHORT).show();
                 dialogExit.hide();
+                SharedPreferences sp = getSharedPreferences("homeJson",MODE_PRIVATE);
+                sp.edit().clear().commit();  //清除sharedPreference房间json数据
                 Intent intent = new Intent(MyMainActivity.this,NewLoginActivity.class);
                 startActivity(intent);
                 this.finish();
@@ -735,5 +706,32 @@ public class MyMainActivity extends FragmentActivity {
         public boolean onTouch(MotionEvent ev);
     }
 
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode==event.KEYCODE_BACK){
+            exit();
+            return false;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
 
+    private boolean isExit = false;
+    private Handler mhandler = new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            isExit = false;
+        }
+    };
+
+    private void exit(){
+        if (isExit==false){
+            isExit = true;
+            Toast.makeText(MyMainActivity.this, "再按一下退出程序", Toast.LENGTH_SHORT).show();
+            mhandler.sendMessageDelayed(new Message(),2000);
+        }else if (isExit==true){
+            finish();
+            System.exit(0);
+        }
+    }
 }
