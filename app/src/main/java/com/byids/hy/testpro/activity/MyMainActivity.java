@@ -47,6 +47,8 @@ import com.byids.hy.testpro.fragment.MyFragment;
 import com.byids.hy.testpro.utils.CommandJsonUtils;
 import com.byids.hy.testpro.utils.Encrypt;
 import com.byids.hy.testpro.utils.HomeJsonDataUtils;
+import com.byids.hy.testpro.utils.NetworkStateUtil;
+import com.byids.hy.testpro.utils.NewJsonParseUtils;
 import com.byids.hy.testpro.utils.RunningTimeDialog;
 import com.byids.hy.testpro.utils.VibratorUtil;
 import com.google.android.gms.appindexing.Action;
@@ -106,7 +108,7 @@ public class MyMainActivity extends FragmentActivity {
     private int[] ivBackList1 = {R.mipmap.back_10, R.mipmap.back_12, R.mipmap.back_13, R.mipmap.back_14};
     private int[] ivBackList2 = {R.mipmap.back_5, R.mipmap.back_6, R.mipmap.back_8, R.mipmap.back_9};
     private int[] ivBackList3 = {R.mipmap.back_1, R.mipmap.back_2, R.mipmap.back_3, R.mipmap.back_4};
-    private int[] ivBackList = {R.mipmap.back_10, R.mipmap.back_12, R.mipmap.back_13, R.mipmap.back_14, R.mipmap.back_5, R.mipmap.back_6, R.mipmap.back_8, R.mipmap.back_9, R.mipmap.back_1, R.mipmap.back_2, R.mipmap.back_3, R.mipmap.back_4};
+    private int[] ivBackList = { R.mipmap.back_13,R.mipmap.back_10, R.mipmap.back_5,R.mipmap.back_6,R.mipmap.back_2, R.mipmap.back_14, R.mipmap.back_8, R.mipmap.back_9,R.mipmap.back_12,  R.mipmap.back_1, R.mipmap.back_3, R.mipmap.back_4};
 
     //房间名数组kk
     private String[] roomNameList = null;
@@ -291,7 +293,7 @@ public class MyMainActivity extends FragmentActivity {
     }
 
 
-    //初始化dialog二级页面
+    //初始化选择房间dialog二级页面
     private View view;
     private void initDialog() {
         dialogSwitchRoom = new Dialog(this, R.style.CustomDialog);
@@ -341,6 +343,10 @@ public class MyMainActivity extends FragmentActivity {
         tvSettingTitle.setTypeface(typeFace);
         tvSettingIP.setTypeface(typeFace);
         tvSettingExit.setTypeface(typeFace);
+        //获取ip地址
+        NetworkStateUtil networkStateUtil = new NetworkStateUtil();
+        String phoneIP = networkStateUtil.getPhoneIp();
+        tvSettingIP.setText(phoneIP);
 
         dialogSetting.setContentView(viewSetting);
         dialogSetting.setCanceledOnTouchOutside(true);//点击外部，弹框消失
@@ -650,6 +656,7 @@ public class MyMainActivity extends FragmentActivity {
 
     //滑动viewpager时，控件消失
     private void scrollViewPager() {
+        EventBus.getDefault().post(new MyEventBus2(SCROLL_FRAGMENT_START));
         ivMusic.setVisibility(View.GONE);
         ivMedia.setVisibility(View.GONE);
     }

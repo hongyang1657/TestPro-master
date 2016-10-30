@@ -6,8 +6,6 @@ import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Typeface;
-import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -59,6 +57,7 @@ import com.byids.hy.testpro.R;
 import com.byids.hy.testpro.View.LoginHScrollView;
 import com.byids.hy.testpro.utils.AES;
 import com.byids.hy.testpro.utils.ByteUtils;
+import com.byids.hy.testpro.utils.NewJsonParseUtils;
 import com.byids.hy.testpro.utils.RunningTimeDialog;
 
 import org.json.JSONArray;
@@ -78,7 +77,9 @@ import java.util.Map;
 
 import okhttp3.Call;
 import okhttp3.Callback;
+import okhttp3.FormBody;
 import okhttp3.OkHttpClient;
+import okhttp3.RequestBody;
 
 /**
  * Created by gqgz2 on 2016/9/23.
@@ -140,14 +141,25 @@ public class NewLoginActivity extends Activity{
     private String udpCheck = "";
     private String ip;    //接收到的ip地址
 
+    private String allJson;     //解析出的json
+
     private Handler handler = new Handler(){
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             switch (msg.what){
                 case 1:
-                    //runningTimeDialog.runningTimeProgressDialog(NewLoginActivity.this);
-                    runningTimeDialog.runningTimeProgressDialog1(NewLoginActivity.this);
+                    runningTimeDialog.runningTimeProgressDialog(NewLoginActivity.this);
+                    //runningTimeDialog.runningTimeProgressDialog1(NewLoginActivity.this);
+                    break;
+                case 2:       //获取token
+                    String token = (String) msg.obj;
+                    Log.i(TAG, "handleMessage: handlllllllll"+token);
+                    getToken(token);
+                    break;
+                case 3:      //获取用户信息
+                    allJson = (String) msg.obj;
+
                     break;
                 default:
                     break;
@@ -325,8 +337,13 @@ public class NewLoginActivity extends Activity{
                 fadeOutAnimation(llLitterLogin,0f,1f,500,llLitterLogin,false);
                 fadeOutAnimation(ivLoginPageMain,1f,0f,500,ivLoginPageMain,true);
                 isSecondPage = true;
+
+                loginPost();   //测试登录
                 break;
             case R.id.iv_tiyan:
+                //测试
+                NewJsonParseUtils utils = new NewJsonParseUtils(allJson);
+                utils.newJsonParse();
                 setScaleAnimation(tvTiyan);
                 break;
             case R.id.iv_phone:
@@ -494,8 +511,6 @@ public class NewLoginActivity extends Activity{
     private void doLogin(){
         userName = etUserName.getText().toString().trim();
         password = etPassword.getText().toString().trim();    //获取用户名和密码
-        saveUserInform(userName,password);    //保存用户名密码到本地
-        Toast.makeText(NewLoginActivity.this, "用户名"+userName+","+"密码"+password, Toast.LENGTH_SHORT).show();
         if (TextUtils.isEmpty(userName)|| TextUtils.isEmpty(password)) {
             Toast.makeText(this, "用户名或密码不能为空", Toast.LENGTH_SHORT).show();
             return;
@@ -514,6 +529,78 @@ public class NewLoginActivity extends Activity{
         sp.edit().putString("homeJson",homeJson).commit();
     }
 
+    //套包返回的json数据
+    private void loginPost(){
+        final String url = "http://192.168.3.66:2000/api/user/login";
+        new Thread(){
+            @Override
+            public void run() {
+                super.run();
+                // 表单提交
+                RequestBody formBody = new FormBody.Builder().add("num", "100000").add("pwd", "smile2014").build();
+                OkHttpClient client = new OkHttpClient();
+                okhttp3.Request request = new okhttp3.Request.Builder().url(url).addHeader("content-type", "application/x-www-form-urlencoded").post(formBody).build();
+                client.newCall(request).enqueue(new Callback() {
+                    @Override
+                    public void onFailure(Call call, IOException e) {
+                        Log.i(TAG, "onFailure: -----------请求失败------------："+e.toString());
+                    }
+
+                    @Override
+                    public void onResponse(Call call, okhttp3.Response response) throws IOException {
+                        String resp = response.body().string();
+                        Log.i(TAG, "onResponse: hehehehehehehehehhe"+resp);
+                        Message msg = new Message();
+                        msg.what = 2;
+                        msg.obj = resp;
+                        handler.sendMessage(msg);
+                    }
+                });
+            }
+        }.start();
+    }
+    //套包登录获取token
+    private void getToken(String response){
+        try {
+            JSONObject obj = new JSONObject(response);
+            String token = obj.getString("token");      //获取token
+            postToken(token);
+            Log.i(TAG, "getToken: ^^^^^^^^^^^^"+token);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    //向服务器post token
+    private void postToken(final String token){
+        final String token1 = "00000000000000000000000000000000"; //暂时用
+        final String url = "http://192.168.3.66:2000/api/user/profile";
+        new Thread(){
+            @Override
+            public void run() {
+                super.run();
+                OkHttpClient client = new OkHttpClient();
+                okhttp3.Request request = new okhttp3.Request.Builder().url(url).addHeader("content-type", "application/json").addHeader("token",token1).build();
+                client.newCall(request).enqueue(new Callback() {
+                    @Override
+                    public void onFailure(Call call, IOException e) {
+                        Log.i(TAG, "onFailure: -----------请求失败------------："+e.toString());
+                    }
+
+                    @Override
+                    public void onResponse(Call call, okhttp3.Response response) throws IOException {
+                        String resp = response.body().string();
+                        Log.i(TAG, "onResponse: hasdasdasdasdasdasd："+resp);
+                        Message msg = new Message();
+                        msg.what = 3;
+                        msg.obj = resp;
+                        handler.sendMessage(msg);
+                    }
+                });
+            }
+        }.start();
+    }
+
 
     //根据用户名密码，返回用户家庭的json数据
     private void postAndInitData(){
@@ -522,14 +609,29 @@ public class NewLoginActivity extends Activity{
         map.put("uname", userName);
         map.put("pwd", password);
         JSONObject jsonObject = new JSONObject(map);
+        Log.i(TAG, "postAndInitData:---------------------------------jsonObject----------------------------- "+jsonObject.toString());
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, jsonObject, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
-                Log.i(TAG, "onResponse:--- "+response.toString());
-                //Toast.makeText(NewLoginActivity.this, "返回的json："+response.toString(), Toast.LENGTH_SHORT).show();
-                doJsonParse(response.toString());
-                saveHomeJson(response.toString());
-
+                String resp = response.toString();
+                Log.i(TAG, "onResponse:新用户家庭数据 "+resp);
+                try {
+                    JSONObject obj = new JSONObject(resp);
+                    Iterator iterator = obj.keys();
+                    String key = (String) iterator.next();       //获取key值，如果为error，则说明用户名或密码错误
+                    if (key=="error"||key.equals("error")){
+                        Toast.makeText(NewLoginActivity.this, "用户名或密码错误！", Toast.LENGTH_SHORT).show();
+                        return;
+                    }else {
+                        //登录成功
+                        Toast.makeText(NewLoginActivity.this, "用户名"+userName+","+"密码"+password, Toast.LENGTH_SHORT).show();
+                        saveUserInform(userName,password);    //保存用户名密码到本地
+                        saveHomeJson(response.toString());    //保存用户的房间信息
+                        doJsonParse(response.toString());    //解析json
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
         }, new Response.ErrorListener() {
             @Override
@@ -677,7 +779,7 @@ public class NewLoginActivity extends Activity{
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        runningTimeDialog.progressDialog1.dismiss();
+        runningTimeDialog.progressDialog.dismiss();
     }
 
     //测试  包装发送udp
@@ -705,7 +807,6 @@ public class NewLoginActivity extends Activity{
         BroadCastUdp udp = new BroadCastUdp(sendByte);
         udp.start();
 
-        Log.i(TAG, "test: 55555555555555555555555555"+ip+"------"+udpCheck);
     }
 
     //发送UDP

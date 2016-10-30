@@ -509,6 +509,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         super.onResume();
         isFragmemtFront = true;
         //initBackGround();     //初始化背景图片
+        initBackPicture();
     }
 
     @Override
@@ -1177,6 +1178,11 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
             }
         });
         BGPThread.start();
+    }
+
+    private void initBackPicture(){
+        Bitmap bitmap = readBitMap(getActivity(),backList[roomIndex]);
+        ivBackGround.setImageBitmap(bitmap);
     }
 
 

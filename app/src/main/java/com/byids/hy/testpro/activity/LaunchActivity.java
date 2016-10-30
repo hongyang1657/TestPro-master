@@ -16,6 +16,7 @@ import com.byids.hy.testpro.R;
 import com.byids.hy.testpro.utils.AES;
 import com.byids.hy.testpro.utils.ByteUtils;
 import com.byids.hy.testpro.utils.HomeJsonDataUtils;
+import com.byids.hy.testpro.utils.NetworkStateUtil;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -72,6 +73,15 @@ public class LaunchActivity extends Activity{
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);//去掉信息栏
         setContentView(R.layout.launch_layout);
         ivLaunch = (ImageView) findViewById(R.id.iv_launch);
+        //获取网络状态  ip地址
+        NetworkStateUtil networkStateUtil = new NetworkStateUtil();
+        boolean isConnect = networkStateUtil.isNetworkAvailable(this);
+        boolean isMobileState = networkStateUtil.isNetworkMobileState(this);
+        String phoneIP = networkStateUtil.getPhoneIp();
+        Log.i("result", "onCreate: -------当前是否有网络可用-------"+isConnect);
+        Log.i("result", "onCreate: --------------是否为数据流量状态--------------"+isMobileState);
+        Log.i("result", "onCreate: --------------本机ip地址--------------"+phoneIP);
+
 
         //延迟2秒跳转
         new Handler().postDelayed(new Runnable() {
@@ -79,11 +89,11 @@ public class LaunchActivity extends Activity{
             public void run() {
                 SharedPreferences sp = getSharedPreferences("homeJson",MODE_PRIVATE);
                 String a = sp.getString("homeJson","");
-                    if (a==null||a==""){
-                        Log.i("result", "run: ============第一次登陆，跳转登陆页面==============");
-                        Intent intent = new Intent(LaunchActivity.this,NewLoginActivity.class);
-                        startActivity(intent);
-                        finish();
+                if (a==null||a==""){
+                    Log.i("result", "run: =============第一次登陆，跳转登陆页面==============");
+                    Intent intent = new Intent(LaunchActivity.this,NewLoginActivity.class);
+                    startActivity(intent);
+                    finish();
                 }else{
                     secondLogin();  //跳转主界面
                 }
@@ -103,8 +113,10 @@ public class LaunchActivity extends Activity{
         SharedPreferences sp1 = getSharedPreferences("user_inform",MODE_PRIVATE);
         userName = sp1.getString("userName","");
         password = sp1.getString("password","");
+        Log.i("result", "secondLogin:userName "+userName+"password"+password);
 
         SharedPreferences sp = getSharedPreferences("homeJson",MODE_PRIVATE);
+        Log.i("result", "secondLogin:---------- "+sp.getString("homeJson",""));
         HomeJsonDataUtils homeJsonDataUtils = new HomeJsonDataUtils();
         homeJsonDataUtils.doJsonParse(sp.getString("homeJson",""));      //获取SharedPreferences保存的json数据并解析
         hid = homeJsonDataUtils.getHid();
@@ -113,8 +125,6 @@ public class LaunchActivity extends Activity{
         roomAttr = homeJsonDataUtils.getRoomAttr();
         homeAttrBean = homeJsonDataUtils.getHomeAttrBean();
         test(hid);
-
-
     }
 
     //测试  包装发送udp
