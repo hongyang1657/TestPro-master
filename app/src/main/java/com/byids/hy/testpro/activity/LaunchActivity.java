@@ -45,8 +45,8 @@ public class LaunchActivity extends Activity{
             super.handleMessage(msg);
             switch (msg.what){
                 case 1:
-                    Log.i("result", "handleMessage:ggggggggggggggggggggggggggggggg "+msg.obj);
-                    Log.i("result", "secondLogin: -----------------------------------"+userName+"------------"+password+"------------"+ip);
+                    //Log.i("result", "handleMessage:ggggggggggggggggggggggggggggggg "+msg.obj);
+                    //Log.i("result", "secondLogin: -----------------------------------"+userName+"------------"+password+"------------"+ip);
                     Intent intent = new Intent(LaunchActivity.this, MyMainActivity.class);
                     intent.putExtra("roomNameList",roomNameList);
                     intent.putExtra("roomDBNameList",roomDBNameList);
@@ -78,9 +78,9 @@ public class LaunchActivity extends Activity{
         boolean isConnect = networkStateUtil.isNetworkAvailable(this);
         boolean isMobileState = networkStateUtil.isNetworkMobileState(this);
         String phoneIP = networkStateUtil.getPhoneIp();
-        Log.i("result", "onCreate: -------当前是否有网络可用-------"+isConnect);
-        Log.i("result", "onCreate: --------------是否为数据流量状态--------------"+isMobileState);
-        Log.i("result", "onCreate: --------------本机ip地址--------------"+phoneIP);
+        //Log.i("result", "onCreate: -------当前是否有网络可用-------"+isConnect);
+        //Log.i("result", "onCreate: --------------是否为数据流量状态--------------"+isMobileState);
+        //Log.i("result", "onCreate: --------------本机ip地址--------------"+phoneIP);
 
 
         //延迟2秒跳转
@@ -90,7 +90,7 @@ public class LaunchActivity extends Activity{
                 SharedPreferences sp = getSharedPreferences("homeJson",MODE_PRIVATE);
                 String a = sp.getString("homeJson","");
                 if (a==null||a==""){
-                    Log.i("result", "run: =============第一次登陆，跳转登陆页面==============");
+                    //Log.i("result", "run: =============第一次登陆，跳转登陆页面==============");
                     Intent intent = new Intent(LaunchActivity.this,NewLoginActivity.class);
                     startActivity(intent);
                     finish();
@@ -113,10 +113,10 @@ public class LaunchActivity extends Activity{
         SharedPreferences sp1 = getSharedPreferences("user_inform",MODE_PRIVATE);
         userName = sp1.getString("userName","");
         password = sp1.getString("password","");
-        Log.i("result", "secondLogin:userName "+userName+"password"+password);
+        //Log.i("result", "secondLogin:userName "+userName+"password"+password);
 
         SharedPreferences sp = getSharedPreferences("homeJson",MODE_PRIVATE);
-        Log.i("result", "secondLogin:---------- "+sp.getString("homeJson",""));
+        //Log.i("result", "secondLogin:---------- "+sp.getString("homeJson",""));
         HomeJsonDataUtils homeJsonDataUtils = new HomeJsonDataUtils();
         homeJsonDataUtils.doJsonParse(sp.getString("homeJson",""));      //获取SharedPreferences保存的json数据并解析
         hid = homeJsonDataUtils.getHid();
@@ -131,7 +131,7 @@ public class LaunchActivity extends Activity{
     public void test(String hid){
 
         String udpJson="{\"command\":\"find\",\"data\":{\"hid\":\""+hid+"\",\"loginName\":\"byids\"}}";
-        Log.i("result", "test: ------------------"+udpJson);
+        //Log.i("result", "test: ------------------"+udpJson);
         byte[] enByte = AES.encrpt(udpJson);//加密
         if (enByte == null)
             return;
@@ -219,7 +219,7 @@ public class LaunchActivity extends Activity{
                     7.4    连接udp，
                      */
                     ip = receiveData.getAddress().toString().substring(1);   //ip地址
-                    Log.i("result", "run: --------===========----------------"+ip);
+                    //Log.i("result", "run: --------===========----------------"+ip);
 
                 }
             }else{

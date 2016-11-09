@@ -55,6 +55,7 @@ import com.byids.hy.testpro.Bean.Securityalarm;
 import com.byids.hy.testpro.Bean.Sence;
 import com.byids.hy.testpro.R;
 import com.byids.hy.testpro.View.LoginHScrollView;
+import com.byids.hy.testpro.newBean.AllJsonData;
 import com.byids.hy.testpro.utils.AES;
 import com.byids.hy.testpro.utils.ByteUtils;
 import com.byids.hy.testpro.utils.NewJsonParseUtils;
@@ -65,15 +66,23 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -142,6 +151,7 @@ public class NewLoginActivity extends Activity{
     private String ip;    //接收到的ip地址
 
     private String allJson;     //解析出的json
+    private AllJsonData allJsonData;
 
     private Handler handler = new Handler(){
         @Override
@@ -166,6 +176,79 @@ public class NewLoginActivity extends Activity{
             }
         }
     };
+
+//-----------------------------------------------------------------------------------------
+
+    public static String encrypt(String seed, String cleartext) throws Exception {
+        byte[] rawKey = getRawKey(seed.getBytes());
+        byte[] result = encrypt(rawKey, cleartext.getBytes());
+        return toHex(result);
+    }
+
+    public static String decrypt(String seed, String encrypted) throws Exception {
+        byte[] rawKey = getRawKey(seed.getBytes());
+        byte[] enc = toByte(encrypted);
+        byte[] result = decrypt(rawKey, enc);
+        return new String(result);
+    }
+
+    private static byte[] getRawKey(byte[] seed) throws Exception {
+        KeyGenerator kgen = KeyGenerator.getInstance("AES");
+        SecureRandom sr = SecureRandom.getInstance("SHA1PRNG");
+        sr.setSeed(seed);
+        kgen.init(128, sr); // 192 and 256 bits may not be available
+        SecretKey skey = kgen.generateKey();
+        byte[] raw = skey.getEncoded();
+        return raw;
+    }
+
+
+    private static byte[] encrypt(byte[] raw, byte[] clear) throws Exception {
+        SecretKeySpec skeySpec = new SecretKeySpec(raw, "AES");
+        Cipher cipher = Cipher.getInstance("AES");
+        cipher.init(Cipher.ENCRYPT_MODE, skeySpec);
+        byte[] encrypted = cipher.doFinal(clear);
+        return encrypted;
+    }
+
+    private static byte[] decrypt(byte[] raw, byte[] encrypted) throws Exception {
+        SecretKeySpec skeySpec = new SecretKeySpec(raw, "AES");
+        Cipher cipher = Cipher.getInstance("AES");
+        cipher.init(Cipher.DECRYPT_MODE, skeySpec);
+        byte[] decrypted = cipher.doFinal(encrypted);
+        return decrypted;
+    }
+
+    public static String toHex(String txt) {
+        return toHex(txt.getBytes());
+    }
+    public static String fromHex(String hex) {
+        return new String(toByte(hex));
+    }
+
+    public static byte[] toByte(String hexString) {
+        int len = hexString.length()/2;
+        byte[] result = new byte[len];
+        for (int i = 0; i < len; i++)
+            result[i] = Integer.valueOf(hexString.substring(2*i, 2*i+2), 16).byteValue();
+        return result;
+    }
+
+    public static String toHex(byte[] buf) {
+        if (buf == null)
+            return "";
+        StringBuffer result = new StringBuffer(2*buf.length);
+        for (int i = 0; i < buf.length; i++) {
+            appendHex(result, buf[i]);
+        }
+        return result.toString();
+    }
+    private final static String HEX = "0123456789ABCDEF";
+    private static void appendHex(StringBuffer sb, byte b) {
+        sb.append(HEX.charAt((b>>4)&0x0f)).append(HEX.charAt(b&0x0f));
+    }
+
+//-------------------------------------------------------------------------------------------------
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -338,12 +421,12 @@ public class NewLoginActivity extends Activity{
                 fadeOutAnimation(ivLoginPageMain,1f,0f,500,ivLoginPageMain,true);
                 isSecondPage = true;
 
-                loginPost();   //测试登录
+                //loginPost();   //测试登录
                 break;
             case R.id.iv_tiyan:
                 //测试
-                NewJsonParseUtils utils = new NewJsonParseUtils(allJson);
-                utils.newJsonParse();
+                NewJsonParseUtils utils = new NewJsonParseUtils();
+                allJsonData = utils.newJsonParse();
                 setScaleAnimation(tvTiyan);
                 break;
             case R.id.iv_phone:
@@ -602,7 +685,7 @@ public class NewLoginActivity extends Activity{
     }
 
 
-    //根据用户名密码，返回用户家庭的json数据
+    //根据用户名密码，返回用户家庭的json数据 -------------旧版--------------
     private void postAndInitData(){
         String url="http://115.29.97.189:2737/api/login";
         Map<String,String> map=new HashMap<String, String>();
@@ -614,7 +697,7 @@ public class NewLoginActivity extends Activity{
             @Override
             public void onResponse(JSONObject response) {
                 String resp = response.toString();
-                Log.i(TAG, "onResponse:新用户家庭数据 "+resp);
+                Log.i(TAG, "onResponse:用户家庭数据 "+resp);
                 try {
                     JSONObject obj = new JSONObject(resp);
                     Iterator iterator = obj.keys();
@@ -643,7 +726,7 @@ public class NewLoginActivity extends Activity{
         requestQueue.add(request);
     }
 
-    //解析服务器返回的json数据
+    //解析服务器返回的json数据    -----------------旧版的数据解析-------------------
     private void doJsonParse(String jsonData){
         try {
             JSONObject obj1 = new JSONObject(jsonData);
@@ -761,17 +844,35 @@ public class NewLoginActivity extends Activity{
                 roomDBNameList[i] = roomDBName;
             }
             Intent intent = new Intent(NewLoginActivity.this, MyMainActivity.class);
+            //旧版
             intent.putExtra("roomNameList",roomNameList);
             intent.putExtra("roomDBNameList",roomDBNameList);
             intent.putExtra("roomAttr",roomAttr);
+            //新版
+            /*int roomsNumNew = allJsonData.getCommandData().getProfile().getRooms().getArray().size();//房间数量
+            String[] roomNameListNew = new String[roomsNumNew];//房间名字数组
+            String[] roomDBNameListNew = new String[roomsNumNew];//房间名字数组
+            for (int i=0;i<roomsNumNew;i++){
+                roomNameListNew[i] = allJsonData.getCommandData().getProfile().getRooms().getArray().get(i).getRoom_zh_name();
+                roomDBNameListNew[i] = allJsonData.getCommandData().getProfile().getRooms().getArray().get(i).getRoom_db_name();
+
+            }
+
+            intent.putExtra("roomNameList",roomNameListNew);
+            intent.putExtra("roomDBNameList",roomDBNameListNew);
+            intent.putExtra("roomAttr",roomAttr);*/
+
+
+
             intent.putExtra("hid",hid);
             intent.putExtra("uname",userName);
             intent.putExtra("pwd",password);
             if (udpCheck.equals("ip")) {
                 intent.putExtra("ip",ip);
+                Log.i(TAG, "doJsonParse: -------------put到MainActivity的ip-----------"+ip);
             }
             Bundle bundle = new Bundle();
-            bundle.putSerializable("homeAttr",homeAttrBean);
+            bundle.putSerializable("homeAttr",homeAttrBean); //旧版
             intent.putExtras(bundle);
             startActivity(intent);
             finish();        //结束此activity，下一个activity返回时，直接退出
@@ -802,12 +903,48 @@ public class NewLoginActivity extends Activity{
         tailByte[3] = 0x0a;
 
         byte[] sendByte = ByteUtils.byteJoin(headByte,lengthByte,enByte,tailByte);
-        AES.byteStringLog(sendByte);
+        String jiaMi = AES.byteStringLog(sendByte);
+        Log.i(TAG, "test: 加密的udp广播，以string[]的形式打印出来"+jiaMi);
+
+
         //发送udp广播
         BroadCastUdp udp = new BroadCastUdp(sendByte);
         udp.start();
 
+        testDecryptByte(sendByte);  //测试解密
     }
+
+    //测试解密byte[]
+    private void testDecryptByte(byte[] sendByte){
+        Log.i(TAG, "testDecryptByte: !!!!!解密前!!!!!!"+byteStringLog(sendByte));
+        byte[] new_sendByte = Arrays.copyOfRange(sendByte,12,sendByte.length);
+        byte[] nnew_sendByte = Arrays.copyOfRange(new_sendByte,0,new_sendByte.length-4);
+        Log.i(TAG, "test: ************************newsendByte"+nnew_sendByte.length);
+        Log.i(TAG, "test: *************newsendByte**************"+byteStringLog(nnew_sendByte));
+        byte[] ivByte = Arrays.copyOfRange(nnew_sendByte,nnew_sendByte.length-16,nnew_sendByte.length);
+        byte[] dataByte = Arrays.copyOfRange(nnew_sendByte,0,nnew_sendByte.length-16);
+        Log.i(TAG, "test: *****************加密向量*******newsendByte"+ivByte.length);
+        Log.i(TAG, "test: *************newsendByte*****加密向量*********"+byteStringLog(ivByte));
+        Log.i(TAG, "test: *****************加密数据*******newsendByte"+dataByte.length);
+        Log.i(TAG, "test: *************newsendByte*****加密数据*********"+byteStringLog(dataByte));
+        byte[] a = AES.decrypt(dataByte,ivByte);
+        Log.i(TAG, "testDecryptByte: ！！！！！！！！！！解密数据byte[]"+byteStringLog(a));
+        Log.i(TAG, "testDecryptByte: !!!!!!!!!!!!!!解密数据长度!!!!!!!!!!!!!!"+a.length+"!!!!解密数据：!!!!"+new String(a));
+    }
+
+
+
+    //测试，用来显示byte[]
+    private String byteStringLog(byte[] bs){
+        String log = new String();
+        for (int i = 0;i<bs.length;i++){
+            int bi = (int)bs[i];
+            log=log+" "+ String.valueOf(bi);
+        }
+        System.out.println(log);
+        return log;
+    }
+
 
     //发送UDP
     public class BroadCastUdp extends Thread {
@@ -853,7 +990,7 @@ public class NewLoginActivity extends Activity{
             }
             try {
                 udpSocket.receive(receiveData);
-                udpSocket.receive(receiveData);
+                //udpSocket.receive(receiveData);
             } catch (Exception e) {
 // TODO Auto-generated catch block
                 Log.e(LOG_TAG, e.toString());
@@ -863,15 +1000,17 @@ public class NewLoginActivity extends Activity{
 
                 if( 0!=receiveData.getLength() ) {
                     String codeString = new String( buffer, 0, receiveData.getLength() );
-
+                    String a = receiveData.getAddress().getHostAddress();  //主机ip地址
+                    int b = receiveData.getPort();      //主机端口号
+                    Log.i(TAG, "run: --------------主机的IP地址--------------"+a+"-------"+b);
                     Log.i("result", "接收到数据为codeString: "+codeString);
                     udpCheck = codeString.substring(2,4);
                     Log.i("result", "接收到数据为: "+udpCheck);
                     Log.i("result","recivedataIP地址为："+receiveData.getAddress().toString().substring(1));//此为IP地址
                     //Log.i("result","recivedata_sock地址为："+receiveData.getAddress());//此为IP加端口号
 
-                    ip = receiveData.getAddress().toString().substring(1);   //ip地址
-
+                    //ip = receiveData.getAddress().toString().substring(1);   //ip地址
+                    ip = receiveData.getAddress().getHostAddress();        //发送udp广播，收到的主机的ip地址
                 }
             }else{
                 try {

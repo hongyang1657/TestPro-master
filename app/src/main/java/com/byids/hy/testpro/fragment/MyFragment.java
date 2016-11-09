@@ -51,6 +51,7 @@ import com.byids.hy.testpro.ScrollViewListener;
 import com.byids.hy.testpro.View.MyCustomScrollView;
 import com.byids.hy.testpro.View.MyPullUpScrollView;
 import com.byids.hy.testpro.activity.MyMainActivity;
+import com.byids.hy.testpro.newBean.RoomDevMesg;
 import com.byids.hy.testpro.utils.CommandJsonUtils;
 import com.byids.hy.testpro.utils.Encrypt;
 import com.videogo.openapi.EZOpenSDK;
@@ -128,6 +129,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
     private String roomName;   //房间名
     private String roomDBName;    //房间拼音名
     private RoomAttr roomAttr;   //房间拥有的各个产品信息
+    //private RoomDevMesg roomAttr;
     private String hid;
     private String uname;
     private String pwd;
@@ -290,7 +292,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
     public MyFragment(){}
 
     private int[] backList;  //背景图片组
-    public MyFragment(int roomIndex, String roomName,String roomDBName, int[] backList, RoomAttr roomAttr, String hid, String uname, String pwd) {
+    public MyFragment(int roomIndex, String roomName, String roomDBName, int[] backList, RoomAttr roomAttr, String hid, String uname, String pwd) {
         this.roomIndex = roomIndex;
         this.roomName = roomName;
         this.roomDBName = roomDBName;
@@ -733,8 +735,6 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         }if (roomAttr.getCurtain().getActive()==0){
             initRoomAttr(tvChuanglian,llChuanglian);
             initRoomAttr(tvJuanLian,llJuanlian);
-        }if (roomAttr.getAircondition().getActive()==0){
-            initRoomAttr(tvAirCondition,llAirCondition);
         }
 
 

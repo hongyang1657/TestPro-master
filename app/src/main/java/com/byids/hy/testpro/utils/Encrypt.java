@@ -1,6 +1,7 @@
 package com.byids.hy.testpro.utils;
 
 /**
+ * 加密
  * Created by byids on 16/6/7.
  */
 public class Encrypt {

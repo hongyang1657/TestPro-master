@@ -1,6 +1,17 @@
 package com.byids.hy.testpro.utils;
 
+import android.util.Log;
+
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+
+import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.KeyGenerator;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -11,6 +22,7 @@ public class AES {
     private static final String AES = "AES/CBC/PKCS5Padding";
 
     private static final String CRYPT_KEY = "fadekiebos1573udoap30elz79vidwyc";
+
 
     /**
      * 加密
@@ -68,14 +80,16 @@ public class AES {
         return b2;
     }
 
-    public static void byteStringLog(byte[] bs){
+    public static String byteStringLog(byte[] bs){
         String log = new String();
         for (int i = 0;i<bs.length;i++){
             int bi = (int)bs[i];
             log=log+" "+ String.valueOf(bi);
         }
         System.out.println(log);
+        return log;
     }
+
 
     public static byte[] generateIV(){
         byte[] ivs = new byte[16];
@@ -84,7 +98,13 @@ public class AES {
             ivs[i] = (byte)randInt;
         }
         byteStringLog(ivs);
-        return  ivs;
+        return ivs;
+    }
+
+    //测试iv
+    public static byte[] testIv(){
+        byte[] ivs = new byte[16];
+        return ivs;
     }
 
     public static byte[] encrpt(String json) {
@@ -102,6 +122,26 @@ public class AES {
             e.printStackTrace();
         }
         return ByteUtils.byteJoin(idEncryptByte,ivs);
+    }
+
+    public static byte[] decrypt(byte[] jsonByte,byte[] iv){
+        /*if (json == null || "".equals(json)){
+            return null;
+        }
+        byte[] jsonByte = json.getBytes();*/
+        Log.i("result", "decrypt: -------解密---------Byte[]:::"+byteStringLog(jsonByte));
+
+        IvParameterSpec piv = new IvParameterSpec(iv);
+
+        byte[] idEncryptByte = null;
+        try {
+            idEncryptByte = decrypt(jsonByte, piv);
+            Log.i("result", "decrypt: $$$$$$$$$$idEncryptByte$$$$$$$$::"+idEncryptByte);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.i("result", "decrypt: #######错误#####"+e.toString());
+        }
+        return ByteUtils.byteJoin(idEncryptByte,iv);
     }
 
 }

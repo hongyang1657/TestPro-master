@@ -44,6 +44,11 @@ import com.byids.hy.testpro.View.MyCustomViewPager;
 import com.byids.hy.testpro.adapter.MyFragmentAdapter;
 import com.byids.hy.testpro.adapter.RoomNameBaseAdapter;
 import com.byids.hy.testpro.fragment.MyFragment;
+import com.byids.hy.testpro.newBean.AllJsonData;
+import com.byids.hy.testpro.newBean.Rooms;
+import com.byids.hy.testpro.newBean.RoomsAttr;
+import com.byids.hy.testpro.service.TcpConnectService;
+import com.byids.hy.testpro.utils.AES;
 import com.byids.hy.testpro.utils.CommandJsonUtils;
 import com.byids.hy.testpro.utils.Encrypt;
 import com.byids.hy.testpro.utils.HomeJsonDataUtils;
@@ -63,6 +68,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -115,6 +121,7 @@ public class MyMainActivity extends FragmentActivity {
     private String[] roomDBNameList = null;
     private HomeAttr homeAttr = new HomeAttr();
 
+
     private MyFragment myFragment1;
 
     private String ip; //home  ip地址
@@ -143,6 +150,7 @@ public class MyMainActivity extends FragmentActivity {
         EventBus.getDefault().register(this);
         reciveIntent();
         initView();
+        startTcpService();
 
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -188,7 +196,8 @@ public class MyMainActivity extends FragmentActivity {
             Toast.makeText(MyMainActivity.this, "找到主机", Toast.LENGTH_LONG).show();
             tcplongSocket = new TcpLongSocket(new ConnectTcp());
             tcplongSocket.startConnect(ip, DEFAULT_PORT);
-            new Thread() {
+
+            /*new Thread() {
                 @Override
                 public void run() {
                     super.run();
@@ -201,14 +210,13 @@ public class MyMainActivity extends FragmentActivity {
                         tcplongSocket.writeDate(Encrypt.encrypt("0"));
                     }
                 }
-            }.start();
+            }.start();*/
         }
     }
 
 
 
     private class ConnectTcp implements TCPLongSocketCallback {
-
 
         @Override
         public void connected() {
@@ -227,14 +235,54 @@ public class MyMainActivity extends FragmentActivity {
 
         }
 
+        private void testDecryptByte(byte[] sendByte){
+
+            byte[] new_sendByte = Arrays.copyOfRange(sendByte,12,sendByte.length);
+            byte[] nnew_sendByte = Arrays.copyOfRange(new_sendByte,0,new_sendByte.length-4);
+            Log.i(TAG, "test: ************************newsendByte"+nnew_sendByte.length);
+            Log.i(TAG, "test: *************newsendByte**************"+byteStringLog(nnew_sendByte));
+            byte[] ivByte = Arrays.copyOfRange(nnew_sendByte,nnew_sendByte.length-16,nnew_sendByte.length);
+            byte[] dataByte = Arrays.copyOfRange(nnew_sendByte,0,nnew_sendByte.length-16);
+            Log.i(TAG, "test: *****************加密向量*******newsendByte"+ivByte.length);
+            Log.i(TAG, "test: *************newsendByte*****加密向量*********"+byteStringLog(ivByte));
+            Log.i(TAG, "test: *****************加密数据*******newsendByte"+dataByte.length);
+            Log.i(TAG, "test: *************newsendByte*****加密数据*********"+byteStringLog(dataByte));
+            byte[] a = AES.decrypt(dataByte,ivByte);
+            Log.i(TAG, "testDecryptByte: !!!!!!!!!!!!!!!!!!!!!!!!!!!!"+a.length+"!!!!!!!!"+new String(a));
+        }
+
+        //测试，用来显示byte[]
+        private String byteStringLog(byte[] bs){
+            String log = new String();
+            for (int i = 0;i<bs.length;i++){
+                int bi = (int)bs[i];
+                log=log+" "+ String.valueOf(bi);
+            }
+            System.out.println(log);
+            return log;
+        }
+
+        byte[] buff = new byte[]{};
         @Override
         public void receive(byte[] buffer) {
             Log.i("result", "---收到         数据-----");
+            Log.i(TAG, "receive: --------------------------加密的！！！！！！-------------------------"+byteStringLog(buffer));
             if ("Hello client" == buffer.toString()) {
                 Log.i("result", "心跳" + String.valueOf(tcplongSocket.getConnectStatus()));
                 Log.i(TAG, "receive: 连接状态**********" + tcplongSocket.getConnectStatus());
             }
+                buff = test(buff,buffer);
+                Log.i(TAG, "receive: 加密加密加密加密加密加密加密加密加密加密加密加密加密加密"+byteStringLog(buff));
+                Log.i(TAG, "receive: 加密加密加密加密加密加密加密加密加密加密加密加密加密加密"+new String(buff));
+            //testDecryptByte(buff);
 
+        }
+
+        private byte[] test(byte[] a,byte[] b){
+            byte[] c = new byte[a.length+b.length];
+            System.arraycopy(a, 0, c, 0, a.length);
+            System.arraycopy(b, 0, c, a.length, b.length);
+            return c;
         }
 
         @Override
@@ -243,15 +291,20 @@ public class MyMainActivity extends FragmentActivity {
         }
     }
 
-    private void initView() {
+    private void initView() { 
 
         typeFace = Typeface.createFromAsset(getAssets(), "fonts/xiyuanti.ttf");
         //获取房间信息
         roomNameList = getIntent().getStringArrayExtra("roomNameList");
         roomDBNameList = getIntent().getStringArrayExtra("roomDBNameList");
         homeAttr = (HomeAttr) getIntent().getSerializableExtra("homeAttr");
-        //Log.i(TAG, "initView: " + homeAttr.getRooms().get(0).getRoomAttr().getLight().getActive());
-        //Log.i(TAG, "initView: " + homeAttr);
+
+        /*Rooms rooms = new Rooms();
+        for (int i=0;i<rooms.getArray().size();i++){
+            roomNameList[i] = rooms.getArray().get(i).getRoom_zh_name();
+            roomDBNameList[i] = rooms.getArray().get(i).getRoom_db_name();
+        }*/
+
 
 
         //初始化activity给fragment传递的数据
@@ -290,6 +343,12 @@ public class MyMainActivity extends FragmentActivity {
         initLockDialog();
         initSecurityDialog();
 
+    }
+
+    //开始执行service
+    private void startTcpService(){
+        Intent intentService = new Intent(this, TcpConnectService.class);
+        startService(intentService);         //启动服务
     }
 
 

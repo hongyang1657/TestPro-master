@@ -5,22 +5,22 @@ package com.byids.hy.testpro.newBean;
  */
 
 public class AllJsonData {
-    private CommandData commandData;
-    private CommandUser commandUser;
+    private CommandData CommandData;
+    private CommandUser CommandUser;
 
     public CommandData getCommandData() {
-        return commandData;
+        return CommandData;
     }
 
     public void setCommandData(CommandData commandData) {
-        this.commandData = commandData;
+        this.CommandData = commandData;
     }
 
     public CommandUser getCommandUser() {
-        return commandUser;
+        return CommandUser;
     }
 
     public void setCommandUser(CommandUser commandUser) {
-        this.commandUser = commandUser;
+        this.CommandUser = commandUser;
     }
 }
