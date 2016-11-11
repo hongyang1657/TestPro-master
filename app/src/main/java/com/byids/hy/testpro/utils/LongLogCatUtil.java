@@ -3,7 +3,7 @@ package com.byids.hy.testpro.utils;
 import android.util.Log;
 
 /**
- * 打印长信息
+ * 打印长信息工具
  * Created by gqgz2 on 2016/11/8.
  */
 

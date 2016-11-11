@@ -48,7 +48,7 @@ public class NetworkStateUtil {
     }
 
     //获取本机ip地址
-    public String getPhoneIp() {
+    public static String getPhoneIp() {
         try {
             for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements();) {
                 NetworkInterface intf = en.nextElement();

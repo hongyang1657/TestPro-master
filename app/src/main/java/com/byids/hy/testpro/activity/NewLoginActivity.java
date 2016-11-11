@@ -58,6 +58,7 @@ import com.byids.hy.testpro.View.LoginHScrollView;
 import com.byids.hy.testpro.newBean.AllJsonData;
 import com.byids.hy.testpro.utils.AES;
 import com.byids.hy.testpro.utils.ByteUtils;
+import com.byids.hy.testpro.utils.NetworkStateUtil;
 import com.byids.hy.testpro.utils.NewJsonParseUtils;
 import com.byids.hy.testpro.utils.RunningTimeDialog;
 
@@ -152,6 +153,9 @@ public class NewLoginActivity extends Activity{
 
     private String allJson;     //解析出的json
     private AllJsonData allJsonData;
+    private boolean isConnect;       //网络是否可用
+    private boolean isMobileState;      //是否为数据流量状态（外网）
+    private String host_ip;
 
     private Handler handler = new Handler(){
         @Override
@@ -164,12 +168,10 @@ public class NewLoginActivity extends Activity{
                     break;
                 case 2:       //获取token
                     String token = (String) msg.obj;
-                    Log.i(TAG, "handleMessage: handlllllllll"+token);
                     getToken(token);
                     break;
                 case 3:      //获取用户信息
                     allJson = (String) msg.obj;
-
                     break;
                 default:
                     break;
@@ -177,78 +179,6 @@ public class NewLoginActivity extends Activity{
         }
     };
 
-//-----------------------------------------------------------------------------------------
-
-    public static String encrypt(String seed, String cleartext) throws Exception {
-        byte[] rawKey = getRawKey(seed.getBytes());
-        byte[] result = encrypt(rawKey, cleartext.getBytes());
-        return toHex(result);
-    }
-
-    public static String decrypt(String seed, String encrypted) throws Exception {
-        byte[] rawKey = getRawKey(seed.getBytes());
-        byte[] enc = toByte(encrypted);
-        byte[] result = decrypt(rawKey, enc);
-        return new String(result);
-    }
-
-    private static byte[] getRawKey(byte[] seed) throws Exception {
-        KeyGenerator kgen = KeyGenerator.getInstance("AES");
-        SecureRandom sr = SecureRandom.getInstance("SHA1PRNG");
-        sr.setSeed(seed);
-        kgen.init(128, sr); // 192 and 256 bits may not be available
-        SecretKey skey = kgen.generateKey();
-        byte[] raw = skey.getEncoded();
-        return raw;
-    }
-
-
-    private static byte[] encrypt(byte[] raw, byte[] clear) throws Exception {
-        SecretKeySpec skeySpec = new SecretKeySpec(raw, "AES");
-        Cipher cipher = Cipher.getInstance("AES");
-        cipher.init(Cipher.ENCRYPT_MODE, skeySpec);
-        byte[] encrypted = cipher.doFinal(clear);
-        return encrypted;
-    }
-
-    private static byte[] decrypt(byte[] raw, byte[] encrypted) throws Exception {
-        SecretKeySpec skeySpec = new SecretKeySpec(raw, "AES");
-        Cipher cipher = Cipher.getInstance("AES");
-        cipher.init(Cipher.DECRYPT_MODE, skeySpec);
-        byte[] decrypted = cipher.doFinal(encrypted);
-        return decrypted;
-    }
-
-    public static String toHex(String txt) {
-        return toHex(txt.getBytes());
-    }
-    public static String fromHex(String hex) {
-        return new String(toByte(hex));
-    }
-
-    public static byte[] toByte(String hexString) {
-        int len = hexString.length()/2;
-        byte[] result = new byte[len];
-        for (int i = 0; i < len; i++)
-            result[i] = Integer.valueOf(hexString.substring(2*i, 2*i+2), 16).byteValue();
-        return result;
-    }
-
-    public static String toHex(byte[] buf) {
-        if (buf == null)
-            return "";
-        StringBuffer result = new StringBuffer(2*buf.length);
-        for (int i = 0; i < buf.length; i++) {
-            appendHex(result, buf[i]);
-        }
-        return result.toString();
-    }
-    private final static String HEX = "0123456789ABCDEF";
-    private static void appendHex(StringBuffer sb, byte b) {
-        sb.append(HEX.charAt((b>>4)&0x0f)).append(HEX.charAt(b&0x0f));
-    }
-
-//-------------------------------------------------------------------------------------------------
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -388,23 +318,24 @@ public class NewLoginActivity extends Activity{
 
         horizontalScrollView.setOnTouchListener(new View.OnTouchListener() {
             @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                //设置不可滑动
+            public boolean onTouch(View v, MotionEvent event) {   //设置不可滑动
                 return true;
             }
         });
         loginHScrollView.setOnTouchListener(new View.OnTouchListener() {
             @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                //设置不可滑动
+            public boolean onTouch(View v, MotionEvent event) {   //设置不可滑动
                 return true;
             }
         });
 
         //获取保存的用户名密码
-        SharedPreferences sp = getSharedPreferences("user_inform",MODE_PRIVATE);
+        /*SharedPreferences sp = getSharedPreferences("user_inform",MODE_PRIVATE);
         etUserName.setText(sp.getString("userName","").toString());
-        etPassword.setText(sp.getString("password","").toString());
+        etPassword.setText(sp.getString("password","").toString());*/
+
+
+        host_ip = getIntent().getStringExtra("ip");  //主机ip
     }
 
     public void loginClick(View v){
@@ -421,13 +352,9 @@ public class NewLoginActivity extends Activity{
                 fadeOutAnimation(ivLoginPageMain,1f,0f,500,ivLoginPageMain,true);
                 isSecondPage = true;
 
-                //loginPost();   //测试登录
                 break;
             case R.id.iv_tiyan:
-                //测试
-                NewJsonParseUtils utils = new NewJsonParseUtils();
-                allJsonData = utils.newJsonParse();
-                setScaleAnimation(tvTiyan);
+
                 break;
             case R.id.iv_phone:
                 setScaleAnimation(ivPhone);
@@ -490,18 +417,27 @@ public class NewLoginActivity extends Activity{
                     isSecondPage = true;
                 }
                 break;
-            case R.id.bt_login:
-                new Thread(){
-                    @Override
-                    public void run() {
-                        super.run();
-                        Message message = new Message();
-                        message.what = 1;
-                        handler.sendMessage(message);
-                    }
-                }.start();
+            case R.id.bt_login:   //登陆
+                //获取网络状态
+                isConnect = NetworkStateUtil.isNetworkAvailable(this);
+                isMobileState = NetworkStateUtil.isNetworkMobileState(this);
+                if (isConnect){  //网络可用
+                    //加载动画
+                    new Thread(){
+                        @Override
+                        public void run() {
+                            super.run();
+                            Message message = new Message();
+                            message.what = 1;
+                            handler.sendMessage(message);
+                        }
+                    }.start();
 
-                doLogin();  //登录
+                    doLogin();  //外网登录
+                }else {
+                    Toast.makeText(this, "当前网络不可用", Toast.LENGTH_SHORT).show();
+                }
+
                 break;
             case R.id.tv_cant_login:
                 Intent intent = new Intent(NewLoginActivity.this,LoginExplainActivity.class);
@@ -597,8 +533,9 @@ public class NewLoginActivity extends Activity{
         if (TextUtils.isEmpty(userName)|| TextUtils.isEmpty(password)) {
             Toast.makeText(this, "用户名或密码不能为空", Toast.LENGTH_SHORT).show();
             return;
-        }else {
-            postAndInitData();
+        }else {         //外网请求
+            postAndInitData();   //旧版，日后删除
+            loginPost();    //新版
         }
     }
 
@@ -607,14 +544,14 @@ public class NewLoginActivity extends Activity{
         SharedPreferences sp = getSharedPreferences("user_inform",MODE_PRIVATE);        //文件名，文件类型
         sp.edit().putString("userName",userName).putString("password",password).commit();
     }
-    private void saveHomeJson(String homeJson){
+    /*private void saveHomeJson(String homeJson){
         SharedPreferences sp = getSharedPreferences("homeJson",MODE_PRIVATE);        //文件名，文件类型
         sp.edit().putString("homeJson",homeJson).commit();
-    }
+    }*/
 
     //套包返回的json数据
     private void loginPost(){
-        final String url = "http://192.168.3.66:2000/api/user/login";
+        final String url = "http://192.168.3.96:2000/api/user/login";
         new Thread(){
             @Override
             public void run() {
@@ -631,11 +568,11 @@ public class NewLoginActivity extends Activity{
 
                     @Override
                     public void onResponse(Call call, okhttp3.Response response) throws IOException {
-                        String resp = response.body().string();
-                        Log.i(TAG, "onResponse: hehehehehehehehehhe"+resp);
+                        String token = response.body().string();
+                        Log.i(TAG, "onResponse: 获取新版token："+token);
                         Message msg = new Message();
                         msg.what = 2;
-                        msg.obj = resp;
+                        msg.obj = token;
                         handler.sendMessage(msg);
                     }
                 });
@@ -648,7 +585,7 @@ public class NewLoginActivity extends Activity{
             JSONObject obj = new JSONObject(response);
             String token = obj.getString("token");      //获取token
             postToken(token);
-            Log.i(TAG, "getToken: ^^^^^^^^^^^^"+token);
+            Log.i(TAG, "getToken: 新版token："+token);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -657,7 +594,7 @@ public class NewLoginActivity extends Activity{
     //向服务器post token
     private void postToken(final String token){
         final String token1 = "00000000000000000000000000000000"; //暂时用
-        final String url = "http://192.168.3.66:2000/api/user/profile";
+        final String url = "http://192.168.3.96:2000/api/user/profile";
         new Thread(){
             @Override
             public void run() {
@@ -673,7 +610,7 @@ public class NewLoginActivity extends Activity{
                     @Override
                     public void onResponse(Call call, okhttp3.Response response) throws IOException {
                         String resp = response.body().string();
-                        Log.i(TAG, "onResponse: hasdasdasdasdasdasd："+resp);
+                        Log.i(TAG, "onResponse:新版房间信息： "+resp);
                         Message msg = new Message();
                         msg.what = 3;
                         msg.obj = resp;
@@ -709,7 +646,7 @@ public class NewLoginActivity extends Activity{
                         //登录成功
                         Toast.makeText(NewLoginActivity.this, "用户名"+userName+","+"密码"+password, Toast.LENGTH_SHORT).show();
                         saveUserInform(userName,password);    //保存用户名密码到本地
-                        saveHomeJson(response.toString());    //保存用户的房间信息
+                        //saveHomeJson(response.toString());    //保存用户的房间信息
                         doJsonParse(response.toString());    //解析json
                     }
                 } catch (JSONException e) {
@@ -732,7 +669,7 @@ public class NewLoginActivity extends Activity{
             JSONObject obj1 = new JSONObject(jsonData);
             Iterator iterator = obj1.keys();
             String hid = (String) iterator.next();   //获取动态json的key值（hid）
-            test(hid);        //测试udp
+            //test(hid);        //测试udp
 
             Log.i(TAG, "doJsonParse: --------------------"+hid);
             JSONObject obj2 = obj1.getJSONObject(hid);
@@ -848,6 +785,7 @@ public class NewLoginActivity extends Activity{
             intent.putExtra("roomNameList",roomNameList);
             intent.putExtra("roomDBNameList",roomDBNameList);
             intent.putExtra("roomAttr",roomAttr);
+
             //新版
             /*int roomsNumNew = allJsonData.getCommandData().getProfile().getRooms().getArray().size();//房间数量
             String[] roomNameListNew = new String[roomsNumNew];//房间名字数组
@@ -863,7 +801,7 @@ public class NewLoginActivity extends Activity{
             intent.putExtra("roomAttr",roomAttr);*/
 
 
-
+            intent.putExtra("host_ip",host_ip);
             intent.putExtra("hid",hid);
             intent.putExtra("uname",userName);
             intent.putExtra("pwd",password);
@@ -884,8 +822,7 @@ public class NewLoginActivity extends Activity{
     }
 
     //测试  包装发送udp
-    public void test(String hid){
-
+    /*public void test(String hid){
         String udpJson="{\"command\":\"find\",\"data\":{\"hid\":\""+hid+"\",\"loginName\":\"byids\"}}";
         Log.i(TAG, "test: ------------------"+udpJson);
         byte[] enByte = AES.encrpt(udpJson);//加密
@@ -903,18 +840,14 @@ public class NewLoginActivity extends Activity{
         tailByte[3] = 0x0a;
 
         byte[] sendByte = ByteUtils.byteJoin(headByte,lengthByte,enByte,tailByte);
-        String jiaMi = AES.byteStringLog(sendByte);
-        Log.i(TAG, "test: 加密的udp广播，以string[]的形式打印出来"+jiaMi);
-
 
         //发送udp广播
         BroadCastUdp udp = new BroadCastUdp(sendByte);
         udp.start();
+    }*/
 
-        testDecryptByte(sendByte);  //测试解密
-    }
 
-    //测试解密byte[]
+    /*//测试解密byte[]
     private void testDecryptByte(byte[] sendByte){
         Log.i(TAG, "testDecryptByte: !!!!!解密前!!!!!!"+byteStringLog(sendByte));
         byte[] new_sendByte = Arrays.copyOfRange(sendByte,12,sendByte.length);
@@ -943,11 +876,11 @@ public class NewLoginActivity extends Activity{
         }
         System.out.println(log);
         return log;
-    }
+    }*/
 
 
     //发送UDP
-    public class BroadCastUdp extends Thread {
+    /*public class BroadCastUdp extends Thread {
         DatagramPacket dataPacket = null;
         DatagramPacket receiveData= null;
         private byte[] dataByte;
@@ -1021,7 +954,7 @@ public class NewLoginActivity extends Activity{
             }
             udpSocket.close();
         }
-    }
+    }*/
 
 
     //解析房间数据

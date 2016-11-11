@@ -58,7 +58,8 @@
             android:screenOrientation="landscape"/>
         <activity android:name=".activity.LoginExplainActivity"/>
 
-
+<!--service-->
+        <service android:name=".service.UDPBroadcastService"/>
         <service android:name=".service.TcpConnectService"/>
 
         <receiver

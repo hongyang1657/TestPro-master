@@ -206,63 +206,40 @@ public class TcpLongSocket {
 			if (threadBoo) {
 				if (in != null) {
 					int len = 0;
-					try {
+					/*try {
 						Log.i(TAG, "run: $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$"+in.read(buffer));
 					} catch (IOException e) {
 						e.printStackTrace();
-					}
+					}*/
 					try {
+						int flag = 1;
 						while ((len = in.read(buffer)) > 0) {
+							Log.i(TAG, "run: ---------len------------"+len);
 							tmpBuffer = new byte[len];
 							System.arraycopy(buffer, 0, tmpBuffer, 0, len);
 							//String recData = new String(tmpBuffer);   //接受的数据
-							Log.i("result", "-------能接收到hello client吗--------"+new String(tmpBuffer));
+
+							Log.i("result", "-------这是第"+flag+"段加密数据--------"+new String(tmpBuffer));
 							if("Hello client".equals(new String(tmpBuffer))){
 								Log.i("result", "--------心跳-------");
+							}else {
+								Log.i(TAG, "run: -------------------"+new String(tmpBuffer));
+								Log.i(TAG, "run: ！！！！！tmpBuffer"+byteStringLog(tmpBuffer));
+								allTmpBuffer = spliceBytes(allTmpBuffer,tmpBuffer);
+								if (len<1024){
+									buffer = new byte[]{};
+								}
 							}
-							Log.i(TAG, "run: ！！！！！tmpBuffer"+byteStringLog(tmpBuffer));
-
-							//Log.i(TAG, "run: ！！！！！buffer"+byteStringLog(buffer));
-							//Log.i(TAG, "run: !!!!len带娣等于多傻婆"+len);
-							//Log.i(TAG, "run: ！！！in.read(buffer)::::::"+in.read(buffer));
-
-							allTmpBuffer = spliceBytes(allTmpBuffer,tmpBuffer);
-							if (len<1024){
-								buffer = new byte[]{};
-							}
-
-
-							/*Log.i("result", "fanliang......接收数据bbbbbbbbbbbbbbbbbbbbbbbbbbb =" + byteStringLog(tmpBuffer));
-							//Log.i("result", "fanliang......接收数据bbbbbbbbbbbbbbbbbbbbbbbbbbb =" + recData);
-
-
-							//-------------------------------------------------------
-							//testDecryptByte(tmpBuffer);
-							//-------------------------------------------------------
-
-							if("Hello client".equals(new String(tmpBuffer))){
-								Log.i("result", "------Hello client心跳---------");
-							}
-							callBack.receive(tmpBuffer);*/
-							//tmpBuffer = null;
+							flag++;
 						}
-
 						//拼接tmpBuffer
 						Log.i(TAG, "run: 跳出循环？？？？？？？？？？？？拼接后的byte[]"+byteStringLog(allTmpBuffer));
-						String strRoomInfo = testDecryptByte(allTmpBuffer);
-						LongLogCatUtil.logE("result",strRoomInfo);
+						/*String strRoomInfo = testDecryptByte(allTmpBuffer);
+						LongLogCatUtil.logE("result",strRoomInfo);*/
+						callBack.receive(allTmpBuffer);
+						allTmpBuffer = null;
 
 
-
-						//-------------测试
-						/*int count = 0;
-						while (count == 0) {
-							count = in.available();
-						}
-						byte[] b = new byte[count];
-						in.read(b);
-						Log.i(TAG, "run: ------------新数据-------------"+new String(b));
-						testDecryptByte(b);*/
 
 					} catch (IOException e) {
 						e.printStackTrace();
