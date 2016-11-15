@@ -8,8 +8,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
-import android.media.Image;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -26,7 +24,6 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
@@ -44,24 +41,15 @@ import com.byids.hy.testpro.View.MyCustomViewPager;
 import com.byids.hy.testpro.adapter.MyFragmentAdapter;
 import com.byids.hy.testpro.adapter.RoomNameBaseAdapter;
 import com.byids.hy.testpro.fragment.MyFragment;
-import com.byids.hy.testpro.newBean.AllJsonData;
-import com.byids.hy.testpro.newBean.Rooms;
-import com.byids.hy.testpro.newBean.RoomsAttr;
 import com.byids.hy.testpro.service.TcpConnectService;
 import com.byids.hy.testpro.utils.AES;
 import com.byids.hy.testpro.utils.CommandJsonUtils;
 import com.byids.hy.testpro.utils.Encrypt;
-import com.byids.hy.testpro.utils.HomeJsonDataUtils;
 import com.byids.hy.testpro.utils.LongLogCatUtil;
 import com.byids.hy.testpro.utils.NetworkStateUtil;
-import com.byids.hy.testpro.utils.NewJsonParseUtils;
-import com.byids.hy.testpro.utils.RunningTimeDialog;
 import com.byids.hy.testpro.utils.VibratorUtil;
-import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.videogo.openapi.EZOpenSDK;
-import android.support.v4.app.FragmentManager;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -132,6 +120,7 @@ public class MyMainActivity extends FragmentActivity {
     private String pwd;
     private String hid = "56e276f3736fb0872c69d876";
     private String host_ip;     //主机地址
+    private String token;
 
     //----------------TCP socket内网通信---------------------
     public static final int DEFAULT_PORT = 57816;
@@ -140,7 +129,7 @@ public class MyMainActivity extends FragmentActivity {
 
     //---------------------TCP Socket外网通信------------------------
     private static final int DEFAULT_PORT_WAN = 3002;
-    private static final String ip_WAN = "192.168.3.96";
+    private static final String ip_WAN = "192.168.3.102";
     private TcpLongSocket tcpLongSocketWAN;   //外网通信的Tcp Socket长连接
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
@@ -216,13 +205,16 @@ public class MyMainActivity extends FragmentActivity {
         uname = getIntent().getStringExtra("uname");
         pwd = getIntent().getStringExtra("pwd");
         host_ip = getIntent().getStringExtra("host_ip");
+        token = getIntent().getStringExtra("token");
         if (host_ip==null||host_ip==""){
             Toast.makeText(this, "内网不通，尝试连接外网", Toast.LENGTH_SHORT).show();
+            Log.i(TAG, "reciveIntent: 内网不通，尝试连接外网");
             //外网Tcp连接
             tcpLongSocketWAN = new TcpLongSocket(new ConnectTcpWAN());
             tcpLongSocketWAN.startConnect(ip_WAN,DEFAULT_PORT_WAN);
         }else {
             Toast.makeText(this, "连接内网", Toast.LENGTH_SHORT).show();
+            Log.i(TAG, "reciveIntent: 连接内网");
             //内网Tcp连接
             tcplongSocket = new TcpLongSocket(new ConnectTcp());
             tcplongSocket.startConnect(host_ip, DEFAULT_PORT);
@@ -230,9 +222,7 @@ public class MyMainActivity extends FragmentActivity {
     }
 
 
-
-
-    //内网通信的Tcp Socket连接
+    //----------------------内网通信的Tcp Socket连接--------------------------
     private class ConnectTcp implements TCPLongSocketCallback {
 
         @Override
@@ -252,33 +242,7 @@ public class MyMainActivity extends FragmentActivity {
 
         }
 
-        private String testDecryptByte(byte[] sendByte){
-            byte[] new_sendByte = Arrays.copyOfRange(sendByte,12,sendByte.length);
-            byte[] nnew_sendByte = Arrays.copyOfRange(new_sendByte,0,new_sendByte.length-4);
-            Log.i(TAG, "test: ************************newsendByte"+nnew_sendByte.length);
-            Log.i(TAG, "test: *************newsendByte**************"+byteStringLog(nnew_sendByte));
-            byte[] ivByte = Arrays.copyOfRange(nnew_sendByte,nnew_sendByte.length-16,nnew_sendByte.length);
-            byte[] dataByte = Arrays.copyOfRange(nnew_sendByte,0,nnew_sendByte.length-16);
-            Log.i(TAG, "test: *****************加密向量长度*******newsendByte"+ivByte.length);
-            Log.i(TAG, "test: *************newsendByte*****加密向量*********"+byteStringLog(ivByte));
-            Log.i(TAG, "test: *****************加密数据长度*******newsendByte"+dataByte.length);
-            Log.i(TAG, "test: *************newsendByte*****加密数据*********"+byteStringLog(dataByte));
-            byte[] a = AES.decrypt(dataByte,ivByte);
-            String strRoomInfo = new String(a);
-            Log.i(TAG, "testDecryptByte: !!!!!!!!!!!!!!!!!!!!!!!!!!!!"+a.length+"!!!!!!!!"+strRoomInfo);
-            return strRoomInfo;
-        }
 
-        //测试，用来显示byte[]
-        private String byteStringLog(byte[] bs){
-            String log = new String();
-            for (int i = 0;i<bs.length;i++){
-                int bi = (int)bs[i];
-                log=log+" "+ String.valueOf(bi);
-            }
-            System.out.println(log);
-            return log;
-        }
 
         @Override
         public void receive(byte[] buffer) {             //接收主机信息
@@ -304,24 +268,143 @@ public class MyMainActivity extends FragmentActivity {
         }
     }
 
+    private String testDecryptByte(byte[] sendByte){
+        byte[] new_sendByte = Arrays.copyOfRange(sendByte,12,sendByte.length);
+        byte[] nnew_sendByte = Arrays.copyOfRange(new_sendByte,0,new_sendByte.length-4);
+        Log.i(TAG, "test: ************************newsendByte"+nnew_sendByte.length);
+        Log.i(TAG, "test: *************newsendByte**************"+byteStringLog(nnew_sendByte));
+        byte[] ivByte = Arrays.copyOfRange(nnew_sendByte,nnew_sendByte.length-16,nnew_sendByte.length);
+        byte[] dataByte = Arrays.copyOfRange(nnew_sendByte,0,nnew_sendByte.length-16);
+        Log.i(TAG, "test: *****************加密向量长度*******newsendByte"+ivByte.length);
+        Log.i(TAG, "test: *************newsendByte*****加密向量*********"+byteStringLog(ivByte));
+        Log.i(TAG, "test: *****************加密数据长度*******newsendByte"+dataByte.length);
+        Log.i(TAG, "test: *************newsendByte*****加密数据*********"+byteStringLog(dataByte));
+        byte[] a = AES.decrypt(dataByte,ivByte);
+        String strRoomInfo = new String(a);
+        Log.i(TAG, "testDecryptByte: !!!!!!!!!!!!!!!!!!!!!!!!!!!!"+a.length+"!!!!!!!!"+strRoomInfo);
+        return strRoomInfo;
+    }
+
+    //测试，用来显示byte[]
+    private String byteStringLog(byte[] bs){
+        String log = new String();
+        for (int i = 0;i<bs.length;i++){
+            int bi = (int)bs[i];
+            log=log+" "+ String.valueOf(bi);
+        }
+        System.out.println(log);
+        return log;
+    }
+
     //-------------------外网通信Tcp Socket连接----------------------
+    private boolean isConnectWAN = false;
     private class ConnectTcpWAN implements TCPLongSocketCallback{
 
         @Override
         public void connected() {
+            Log.i(TAG, "connected: ********连接上了外网************");
+            VibratorUtil.Vibrate(MyMainActivity.this, 500);
 
+            byte[] postHead = "#byids".getBytes();
+            Log.i(TAG, "onClick: ------------------"+byteStringLog(postHead));
+            byte[] postType = new byte[]{2};
+            byte[] postLenth = new byte[]{0,0,0,32};
+
+            byte[] data3 = new byte[postHead.length+postType.length];
+            System.arraycopy(postHead,0,data3,0,postHead.length);
+            System.arraycopy(postType,0,data3,postHead.length,postType.length);
+
+            byte[] data = new byte[data3.length+postLenth.length];
+            System.arraycopy(data3,0,data,0,data3.length);
+            System.arraycopy(postLenth,0,data,data3.length,postLenth.length);
+
+            Log.i(TAG, "connected: -----token-------"+token);
+            String tokenStr = null;
+            try {
+                JSONObject obj = new JSONObject(token);
+                tokenStr = obj.getString("token");
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            //把十六进制token转byte数组
+            byte[] tokenBytes = hexStr2Bytes(tokenStr);
+            Log.i(TAG, "onClick: --------"+byteStringLog(tokenBytes));
+
+            byte[] toConnectTcpLong = new byte[data.length+tokenBytes.length];
+            System.arraycopy(data,0,toConnectTcpLong,0,data.length);
+            System.arraycopy(tokenBytes,0,toConnectTcpLong,data.length,tokenBytes.length);
+
+
+            Log.i(TAG, "onClick: ----------------------------"+byteStringLog(toConnectTcpLong));
+
+            tcpLongSocketWAN.writeDate(toConnectTcpLong);
         }
 
         @Override
         public void receive(byte[] buffer) {
+            Log.i(TAG, "receive: buffer.length:"+buffer.length);
+            Log.i(TAG, "receive: "+byteStringLog(buffer));
+            //取最后一位，0：验证token成功；1：验证失败
+            switch (buffer[buffer.length-1]){
+                case 0:
+                    Log.i(TAG, "receive: ---验证token成功---");
+                    isConnectWAN = true;
+                    new Thread(){
+                        @Override
+                        public void run() {
+                            super.run();
 
+                            while (isConnectWAN){
+                                tcpLongSocketWAN.writeDate(new byte[]{35,98,121,105,100,115,3});
+                                try {
+                                    sleep(3000);    //隔三秒发送心跳
+                                    Log.i(TAG, "run: ------------我的心跳---------------");
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                    }.start();
+                    break;
+                case 1:
+                    Log.i(TAG, "receive: ---验证token失败---");
+                    break;
+                default:
+                    break;
+            }
+            Log.i(TAG, "receive: **********收到的buffer**********："+new String(buffer));
         }
 
         @Override
         public void disconnect() {
-
+            Log.i(TAG, "disconnect: ------disconnect-----------disconnect-------------disconnect-----");
+            tcpLongSocketWAN.close();
+            isConnectWAN = false;
         }
     }
+
+    //把十六进制token转byte数组
+    public static byte[] hexStr2Bytes(String src) {
+        int m = 0, n = 0;
+        int l = src.length() / 2;
+        System.out.println(l);
+        byte[] ret = new byte[l];
+        for (int i = 0; i < l; i++) {
+            m = i * 2 + 1;
+            n = m + 1;
+            ret[i] = uniteBytes(src.substring(i * 2, m), src.substring(m, n));
+        }
+        return ret;
+    }
+    private static byte uniteBytes(String src0, String src1) {
+        byte b0 = Byte.decode("0x" + src0).byteValue();
+        b0 = (byte) (b0 << 4);
+        byte b1 = Byte.decode("0x" + src1).byteValue();
+        byte ret = (byte) (b0 | b1);
+        return ret;
+    }
+
 
     private void initView() { 
 
@@ -666,9 +749,12 @@ public class MyMainActivity extends FragmentActivity {
             switch (view.getId()) {
                 case R.id.iv_music:
                     Toast.makeText(MyMainActivity.this, "音乐", Toast.LENGTH_SHORT).show();
+                    Log.i(TAG, "onClick: 获取外网的tcp连接状态："+tcpLongSocketWAN.getConnectStatus());
+                    Toast.makeText(MyMainActivity.this, "获取外网的tcp连接状态："+tcpLongSocketWAN.getConnectStatus(), Toast.LENGTH_SHORT).show();
                     break;
                 case R.id.iv_media:
                     Toast.makeText(MyMainActivity.this, "媒体", Toast.LENGTH_SHORT).show();
+                    //tcpLongSocketWAN.writeDate(new byte[]{35,98,121,105,100,115,4,0,0,0,6,11,12,13,14,15,16});
                     break;
             }
         }

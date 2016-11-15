@@ -2,8 +2,6 @@ package com.byids.hy.testpro.utils;
 
 import android.util.Log;
 
-import com.byids.hy.testpro.activity.NewLoginActivity;
-
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -49,7 +47,7 @@ public class UDPSocket {
 
         byte[] sendByte = ByteUtils.byteJoin(headByte,lengthByte,enByte,tailByte);
         String jiaMi = AES.byteStringLog(sendByte);
-        Log.i(TAG, "test: 发送加密的udp广播，以string[]的形式打印出来"+jiaMi);
+        //Log.i(TAG, "test: 发送加密的udp广播，以string[]的形式打印出来"+jiaMi);
 
         //发送udp广播
         BroadCastUdp udp = new BroadCastUdp(sendByte);

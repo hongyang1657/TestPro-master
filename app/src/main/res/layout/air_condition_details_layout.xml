@@ -3,7 +3,7 @@
     android:id="@+id/linear_air_details"
     android:orientation="vertical"
     android:background="@mipmap/mohu"
-    android:padding="4dp"
+    android:padding="8dp"
     android:visibility="gone"
     android:layout_width="match_parent"
     android:layout_height="match_parent">

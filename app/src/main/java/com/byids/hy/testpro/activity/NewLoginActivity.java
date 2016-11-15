@@ -4,11 +4,14 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
@@ -56,10 +59,8 @@ import com.byids.hy.testpro.Bean.Sence;
 import com.byids.hy.testpro.R;
 import com.byids.hy.testpro.View.LoginHScrollView;
 import com.byids.hy.testpro.newBean.AllJsonData;
-import com.byids.hy.testpro.utils.AES;
-import com.byids.hy.testpro.utils.ByteUtils;
+import com.byids.hy.testpro.service.UDPBroadcastService;
 import com.byids.hy.testpro.utils.NetworkStateUtil;
-import com.byids.hy.testpro.utils.NewJsonParseUtils;
 import com.byids.hy.testpro.utils.RunningTimeDialog;
 
 import org.json.JSONArray;
@@ -67,23 +68,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.security.SecureRandom;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -143,6 +132,8 @@ public class NewLoginActivity extends Activity{
     RoomAttr ra;
     private RunningTimeDialog runningTimeDialog = new RunningTimeDialog();
 
+    private Intent intentLogin;
+
     //---------------------------udp----------------------------
     public static final int DEFAULT_PORT = 57816;//端口号
     public static final String LOG_TAG = "WifiBroadcastActivity";
@@ -156,6 +147,7 @@ public class NewLoginActivity extends Activity{
     private boolean isConnect;       //网络是否可用
     private boolean isMobileState;      //是否为数据流量状态（外网）
     private String host_ip;
+    private String token;
 
     private Handler handler = new Handler(){
         @Override
@@ -169,6 +161,12 @@ public class NewLoginActivity extends Activity{
                 case 2:       //获取token
                     String token = (String) msg.obj;
                     getToken(token);
+
+                    //加一个token
+                    intentLogin.putExtra("token",token);
+                    startActivity(intentLogin);
+                    finish();        //结束此activity，下一个activity返回时，直接退出
+
                     break;
                 case 3:      //获取用户信息
                     allJson = (String) msg.obj;
@@ -176,6 +174,22 @@ public class NewLoginActivity extends Activity{
                 default:
                     break;
             }
+        }
+    };
+
+    //-------------------activity与service通信----------------------
+    private UDPBroadcastService.UDPBinder udpBinder;      //绑定后台udp
+    private ServiceConnection connection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            udpBinder = (UDPBroadcastService.UDPBinder) service;
+            String a = udpBinder.getHostIp();
+            Log.i(TAG, "onServiceConnected: -----获取后台接受的主机ip------"+a);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            Log.i(TAG, "onServiceDisconnected: service断开绑定");
         }
     };
 
@@ -188,6 +202,9 @@ public class NewLoginActivity extends Activity{
         setContentView(R.layout.login_1_layout);
         requestQueue = Volley.newRequestQueue(NewLoginActivity.this);
         initView();
+        //绑定service，实现通信
+        Intent bindIntent = new Intent(this, UDPBroadcastService.class);
+        bindService(bindIntent, connection, BIND_AUTO_CREATE); // 绑定服务
     }
 
     @Override
@@ -197,6 +214,9 @@ public class NewLoginActivity extends Activity{
     }
 
     private void initView(){
+        //获取主机ip
+        ip = getIntent().getStringExtra("ip");
+
         //获取屏幕宽高，设置图片大小一致
         WindowManager wm = this.getWindowManager();
         width = wm.getDefaultDisplay().getWidth();
@@ -355,6 +375,7 @@ public class NewLoginActivity extends Activity{
                 break;
             case R.id.iv_tiyan:
 
+                Log.i(TAG, "loginClick: %%%%%%%%%%登录页%%%%%%%获取主机ip%%%%%%%%%%%登录页%%%%%%%%"+udpBinder.getHostIp());
                 break;
             case R.id.iv_phone:
                 setScaleAnimation(ivPhone);
@@ -528,14 +549,16 @@ public class NewLoginActivity extends Activity{
 
     //-----------------------------登录----------------------------
     private void doLogin(){
+        intentLogin = new Intent(NewLoginActivity.this, MyMainActivity.class);  //跳转的
+
         userName = etUserName.getText().toString().trim();
         password = etPassword.getText().toString().trim();    //获取用户名和密码
         if (TextUtils.isEmpty(userName)|| TextUtils.isEmpty(password)) {
             Toast.makeText(this, "用户名或密码不能为空", Toast.LENGTH_SHORT).show();
             return;
         }else {         //外网请求
-            postAndInitData();   //旧版，日后删除
             loginPost();    //新版
+            postAndInitData();   //旧版，日后删除
         }
     }
 
@@ -551,7 +574,7 @@ public class NewLoginActivity extends Activity{
 
     //套包返回的json数据
     private void loginPost(){
-        final String url = "http://192.168.3.96:2000/api/user/login";
+        final String url = "http://192.168.3.102:2000/api/user/login";
         new Thread(){
             @Override
             public void run() {
@@ -583,7 +606,7 @@ public class NewLoginActivity extends Activity{
     private void getToken(String response){
         try {
             JSONObject obj = new JSONObject(response);
-            String token = obj.getString("token");      //获取token
+            token = obj.getString("token");      //获取token
             postToken(token);
             Log.i(TAG, "getToken: 新版token："+token);
         } catch (JSONException e) {
@@ -594,7 +617,7 @@ public class NewLoginActivity extends Activity{
     //向服务器post token
     private void postToken(final String token){
         final String token1 = "00000000000000000000000000000000"; //暂时用
-        final String url = "http://192.168.3.96:2000/api/user/profile";
+        final String url = "http://192.168.3.102:2000/api/user/profile";
         new Thread(){
             @Override
             public void run() {
@@ -780,11 +803,12 @@ public class NewLoginActivity extends Activity{
                 roomNameList[i] = roomName;
                 roomDBNameList[i] = roomDBName;
             }
-            Intent intent = new Intent(NewLoginActivity.this, MyMainActivity.class);
+
             //旧版
-            intent.putExtra("roomNameList",roomNameList);
-            intent.putExtra("roomDBNameList",roomDBNameList);
-            intent.putExtra("roomAttr",roomAttr);
+            intentLogin.putExtra("roomNameList",roomNameList);
+            intentLogin.putExtra("roomDBNameList",roomDBNameList);
+            intentLogin.putExtra("roomAttr",roomAttr);
+
 
             //新版
             /*int roomsNumNew = allJsonData.getCommandData().getProfile().getRooms().getArray().size();//房间数量
@@ -801,19 +825,19 @@ public class NewLoginActivity extends Activity{
             intent.putExtra("roomAttr",roomAttr);*/
 
 
-            intent.putExtra("host_ip",host_ip);
-            intent.putExtra("hid",hid);
-            intent.putExtra("uname",userName);
-            intent.putExtra("pwd",password);
+
+            intentLogin.putExtra("host_ip",host_ip);
+            intentLogin.putExtra("hid",hid);
+            intentLogin.putExtra("uname",userName);
+            intentLogin.putExtra("pwd",password);
             if (udpCheck.equals("ip")) {
-                intent.putExtra("ip",ip);
+                intentLogin.putExtra("ip",ip);
                 Log.i(TAG, "doJsonParse: -------------put到MainActivity的ip-----------"+ip);
             }
             Bundle bundle = new Bundle();
             bundle.putSerializable("homeAttr",homeAttrBean); //旧版
-            intent.putExtras(bundle);
-            startActivity(intent);
-            finish();        //结束此activity，下一个activity返回时，直接退出
+            intentLogin.putExtras(bundle);
+
             //overridePendingTransition(R.anim.zoom_in,R.anim.zoom_out);
         } catch (JSONException e) {
             e.printStackTrace();

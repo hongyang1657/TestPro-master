@@ -68,6 +68,7 @@ import java.util.Random;
 import android.support.v4.app.FragmentManager;
 
 /**
+ * 382,770     android23以上能使用
  * Created by hy on 2016/8/15.
  */
 @SuppressLint({"ValidFragment", "NewApi"})
@@ -378,7 +379,9 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                 isCanScroll = true;  //滑动动画停止后才能用手操作
             }
         });
-        svPullUpMenu.setOnScrollChangeListener(new View.OnScrollChangeListener() {
+
+        //android 23 以上能用
+        /*svPullUpMenu.setOnScrollChangeListener(new View.OnScrollChangeListener() {
             @Override
             public void onScrollChange(View view, int i, int i1, int i2, int i3) {
                 if (i1==btHeight_X3){
@@ -388,7 +391,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                 }
                 position = i1;
             }
-        });
+        });*/
 
         //获取控件高度
         int w = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
@@ -480,6 +483,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         tvRoomNameTop.setText(roomName);
         ViewGroup.LayoutParams layoutParams1 = rlRoomName.getLayoutParams();
         layoutParams1.height = height-initFloatHeight+btHeight*2;     //设置房间textview的高度 = 屏幕高 - 浮出部分高 + 上部控件的高*2
+        //layoutParams1.height = linearPullUpScrollHeight-initFloatHeight;     //设置房间textview的高度 = 屏幕高 - 浮出部分高 + 上部控件的高*2
         rlRoomName.setLayoutParams(layoutParams1);
 
         scrollToBottomInit();   //初始化ScrollView的位置
@@ -764,7 +768,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
 
 
         sbTemp.setOnSeekBarChangeListener(tempSeekBarListener);  //空调调温SeekBar
-        hsLightValue.setOnScrollChangeListener(hsChangeListener);
+        //hsLightValue.setOnScrollChangeListener(hsChangeListener);       //android 23 以上才能用
         //判断hsScrollView是否停下
         hsLightValue.setOnTouchListener(new View.OnTouchListener() {
             private int lastX = 0;
@@ -1017,7 +1021,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
 
     //灯光亮度调节监听
     private boolean isLightOpen = false;
-    View.OnScrollChangeListener hsChangeListener = new View.OnScrollChangeListener() {
+    /*View.OnScrollChangeListener hsChangeListener = new View.OnScrollChangeListener() {
         @Override
         public void onScrollChange(View view, int i, int i1, int i2, int i3) {
             lightSVPosition = i;
@@ -1087,7 +1091,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                 isLightOpen = true;
             }
         }
-    };
+    };*/
 
     //空调温度调节滑块监听
     SeekBar.OnSeekBarChangeListener tempSeekBarListener = new SeekBar.OnSeekBarChangeListener() {

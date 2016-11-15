@@ -3,8 +3,6 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 24
     buildToolsVersion "23.0.3"
-
-
     defaultConfig {
         applicationId "com.byids.hy.testpro"
         minSdkVersion 15
@@ -23,6 +21,8 @@ android {
         main {
             jniLibs.srcDirs = ['libs']
         }
+    }
+    productFlavors {
     }
 }
 

@@ -2,6 +2,7 @@ package com.byids.hy.testpro.service;
 
 import android.app.Service;
 import android.content.Intent;
+import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -17,12 +18,13 @@ public class UDPBroadcastService extends Service{
     private UDPSocket udpSocket;
     private String udpCheck;
     private String ip;
+    private UDPBinder mUDPBinder = new UDPBinder();
 
 
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        return mUDPBinder;
     }
 
     @Override
@@ -40,17 +42,26 @@ public class UDPBroadcastService extends Service{
             @Override
             public void run() {
                 super.run();
-                while (true){
+                int i = 0;
+                while (i==0){
+                    Log.i(TAG, "run: --------------开始循环发送udp-------------");
                     udpSocket.sendEncryptUdp();
-                    udpCheck = udpSocket.getUdpCheck();
-                    ip = udpSocket.getIp();
-                    Log.i(TAG, "run: ----------收到的udpcheck:"+udpCheck+"----收到的主机ip："+ip);
                     try {
-                        sleep(10000);
+                        sleep(1000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-
+                    udpCheck = udpSocket.getUdpCheck();
+                    ip = udpSocket.getIp();
+                    if (udpCheck=="ip"||udpCheck.equals("ip")){
+                        Log.i(TAG, "run: --------ip------------ip---------------ip-------------ip-----------ip-------收到的主机ip："+ip);
+                    }
+                    try {
+                        sleep(9000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    i = 1;
                 }
             }
         }.start();
@@ -62,5 +73,16 @@ public class UDPBroadcastService extends Service{
     public void onDestroy() {
         super.onDestroy();
         Log.i(TAG, "onCreate:--------------销毁Udp service------------------- ");
+    }
+
+    //与Activity通信
+    public class UDPBinder extends Binder{
+        public String getHostIp(){
+            return ip;
+        }
+
+        public String getUdpCheck(){
+            return udpCheck;
+        }
     }
 }

@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <TextView
+        android:id="@+id/tv_camera_room_name"
+        android:text="房间"
+        android:clickable="true"
+        android:onClick="cameraClick"
+        android:background="@color/colorWhite"
+        android:layout_alignParentBottom="true"
+        android:textSize="18sp"
+        android:gravity="center"
+        android:layout_width="120dp"
+        android:layout_height="50dp" />
+
+    <ListView
+        android:id="@+id/lv_jiankong"
+        android:layout_above="@id/tv_camera_room_name"
+        android:background="@color/colorLoginBack"
+        android:layout_gravity="center"
+        android:divider="@null"
+        android:scrollbars="none"
+        android:layout_alignRight="@id/tv_camera_room_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+    </ListView>
+
+
+
+
+        <SurfaceView
+            android:id="@+id/sfv_camera"
+            android:layout_toRightOf="@id/lv_jiankong"
+            android:clickable="true"
+            android:onClick="cameraClick"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+        <ImageView
+            android:id="@+id/iv_capture"
+            android:scaleType="centerCrop"
+            android:layout_toRightOf="@id/lv_jiankong"
+            android:onClick="cameraClick"
+            android:clickable="true"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+        <ImageView
+            android:id="@+id/iv_camera_loading"
+            android:visibility="gone"
+            android:layout_toRightOf="@id/lv_jiankong"
+            android:src="@mipmap/longding_3x"
+            android:scaleType="center"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+        <ImageView
+            android:id="@+id/iv_shoushi"
+            android:onClick="cameraClick"
+            android:visibility="gone"
+            android:clickable="true"
+            android:src="@mipmap/jiankong_shoushi_3x"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:padding="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+    <ListView
+        android:id="@+id/lv_pick_time"
+        android:layout_above="@id/tv_camera_room_name"
+        android:layout_toRightOf="@id/lv_jiankong"
+        android:visibility="gone"
+        android:background="@color/colorLoginBack"
+        android:layout_gravity="center"
+        android:divider="@null"
+        android:scrollbars="none"
+        android:layout_width="120dp"
+        android:layout_height="wrap_content">
+
+    </ListView>
+
+        <LinearLayout
+            android:id="@+id/ll_play_status"
+            android:background="@mipmap/mohu"
+            android:layout_toRightOf="@id/lv_jiankong"
+            android:layout_alignTop="@id/tv_camera_room_name"
+            android:layout_alignParentBottom="true"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="50dp">
+
+            <ImageView
+                android:id="@+id/iv_kuaitui"
+                android:src="@mipmap/kuaitui_3x"
+                android:onClick="cameraClick"
+                android:clickable="true"
+                android:layout_gravity="center"
+                android:padding="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent" />
+            <ImageView
+                android:id="@+id/iv_play"
+                android:src="@mipmap/play_3x"
+                android:onClick="cameraClick"
+                android:clickable="true"
+                android:layout_gravity="center"
+                android:padding="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent" />
+            <ImageView
+                android:id="@+id/iv_kuaijin"
+                android:src="@mipmap/kuaijin_3x"
+                android:onClick="cameraClick"
+                android:clickable="true"
+                android:layout_gravity="center"
+                android:padding="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent" />
+            <SeekBar
+                android:id="@+id/sb_jiankong"
+                android:layout_weight="1"
+                android:thumb="@mipmap/thumb"
+                android:maxHeight="4dp"
+                android:minHeight="2dp"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp"
+                android:layout_gravity="center"
+                android:max="1440"
+                android:progressDrawable="@drawable/air_temp_seekbar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+
+</RelativeLayout>

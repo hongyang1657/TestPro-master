@@ -3,7 +3,6 @@ package com.byids.hy.testpro;
 import android.util.Log;
 
 import com.byids.hy.testpro.utils.AES;
-import com.byids.hy.testpro.utils.LongLogCatUtil;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -47,6 +46,7 @@ public class TcpLongSocket {
 		// try {
 		connThread = new ConnectThread(ip, port);
 		connThread.start();
+		Log.i(TAG, "startConnect: 连接上服务器，服务器ip："+ip+"   服务器port："+port);
 
 		// } catch (IOException e) {
 		// // 连接失败告诉调用者，重新连接
@@ -56,12 +56,26 @@ public class TcpLongSocket {
 	}
 
 	// 获取当前连接状态
-	public boolean getConnectStatus() {
-		if (mSocket != null)
+	/*public boolean getConnectStatus() {
+		if (mSocket != null){
+			Log.i(TAG, "getConnectStatus: --------mSocket不等于空--------是否连接上-"+mSocket.isConnected());
 			return mSocket.isConnected();
-		else
+		} else{
+			Log.i(TAG, "getConnectStatus: ------mSocket等于空-----");
 			return false;
+		}
+	}*/
+
+	// 获取当前连接状态
+	public boolean getConnectStatus(){
+		try{
+			mSocket.sendUrgentData(0xFF);
+			return true;
+		}catch(Exception e){
+			return false;
+		}
 	}
+
 
 	public void sendData(byte[] data) {
 		if (out != null) {
