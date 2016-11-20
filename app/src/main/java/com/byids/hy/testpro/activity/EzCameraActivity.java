@@ -1,7 +1,6 @@
 package com.byids.hy.testpro.activity;
 
 import android.animation.ObjectAnimator;
-import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
@@ -10,7 +9,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.SurfaceHolder;
@@ -26,7 +24,6 @@ import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.byids.hy.testpro.R;
 import com.byids.hy.testpro.adapter.CameraDataBaseAdapter;
@@ -34,26 +31,20 @@ import com.byids.hy.testpro.adapter.JianKongRoomAdapter;
 import com.byids.hy.testpro.adapter.PickTimeAdapter;
 import com.squareup.picasso.Picasso;
 import com.videogo.exception.BaseException;
-import com.videogo.openapi.EZConstants;
 import com.videogo.openapi.EZOpenSDK;
 import com.videogo.openapi.EZPlayer;
 import com.videogo.openapi.bean.EZCameraInfo;
 import com.videogo.openapi.bean.EZCloudRecordFile;
 import com.videogo.openapi.bean.EZDeviceRecordFile;
-import com.videogo.openapi.bean.EZUserInfo;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 /**
  * Created by gqgz2 on 2016/9/29.
  */
-public class EzCameraActivity extends Activity{
+public class EzCameraActivity extends BaseActivity{
 
     private static String TAG = "result";
     private int width;
@@ -70,6 +61,13 @@ public class EzCameraActivity extends Activity{
     private String captureUrl;
     private String[] cameraDate = {"今天","昨天","前天","1","1","1","1"};
     private Typeface typeFace;
+
+    private LinearLayout llSwitchButtonLeft;
+    private TextView tvSwitchVcr;
+    private TextView tvSwitchRoom;
+    private LinearLayout llCameraList;
+    private ListView lvCamera;
+
 
     private ListView lvJiankong;
     private CameraDataBaseAdapter cameraDataBaseAdapter;
@@ -184,19 +182,14 @@ public class EzCameraActivity extends Activity{
     private void initView(){
 
         ezOpenSDK = EZOpenSDK.getInstance();
-        lvJiankong = (ListView) findViewById(R.id.lv_jiankong);
-        tvCameraRoomName = (TextView) findViewById(R.id.tv_camera_room_name);
         sfvCamera = (SurfaceView) findViewById(R.id.sfv_camera);
         ivCapture = (ImageView) findViewById(R.id.iv_capture);
         ivShoushi = (ImageView) findViewById(R.id.iv_shoushi);
         llPlayStatus = (LinearLayout) findViewById(R.id.ll_play_status);
-        ivKuaitui = (ImageView) findViewById(R.id.iv_kuaitui);
         ivPlay = (ImageView) findViewById(R.id.iv_play);
-        ivKuaijin = (ImageView) findViewById(R.id.iv_kuaijin);
         sbJiankong = (SeekBar) findViewById(R.id.sb_jiankong);
         ivCameraLoading = (ImageView) findViewById(R.id.iv_camera_loading);
-        lvPickTime = (ListView) findViewById(R.id.lv_pick_time);
-        pickTimeAdapter = new PickTimeAdapter(EzCameraActivity.this,timesPickList);  //传入选择的那一天的录像片段
+        //pickTimeAdapter = new PickTimeAdapter(EzCameraActivity.this,timesPickList);  //传入选择的那一天的录像片段
         lvPickTime.setAdapter(pickTimeAdapter);
         //选择查看当天的视频录像片段
         lvPickTime.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -341,8 +334,6 @@ public class EzCameraActivity extends Activity{
             case R.id.iv_shoushi:
                 setfullscreen();          //设置全屏或退出全屏
                 break;
-            case R.id.iv_kuaitui:
-                break;
             case R.id.iv_play:
                 if (isStartPlay==true){
                     ezPlayer.stopRealPlay();         //暂停播放
@@ -354,15 +345,13 @@ public class EzCameraActivity extends Activity{
                     loadingAnimation();
                 }
                 break;
-            case R.id.iv_kuaijin:
-                break;
             case R.id.sfv_camera:
                 setfullscreen();          //设置全屏或退出全屏
                 break;
-            case R.id.tv_camera_room_name:
+            /*case R.id.tv_camera_room_name:
 
                 popupWindow.showAtLocation(getLayoutInflater().inflate(R.layout.camera_main_layout,null), Gravity.CENTER,0,0);
-                break;
+                break;*/
             default:
                 break;
         }

@@ -159,7 +159,7 @@ public class TcpLongSocket {
 				}
 				if (datas.size() > 0) {
 					byte[] data = datas.remove(0);
-					Log.i("result", "fanliang......发送数据 =" + new String(data));
+					Log.i("send_xintiao", "fanliang......发送数据 = " + new String(data));
 					sendData(data);
 				}
 			}
@@ -217,7 +217,7 @@ public class TcpLongSocket {
 
 		public void run() {
 			super.run();
-			if (threadBoo) {
+			if (true) {
 				if (in != null) {
 					int len = 0;
 					/*try {
@@ -251,9 +251,8 @@ public class TcpLongSocket {
 						/*String strRoomInfo = testDecryptByte(allTmpBuffer);
 						LongLogCatUtil.logE("result",strRoomInfo);*/
 						callBack.receive(allTmpBuffer);
+
 						allTmpBuffer = null;
-
-
 
 					} catch (IOException e) {
 						e.printStackTrace();

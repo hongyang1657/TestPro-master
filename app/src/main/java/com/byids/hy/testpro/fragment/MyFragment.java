@@ -4,17 +4,13 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
-import android.animation.TimeInterpolator;
 import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
 import android.app.Activity;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -28,9 +24,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
-import android.view.animation.Animation;
-import android.view.animation.AnimationSet;
-import android.view.animation.RotateAnimation;
 import android.widget.Button;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
@@ -51,9 +44,7 @@ import com.byids.hy.testpro.ScrollViewListener;
 import com.byids.hy.testpro.View.MyCustomScrollView;
 import com.byids.hy.testpro.View.MyPullUpScrollView;
 import com.byids.hy.testpro.activity.MyMainActivity;
-import com.byids.hy.testpro.newBean.RoomDevMesg;
 import com.byids.hy.testpro.utils.CommandJsonUtils;
-import com.byids.hy.testpro.utils.Encrypt;
 import com.videogo.openapi.EZOpenSDK;
 
 import org.greenrobot.eventbus.EventBus;
@@ -65,7 +56,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import android.support.v4.app.FragmentManager;
 
 /**
  * 382,770     android23以上能使用
@@ -124,6 +114,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
 
     private ImageView ivBackGround;   //背景图片
     private ImageView ivBackGroundTrans;      //切换背景图片
+    private ImageView ivStateLight;     //状态指示灯
 
     private MyCustomScrollView scrollView;
     private int roomIndex;     //房间标示
@@ -293,7 +284,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
     public MyFragment(){}
 
     private int[] backList;  //背景图片组
-    public MyFragment(int roomIndex, String roomName, String roomDBName, int[] backList, RoomAttr roomAttr, String hid, String uname, String pwd) {
+    public MyFragment(int roomIndex, String roomName, String roomDBName, int[] backList, String hid, String uname, String pwd) {
         this.roomIndex = roomIndex;
         this.roomName = roomName;
         this.roomDBName = roomDBName;
@@ -546,6 +537,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
 
         ivBackGround = (ImageView) view.findViewById(R.id.id_iv);
         ivBackGroundTrans = (ImageView) view.findViewById(R.id.id_iv1);
+        ivStateLight = (ImageView) view.findViewById(R.id.iv_state_light);     //连接状态指示灯
 
         ivHomeIcon = (ImageView) view.findViewById(R.id.iv_home_icon);
         tvRoomNameTop = (TextView) view.findViewById(R.id.tv_room_name);
@@ -734,12 +726,13 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         //tvList.add(tvLocalTemp);
 
 
-        if (roomAttr.getLight().getActive()==0){
+        //根据房间信息选择隐藏的控件
+        /*if (roomAttr.getLight().getActive()==0){
             initRoomAttr(tvLight,llLight);
         }if (roomAttr.getCurtain().getActive()==0){
             initRoomAttr(tvChuanglian,llChuanglian);
             initRoomAttr(tvJuanLian,llJuanlian);
-        }
+        }*/
 
 
 
@@ -907,6 +900,18 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                 btPullMenu.setVisibility(View.VISIBLE);
                 //homeButtonSetVisableAnimator();
                 ObjectAnimator.ofFloat(btPullMenu,"translationY",-btMenuHeight,0).setDuration(600).start();
+                break;
+            case "11":
+                Log.i(TAG, "onEventMainThread: ------————————————————————————————————————————————————————————---内网连接---------");
+                ivStateLight.setImageResource(R.drawable.state_light_connect);
+                break;
+            case "12":
+                Log.i(TAG, "onEventMainThread: -----——————————————————————————————————————————————————————————----外网连接---------");
+                ivStateLight.setImageResource(R.drawable.state_light_connect_4g);
+                break;
+            case "22":
+                Log.i(TAG, "onEventMainThread: --————————————————————————————————————————————————————————-------断开连接---------");
+                ivStateLight.setImageResource(R.drawable.state_light_disconnect);
                 break;
         }
     }

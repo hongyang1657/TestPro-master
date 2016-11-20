@@ -3,7 +3,6 @@ package com.byids.hy.testpro.activity;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
-import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -60,6 +59,7 @@ import com.byids.hy.testpro.R;
 import com.byids.hy.testpro.View.LoginHScrollView;
 import com.byids.hy.testpro.newBean.AllJsonData;
 import com.byids.hy.testpro.service.UDPBroadcastService;
+import com.byids.hy.testpro.utils.LongLogCatUtil;
 import com.byids.hy.testpro.utils.NetworkStateUtil;
 import com.byids.hy.testpro.utils.RunningTimeDialog;
 
@@ -84,7 +84,7 @@ import okhttp3.RequestBody;
  * Created by gqgz2 on 2016/9/23.
  * 登录页面
  */
-public class NewLoginActivity extends Activity{
+public class NewLoginActivity extends BaseActivity{
 
     private String TAG = "result";
     private ImageView ivBackground;
@@ -633,7 +633,7 @@ public class NewLoginActivity extends Activity{
                     @Override
                     public void onResponse(Call call, okhttp3.Response response) throws IOException {
                         String resp = response.body().string();
-                        Log.i(TAG, "onResponse:新版房间信息： "+resp);
+                        LongLogCatUtil.logE(TAG,"新版房间信息:"+resp);
                         Message msg = new Message();
                         msg.what = 3;
                         msg.obj = resp;

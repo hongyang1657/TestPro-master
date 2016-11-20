@@ -1,6 +1,5 @@
 package com.byids.hy.testpro.activity;
 
-import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -43,7 +42,7 @@ import okhttp3.RequestBody;
 /**
  * Created by gqgz2 on 2016/10/21.
  */
-public class LaunchActivity extends Activity{
+public class LaunchActivity extends BaseActivity{
 
     private static final String TAG = "result";
     private static final int LAUNCH_DELAY = 3000;
@@ -68,9 +67,14 @@ public class LaunchActivity extends Activity{
     private HomeAttr homeAttrBean;
     private String hid = "56e276f3736fb0872c69d876";
     private String allJson;
+    private String tokenJson;
 
     //长连接
     private TcpLongSocket tcplongSocket;
+
+    private boolean isConnect;
+    private boolean isMobileState;
+    private String phoneIP;
 
     private Handler handler = new Handler(){
         @Override
@@ -96,13 +100,20 @@ public class LaunchActivity extends Activity{
                     break;*/
                 case 2:
                     //获取token
-                    String token = (String) msg.obj;
-                    Log.i(TAG, "handleMessage: handlllllllll"+token);
-                    getToken(token);
+                    tokenJson = (String) msg.obj;
+                    Log.i(TAG, "handleMessage: handlllllllll"+tokenJson);
+                    getToken(tokenJson);
                     break;
                 case 3:      //获取用户信息
-                    VibratorUtil.Vibrate(LaunchActivity.this, 1000);
+                    VibratorUtil.Vibrate(LaunchActivity.this, 100);
                     allJson = (String) msg.obj;
+                    //解析数据后跳转
+                    Intent intent = new Intent(LaunchActivity.this,MyMainActivity.class);
+                    intent.putExtra("token",tokenJson);
+                    intent.putExtra("host_ip",ip);
+                    startActivity(intent);
+                    finish();
+
                     break;
 
             }
@@ -134,9 +145,9 @@ public class LaunchActivity extends Activity{
         ivLaunch = (ImageView) findViewById(R.id.iv_launch);
 
         //获取网络状态  ip地址
-        boolean isConnect = NetworkStateUtil.isNetworkAvailable(this);
-        boolean isMobileState = NetworkStateUtil.isNetworkMobileState(this);
-        String phoneIP = NetworkStateUtil.getPhoneIp();
+        isConnect = NetworkStateUtil.isNetworkAvailable(this);
+        isMobileState = NetworkStateUtil.isNetworkMobileState(this);
+        phoneIP = NetworkStateUtil.getPhoneIp();
         Log.i("result", "onCreate: -------当前是否有网络可用-------"+isConnect);
         Log.i("result", "onCreate: --------------是否为数据流量状态--------------"+isMobileState);
         Log.i("result", "onCreate: --------------本机ip地址--------------"+phoneIP);
@@ -150,15 +161,17 @@ public class LaunchActivity extends Activity{
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    }
+
     private void init(){
         sp1 = getSharedPreferences("user_inform",MODE_PRIVATE);
-        startTcpService();     //开启service
-        Intent bindIntent = new Intent(this, UDPBroadcastService.class);
-        bindService(bindIntent, connection, BIND_AUTO_CREATE); // 绑定服务
+        if (!isMobileState){      //在连接wifi的情况下，开启后台udp广播
+            startTcpService();     //开启service 绑定service
+        }
 
-
-        /*udpSocket = new UDPSocket("主机在吗？");
-        udpSocket.sendEncryptUdp();*/
 
         //延迟3秒跳转
         new Handler().postDelayed(new Runnable() {
@@ -171,22 +184,19 @@ public class LaunchActivity extends Activity{
 
                 userName = sp1.getString("userName","");
                 password = sp1.getString("password","");
-                /*udpCheck = udpSocket.getUdpCheck();
-                ip = udpSocket.getIp();
-                Log.i(TAG, "onCreate: 如果是ip就表示找到主机了:"+udpCheck);
-                Log.i(TAG, "onCreate: 主机的ip地址:"+ip);*/
+
                 //userName = null;     //为了模拟每次都是第一次登陆，以后删除
-                if (userName==null||userName==""){          //第一次登陆，必须外网，跳转登陆页面
+                if (userName==null||userName.equals("")){          //第一次登陆，必须外网，跳转登陆页面
                     Log.i(TAG, "run: ************************首次登陆，必须外网登陆，跳转登陆页************************");
                     Intent intent = new Intent(LaunchActivity.this,NewLoginActivity.class);
-                    ip = null;     //删除
+                    //ip = null;     //删除
                     intent.putExtra("ip",ip);       //后台udp广播获取主机ip，如果能获取，表示可以本地内网连接，如果没能获取，走外网连接
                     Log.i(TAG, "run: --------------获取到主机ip没：-------------"+ip);
                     startActivity(intent);
                     finish();
                 }else{          //非第一次登陆
-                    udpCheck = "外网测试，故意让内网不通，测完删除";
-                    if (udpCheck=="ip"||udpCheck.equals("ip")){      //内网连通
+                    //udpCheck = "外网测试，故意让内网不通，测完删除";
+                    if (udpCheck.equals("ip")){      //内网连通
                         Toast.makeText(LaunchActivity.this, "找到主机，内网登陆", Toast.LENGTH_SHORT).show();
                         Log.i(TAG, "run: ************************非首次登陆，找到主机，内网登陆************************");
                         secondLoginLAN();    //内网Tcp获取房间信息
@@ -205,25 +215,31 @@ public class LaunchActivity extends Activity{
     private void startTcpService(){
         Intent intentService = new Intent(this, UDPBroadcastService.class);
         startService(intentService);         //启动服务
+
+        Intent bindIntent = new Intent(this, UDPBroadcastService.class);
+        bindService(bindIntent, connection, BIND_AUTO_CREATE); // 绑定服务
+
+
+
     }
 
 
-    //内网通过连接Tcp 获取房间信息
+    //--------------非首次登录---------内网通过连接Tcp 获取房间信息-------------
     private void secondLoginLAN(){
         tcplongSocket = new TcpLongSocket(new ConnectTcp());
         tcplongSocket.startConnect(ip, DEFAULT_PORT);
         //解析数据后跳转（测试，直接加载假数据跳转，以后删除）
-        /*Intent intent = new Intent(LaunchActivity.this,MyMainActivity.class);
-        startActivity(intent);*/
+        Intent intent = new Intent(LaunchActivity.this,MyMainActivity.class);
+        intent.putExtra("host_ip",ip);
+        startActivity(intent);
+        finish();
     }
 
 
-    //外网通过http请求获取房间信息
+    //--------------非首次登录---------外网通过http请求获取房间信息-----------
     private void secondLoginWAN(){
         loginPost();  //http post
         //解析数据后跳转（测试，直接加载假数据跳转，以后删除）
-        /*Intent intent = new Intent(LaunchActivity.this,MyMainActivity.class);
-        startActivity(intent);*/
     }
 
 
@@ -233,7 +249,7 @@ public class LaunchActivity extends Activity{
         @Override
         public void connected() {
             Log.i("MAIN", String.valueOf(tcplongSocket.getConnectStatus()));
-            VibratorUtil.Vibrate(LaunchActivity.this, 500);
+            VibratorUtil.Vibrate(LaunchActivity.this, 100);
             JSONObject checkCommandData = new JSONObject();
             try {
                 checkCommandData.put("kong", "keys");

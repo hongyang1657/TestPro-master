@@ -1,6 +1,5 @@
 package com.byids.hy.testpro.activity;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.view.Window;
 import android.view.WindowManager;
@@ -10,7 +9,7 @@ import com.byids.hy.testpro.R;
 /**
  * Created by gqgz2 on 2016/9/25.
  */
-public class LoginExplainActivity extends Activity{
+public class LoginExplainActivity extends BaseActivity{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

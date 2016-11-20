@@ -9,7 +9,6 @@
         android:id="@+id/tv_room_name_item"
         android:text="客厅"
         android:textColor="@color/colorText"
-        android:textSize="22sp"
         android:padding="12dp"
         android:gravity="center"
         android:layout_width="match_parent"

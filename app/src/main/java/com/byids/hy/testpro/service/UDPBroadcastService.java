@@ -15,10 +15,14 @@ import com.byids.hy.testpro.utils.UDPSocket;
 
 public class UDPBroadcastService extends Service{
     private static final String TAG = "result";
+    private static final String TAG_UDP_SERVICE = "udp_service";
     private UDPSocket udpSocket;
     private String udpCheck;
     private String ip;
     private UDPBinder mUDPBinder = new UDPBinder();
+    private boolean isUdpThreadOn;
+    private boolean isSendingUDP = true;     //是否正在发送udp
+
 
 
     @Nullable
@@ -37,17 +41,15 @@ public class UDPBroadcastService extends Service{
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(TAG, "onCreate:--------------启动Udp service------------------- ");
-        //后台开启UDP Socket，每隔一段时间发送udp广播，寻找主机
         new Thread(){
             @Override
             public void run() {
                 super.run();
-                int i = 0;
-                while (i==0){
-                    Log.i(TAG, "run: --------------开始循环发送udp-------------");
+                while (isSendingUDP){
+                    Log.i(TAG, "run: --------------开始循环发送udp-------------"+isUdpThreadOn);
                     udpSocket.sendEncryptUdp();
                     try {
-                        sleep(1000);
+                        sleep(2000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -55,13 +57,15 @@ public class UDPBroadcastService extends Service{
                     ip = udpSocket.getIp();
                     if (udpCheck=="ip"||udpCheck.equals("ip")){
                         Log.i(TAG, "run: --------ip------------ip---------------ip-------------ip-----------ip-------收到的主机ip："+ip);
+                    }else if (udpCheck.equals("")||udpCheck==null){
+                        Log.i(TAG, "找不到ip了，可能是关闭了网络，停止发送udp");
+                        isSendingUDP = false;
                     }
                     try {
-                        sleep(9000);
+                        sleep(8000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    i = 1;
                 }
             }
         }.start();
@@ -72,17 +76,29 @@ public class UDPBroadcastService extends Service{
     @Override
     public void onDestroy() {
         super.onDestroy();
+
         Log.i(TAG, "onCreate:--------------销毁Udp service------------------- ");
     }
 
     //与Activity通信
     public class UDPBinder extends Binder{
+        private boolean isSendUDPOn = true;
+
         public String getHostIp(){
             return ip;
         }
 
         public String getUdpCheck(){
             return udpCheck;
+        }
+
+        public void startSendUDP(){
+            //后台开启UDP Socket，每隔一段时间发送udp广播，寻找主机
+
+        }
+
+        public void stopSendUDP(){
+            this.isSendUDPOn = false;
         }
     }
 }

@@ -42,6 +42,7 @@ import com.byids.hy.testpro.adapter.MyFragmentAdapter;
 import com.byids.hy.testpro.adapter.RoomNameBaseAdapter;
 import com.byids.hy.testpro.fragment.MyFragment;
 import com.byids.hy.testpro.service.TcpConnectService;
+import com.byids.hy.testpro.service.UDPBroadcastService;
 import com.byids.hy.testpro.utils.AES;
 import com.byids.hy.testpro.utils.CommandJsonUtils;
 import com.byids.hy.testpro.utils.Encrypt;
@@ -102,9 +103,6 @@ public class MyMainActivity extends FragmentActivity {
 
 
     //背景图片
-    private int[] ivBackList1 = {R.mipmap.back_10, R.mipmap.back_12, R.mipmap.back_13, R.mipmap.back_14};
-    private int[] ivBackList2 = {R.mipmap.back_5, R.mipmap.back_6, R.mipmap.back_8, R.mipmap.back_9};
-    private int[] ivBackList3 = {R.mipmap.back_1, R.mipmap.back_2, R.mipmap.back_3, R.mipmap.back_4};
     private int[] ivBackList = { R.mipmap.back_13,R.mipmap.back_10, R.mipmap.back_5,R.mipmap.back_6,R.mipmap.back_2, R.mipmap.back_14, R.mipmap.back_8, R.mipmap.back_9,R.mipmap.back_12,  R.mipmap.back_1, R.mipmap.back_3, R.mipmap.back_4};
 
     //房间名数组kk
@@ -137,6 +135,33 @@ public class MyMainActivity extends FragmentActivity {
      */
     private GoogleApiClient client;
 
+    private Handler handler = new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what){
+                case 1:         //外网
+                    Log.i("hahaha", "run:外网连接状态 "+tcpLongSocketWAN.getConnectStatus());
+                    if (tcpLongSocketWAN.getConnectStatus()){
+                        EventBus.getDefault().post(new MyEventBus2("12"));
+                    }else {
+                        EventBus.getDefault().post(new MyEventBus2("22"));
+                    }
+                    break;
+                case 2:         //内网
+                    Log.i("hahaha", "run:内网连接状态 "+tcplongSocket.getConnectStatus());
+                    if (tcplongSocket.getConnectStatus()){
+                        EventBus.getDefault().post(new MyEventBus2("11"));
+                    }else {
+                        EventBus.getDefault().post(new MyEventBus2("22"));
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+    };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -146,9 +171,9 @@ public class MyMainActivity extends FragmentActivity {
         setContentView(R.layout.my_main_layout);
         //注册EventBus
         EventBus.getDefault().register(this);
-        reciveIntent();
         initView();
-        startTcpService();
+        reciveIntent();
+        //startTcpService();
 
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -167,6 +192,8 @@ public class MyMainActivity extends FragmentActivity {
         EventBus.getDefault().unregister(this);  //反注册EventBus
         //connectTcp = false;    //关闭线程
         Log.i(TAG, "onDestroy: ----------------主界面退出--------------onDestroy---------------------------");
+
+        //System.exit(0);          //确定该Activity销毁时就是程序退出时，才能调用该方法来关闭整个应用
 
     }
 
@@ -206,19 +233,34 @@ public class MyMainActivity extends FragmentActivity {
         pwd = getIntent().getStringExtra("pwd");
         host_ip = getIntent().getStringExtra("host_ip");
         token = getIntent().getStringExtra("token");
-        if (host_ip==null||host_ip==""){
-            Toast.makeText(this, "内网不通，尝试连接外网", Toast.LENGTH_SHORT).show();
-            Log.i(TAG, "reciveIntent: 内网不通，尝试连接外网");
-            //外网Tcp连接
-            tcpLongSocketWAN = new TcpLongSocket(new ConnectTcpWAN());
-            tcpLongSocketWAN.startConnect(ip_WAN,DEFAULT_PORT_WAN);
-        }else {
-            Toast.makeText(this, "连接内网", Toast.LENGTH_SHORT).show();
-            Log.i(TAG, "reciveIntent: 连接内网");
-            //内网Tcp连接
-            tcplongSocket = new TcpLongSocket(new ConnectTcp());
-            tcplongSocket.startConnect(host_ip, DEFAULT_PORT);
-        }
+        Log.i(TAG, "reciveIntent: !!!!!!!!!!!host_ip!!!!!!!!!!"+host_ip);
+        host_ip = null;    //连外网,以后删除
+        new Thread(){
+            @Override
+            public void run() {
+                super.run();
+                if (host_ip==null||host_ip.equals("")){
+                    //Toast.makeText(this, "内网不通，尝试连接外网", Toast.LENGTH_SHORT).show();
+                    Log.i(TAG, "reciveIntent: 内网不通，尝试连接外网");
+                    //外网Tcp连接
+                    tcpLongSocketWAN = new TcpLongSocket(new ConnectTcpWAN());
+                    tcpLongSocketWAN.startConnect(ip_WAN,DEFAULT_PORT_WAN);
+                    Message message = new Message();
+                    message.what = 1;
+                    handler.sendMessageDelayed(message,3000);
+                }else {
+                    //Toast.makeText(this, "连接内网", Toast.LENGTH_SHORT).show();
+                    Log.i(TAG, "reciveIntent: 连接内网");
+                    //内网Tcp连接
+                    tcplongSocket = new TcpLongSocket(new ConnectTcp());
+                    tcplongSocket.startConnect(host_ip, DEFAULT_PORT);
+                    Message message = new Message();
+                    message.what = 2;
+                    handler.sendMessageDelayed(message,3000);
+                }
+            }
+        }.start();
+
     }
 
 
@@ -227,6 +269,7 @@ public class MyMainActivity extends FragmentActivity {
 
         @Override
         public void connected() {
+            Log.i(TAG, "connected: ============================连接上了内网============================");
             Log.i("MAIN", String.valueOf(tcplongSocket.getConnectStatus()));
             VibratorUtil.Vibrate(MyMainActivity.this, 300);
             JSONObject checkCommandData = new JSONObject();
@@ -242,20 +285,8 @@ public class MyMainActivity extends FragmentActivity {
 
         }
 
-
-
         @Override
         public void receive(byte[] buffer) {             //接收主机信息
-            /*Log.i("result", "---收到         数据-----");
-            Log.i(TAG, "receive: --------------------------加密的！！！！！！-------------------------"+byteStringLog(buffer));
-            if ("Hello client" == buffer.toString()) {
-                Log.i("result", "心跳" + String.valueOf(tcplongSocket.getConnectStatus()));
-                Log.i(TAG, "receive: 连接状态**********" + tcplongSocket.getConnectStatus());
-            }
-                buff = test(buff,buffer);
-                Log.i(TAG, "receive: 加密加密加密加密加密加密加密加密加密加密加密加密加密加密"+byteStringLog(buff));
-                Log.i(TAG, "receive: 加密加密加密加密加密加密加密加密加密加密加密加密加密加密"+new String(buff));
-            //testDecryptByte(buff);*/
 
             String strRoomInfo = testDecryptByte(buffer);
             LongLogCatUtil.logE("result",strRoomInfo);
@@ -265,6 +296,7 @@ public class MyMainActivity extends FragmentActivity {
         @Override
         public void disconnect() {
             tcplongSocket.close();
+            EventBus.getDefault().post(new MyEventBus2("22"));
         }
     }
 
@@ -303,7 +335,8 @@ public class MyMainActivity extends FragmentActivity {
         @Override
         public void connected() {
             Log.i(TAG, "connected: ********连接上了外网************");
-            VibratorUtil.Vibrate(MyMainActivity.this, 500);
+
+            VibratorUtil.Vibrate(MyMainActivity.this, 200);
 
             byte[] postHead = "#byids".getBytes();
             Log.i(TAG, "onClick: ------------------"+byteStringLog(postHead));
@@ -343,8 +376,9 @@ public class MyMainActivity extends FragmentActivity {
 
         @Override
         public void receive(byte[] buffer) {
+
             Log.i(TAG, "receive: buffer.length:"+buffer.length);
-            Log.i(TAG, "receive: "+byteStringLog(buffer));
+            //Log.i(TAG, "receive: "+byteStringLog(buffer));
             //取最后一位，0：验证token成功；1：验证失败
             switch (buffer[buffer.length-1]){
                 case 0:
@@ -354,12 +388,15 @@ public class MyMainActivity extends FragmentActivity {
                         @Override
                         public void run() {
                             super.run();
+                            byte[] heartbeat = new byte[]{35,98,121,105,100,115,3};
+                            //Log.i(TAG, "run: 心跳byte【】"+byteStringLog(heartbeat));
 
                             while (isConnectWAN){
-                                tcpLongSocketWAN.writeDate(new byte[]{35,98,121,105,100,115,3});
+
+                                tcpLongSocketWAN.writeDate(heartbeat);
                                 try {
                                     sleep(3000);    //隔三秒发送心跳
-                                    Log.i(TAG, "run: ------------我的心跳---------------");
+                                    Log.i("xintiao", "run: ------------我的心跳---------------");
                                 } catch (InterruptedException e) {
                                     e.printStackTrace();
                                 }
@@ -379,6 +416,7 @@ public class MyMainActivity extends FragmentActivity {
         @Override
         public void disconnect() {
             Log.i(TAG, "disconnect: ------disconnect-----------disconnect-------------disconnect-----");
+            EventBus.getDefault().post(new MyEventBus2("22"));
             tcpLongSocketWAN.close();
             isConnectWAN = false;
         }
@@ -423,8 +461,11 @@ public class MyMainActivity extends FragmentActivity {
 
 
         //初始化activity给fragment传递的数据
+        roomNameList = new String[]{"测试房间1","测试房间2","测试房间3","测试房间4","测试房间5"};
+        roomDBNameList = new String[]{"cs1","cs2","cs3","cs4","cs5"};
+
         for (int i = 0; i < roomNameList.length; i++) {
-            myFragment1 = new MyFragment(i, roomNameList[i], roomDBNameList[i], ivBackList, homeAttr.getRooms().get(i).getRoomAttr(), hid, uname, pwd);         //房间id,房间名数组，房间拼音名数组，背景图片数组，活跃的控件数组,hid,uname,pwd
+            myFragment1 = new MyFragment(i, roomNameList[i], roomDBNameList[i], ivBackList, hid, uname, pwd);         //房间id,房间名数组，房间拼音名数组，背景图片数组，活跃的控件数组,hid,uname,pwd
             pullMenu(myFragment1);
             viewList.add(myFragment1);
         }
@@ -669,8 +710,13 @@ public class MyMainActivity extends FragmentActivity {
             case R.id.tv_exit:
                 Toast.makeText(MyMainActivity.this, "退出该账号", Toast.LENGTH_SHORT).show();
                 dialogExit.hide();
+                dialogExit = null;
+                dialogSetting = null;
                 SharedPreferences sp = getSharedPreferences("homeJson",MODE_PRIVATE);
                 sp.edit().clear().commit();  //清除sharedPreference房间json数据
+                isConnectWAN = false;
+                tcpLongSocketWAN.close();    //关闭外网的连接
+
                 Intent intent = new Intent(MyMainActivity.this,NewLoginActivity.class);
                 startActivity(intent);
                 this.finish();
@@ -754,7 +800,7 @@ public class MyMainActivity extends FragmentActivity {
                     break;
                 case R.id.iv_media:
                     Toast.makeText(MyMainActivity.this, "媒体", Toast.LENGTH_SHORT).show();
-                    //tcpLongSocketWAN.writeDate(new byte[]{35,98,121,105,100,115,4,0,0,0,6,11,12,13,14,15,16});
+                    tcpLongSocketWAN.writeDate(new byte[]{35,98,121,105,100,115,4,0,0,0,6,11,12,13,14,15,16});
                     break;
             }
         }
@@ -914,8 +960,14 @@ public class MyMainActivity extends FragmentActivity {
             Toast.makeText(MyMainActivity.this, "再按一下退出程序", Toast.LENGTH_SHORT).show();
             mhandler.sendMessageDelayed(new Message(),2000);
         }else if (isExit==true){
+            Intent stopIntent = new Intent(this, UDPBroadcastService.class);
+            stopService(stopIntent); // 停止服务
+            Intent intent = new Intent("com.byids.hy.testpro.activity.BaseActivity");
+            intent.putExtra("closeAll", 1);
+            sendBroadcast(intent);//发送广播
             finish();
             System.exit(0);
+            //广播，关闭所有activity资源，退出程序
         }
     }
 }

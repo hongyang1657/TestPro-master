@@ -15,26 +15,43 @@ import com.byids.hy.testpro.R;
  */
 public class PickTimeAdapter extends BaseAdapter{
 
+    private int flag;
     private Context context;
     private LayoutInflater inflater;
     private String[] timesList = null;
+    private String[] roomsName = null;
     private Typeface typeFace;
     private int mSelect;
 
-    public PickTimeAdapter(Context context, String[] timesList) {
+    //flag为0：加载视频片段          flag为1：加载房间名list
+    public PickTimeAdapter(int flag, Context context, String[] timesList,String[] roomsName) {
+        this.flag = flag;
         this.context = context;
         this.timesList = timesList;
+        this.roomsName = roomsName;
         inflater = LayoutInflater.from(context);
     }
 
     @Override
     public int getCount() {
-        return timesList.length;
+        if (flag==0){
+            return timesList.length;
+        }else if (flag==1){
+            return roomsName.length;
+        }else{
+            return 0;
+        }
     }
 
     @Override
     public Object getItem(int position) {
-        return timesList[position];
+        if (flag==0){
+            return timesList[position];
+        }else if (flag==1){
+            return roomsName[position];
+        }else{
+            return 0;
+        }
     }
 
     @Override

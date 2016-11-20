@@ -46,7 +46,7 @@ public class UDPSocket {
         tailByte[3] = 0x0a;
 
         byte[] sendByte = ByteUtils.byteJoin(headByte,lengthByte,enByte,tailByte);
-        String jiaMi = AES.byteStringLog(sendByte);
+        //String jiaMi = AES.byteStringLog(sendByte);
         //Log.i(TAG, "test: 发送加密的udp广播，以string[]的形式打印出来"+jiaMi);
 
         //发送udp广播
@@ -109,9 +109,9 @@ public class UDPSocket {
 
                 if( 0!=receiveData.getLength() ) {
                     String codeString = new String( buffer, 0, receiveData.getLength() );
-                    String a = receiveData.getAddress().getHostAddress();  //主机ip地址
+                    /*String a = receiveData.getAddress().getHostAddress();  //主机ip地址
                     int b = receiveData.getPort();      //主机端口号
-                    Log.i(TAG, "run: --------------主机的IP地址--------------"+a+"-------"+b);
+                    Log.i(TAG, "run: --------------主机的IP地址--------------"+a+"-------"+b);*/
                     Log.i("result", "接收到数据为codeString: "+codeString);
                     udpCheck = codeString.substring(2,4);   //用来判断是否找到主机
                     Log.i("result", "接收到数据为: "+udpCheck);
