@@ -14,5 +14,7 @@
     <color name="colorYellowGreen">#bed742</color>
     <color name="colorYellow">#ffc20e</color>
     <color name="colorLoginBack">#f2f2f2</color>
+    <color name="colorAlphaBlack1">#cc000000</color>
     <color name="colorAlphaBlack">#90000000</color>
+    <color name="colorAlpha">#00000000</color>
 </resources>

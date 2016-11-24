@@ -114,8 +114,8 @@ public class MyMainActivity extends FragmentActivity {
     private MyFragment myFragment1;
 
     private String ip; //home  ip地址
-    private String uname;
-    private String pwd;
+    private String uname = "@";
+    private String pwd = "@";
     private String hid = "56e276f3736fb0872c69d876";
     private String host_ip;     //主机地址
     private String token;
@@ -233,8 +233,12 @@ public class MyMainActivity extends FragmentActivity {
         pwd = getIntent().getStringExtra("pwd");
         host_ip = getIntent().getStringExtra("host_ip");
         token = getIntent().getStringExtra("token");
+        Log.i("hongyang", "reciveIntent: ---MyMainActivity--------获取uname，pwd-------------"+uname+"-------"+pwd);
+        if (uname!=null){
+            saveUserInform(uname,pwd);     //本地储存
+        }
         Log.i(TAG, "reciveIntent: !!!!!!!!!!!host_ip!!!!!!!!!!"+host_ip);
-        host_ip = null;    //连外网,以后删除
+        //host_ip = null;    //连外网,以后删除
         new Thread(){
             @Override
             public void run() {
@@ -263,6 +267,12 @@ public class MyMainActivity extends FragmentActivity {
 
     }
 
+    //SharedPreferences本地储存用户信息
+    private void saveUserInform(String userName,String password){
+        SharedPreferences sp = getSharedPreferences("user_inform",MODE_PRIVATE);        //文件名，文件类型
+        sp.edit().putString("userName",userName).putString("password",password).commit();
+        Log.i("hongyang", "reciveIntent: -----------存储uname，pwd-------------"+uname+"-----"+pwd);
+    }
 
     //----------------------内网通信的Tcp Socket连接--------------------------
     private class ConnectTcp implements TCPLongSocketCallback {
@@ -713,7 +723,9 @@ public class MyMainActivity extends FragmentActivity {
                 dialogExit = null;
                 dialogSetting = null;
                 SharedPreferences sp = getSharedPreferences("homeJson",MODE_PRIVATE);
-                sp.edit().clear().commit();  //清除sharedPreference房间json数据
+                sp.edit().clear().commit();    //清除sharedPreference房间json数据
+                SharedPreferences spUser = getSharedPreferences("user_inform",MODE_PRIVATE);
+                spUser.edit().clear().commit();    //清除sharedPreference用户数据
                 isConnectWAN = false;
                 tcpLongSocketWAN.close();    //关闭外网的连接
 

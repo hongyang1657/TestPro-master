@@ -184,9 +184,12 @@ public class LaunchActivity extends BaseActivity{
 
                 userName = sp1.getString("userName","");
                 password = sp1.getString("password","");
+                Log.i("hongyang", "reciveIntent: -----------获取uname:"+userName+"，pwd:"+password+"-------------");
 
                 //userName = null;     //为了模拟每次都是第一次登陆，以后删除
-                if (userName==null||userName.equals("")){          //第一次登陆，必须外网，跳转登陆页面
+                userName = "byidstest";     //模拟非第一次登陆
+                password = "byids";
+                if (userName.equals("")){          //第一次登陆，必须外网，跳转登陆页面
                     Log.i(TAG, "run: ************************首次登陆，必须外网登陆，跳转登陆页************************");
                     Intent intent = new Intent(LaunchActivity.this,NewLoginActivity.class);
                     //ip = null;     //删除
@@ -268,8 +271,10 @@ public class LaunchActivity extends BaseActivity{
             /*
             * ******************************从主机获取了房间信息*******************************用Gson处理
             * */
-            String strRoomInfo = testDecryptByte(buffer);
-            LongLogCatUtil.logE("result",strRoomInfo);     //多行打印logcat
+            if (buffer.length>11){
+                String strRoomInfo = testDecryptByte(buffer);
+                LongLogCatUtil.logE("result",strRoomInfo);     //多行打印logcat
+            }
         }
 
         @Override
@@ -280,6 +285,7 @@ public class LaunchActivity extends BaseActivity{
 
     //解密，返回json数据
     private String testDecryptByte(byte[] sendByte){
+        Log.i(TAG, "test: ************************newsendByte"+sendByte.length);
         byte[] new_sendByte = Arrays.copyOfRange(sendByte,12,sendByte.length);
         byte[] nnew_sendByte = Arrays.copyOfRange(new_sendByte,0,new_sendByte.length-4);
         Log.i(TAG, "test: ************************newsendByte"+nnew_sendByte.length);

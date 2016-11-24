@@ -63,19 +63,24 @@ public class PickTimeAdapter extends BaseAdapter{
     public View getView(int position, View convertView, ViewGroup parent) {
         ViewHolder holder = null;
         if (convertView==null){
-            convertView = inflater.inflate(R.layout.switch_room_item,null);
+            convertView = inflater.inflate(R.layout.camera_data_item,null);
             holder = new ViewHolder();
             typeFace = Typeface.createFromAsset(context.getAssets(),"fonts/xiyuanti.ttf");
-            holder.textView = (TextView) convertView.findViewById(R.id.tv_room_name_item);
+            holder.textView = (TextView) convertView.findViewById(R.id.tv_camera_data);
             holder.textView.setTypeface(typeFace);
             convertView.setTag(holder);
         }
         holder = (ViewHolder) convertView.getTag();
-        holder.textView.setText(timesList[position]);
+        if (flag==0){
+            holder.textView.setText(timesList[position]);
+        }else if (flag==1){
+            holder.textView.setText(roomsName[position]);
+        }
         if (mSelect==position){
-            holder.textView.setBackgroundColor(context.getResources().getColor(R.color.colorWhite));    //点击项变色
+            //holder.textView.setBackgroundColor(context.getResources().getColor(R.color.colorAlphaBlack1));    //点击项变色
+            holder.textView.setBackgroundResource(R.drawable.camera_switch_list);
         }else {
-            holder.textView.setBackgroundColor(context.getResources().getColor(R.color.colorLoginBack));   //其他的设为正常色
+            holder.textView.setBackgroundColor(context.getResources().getColor(R.color.colorAlpha));   //其他的设为正常色
         }
         return convertView;
     }

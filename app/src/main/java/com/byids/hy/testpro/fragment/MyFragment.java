@@ -305,6 +305,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         EventBus.getDefault().register(this);
         initView();
 
+        //initBackPicture();
         btPullMenu.setOnClickListener(pullMenuListener);
         //上拉菜单   子scrollview
         svPullUpMenu = (MyPullUpScrollView) view.findViewById(R.id.scroll_pull_up);
@@ -506,7 +507,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         super.onResume();
         isFragmemtFront = true;
         //initBackGround();     //初始化背景图片
-        initBackPicture();
+
     }
 
     @Override

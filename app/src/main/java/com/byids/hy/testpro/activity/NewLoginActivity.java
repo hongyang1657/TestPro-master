@@ -6,7 +6,6 @@ import android.animation.ObjectAnimator;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -562,11 +561,11 @@ public class NewLoginActivity extends BaseActivity{
         }
     }
 
-    //SharedPreferences本地储存用户信息
+    /*//SharedPreferences本地储存用户信息
     private void saveUserInform(String userName,String password){
         SharedPreferences sp = getSharedPreferences("user_inform",MODE_PRIVATE);        //文件名，文件类型
         sp.edit().putString("userName",userName).putString("password",password).commit();
-    }
+    }*/
     /*private void saveHomeJson(String homeJson){
         SharedPreferences sp = getSharedPreferences("homeJson",MODE_PRIVATE);        //文件名，文件类型
         sp.edit().putString("homeJson",homeJson).commit();
@@ -668,7 +667,8 @@ public class NewLoginActivity extends BaseActivity{
                     }else {
                         //登录成功
                         Toast.makeText(NewLoginActivity.this, "用户名"+userName+","+"密码"+password, Toast.LENGTH_SHORT).show();
-                        saveUserInform(userName,password);    //保存用户名密码到本地
+
+                        //saveUserInform(userName,password);    //保存用户名密码到本地
                         //saveHomeJson(response.toString());    //保存用户的房间信息
                         doJsonParse(response.toString());    //解析json
                     }
