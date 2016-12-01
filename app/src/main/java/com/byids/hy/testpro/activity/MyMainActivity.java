@@ -54,12 +54,20 @@ import com.google.android.gms.common.api.GoogleApiClient;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 /**
  * 主界面：
@@ -97,6 +105,7 @@ public class MyMainActivity extends FragmentActivity {
     private Dialog dialogSetting;
     private Dialog dialogLock;
     private Dialog dialogSecurity;
+    private Dialog dialogMusic;
     private ListView lvSwitchRoom;
     private TextView tvSwitchRoomCancel;
     private RoomNameBaseAdapter adapterRoomName;
@@ -508,7 +517,7 @@ public class MyMainActivity extends FragmentActivity {
         initSettingDialog();    //初始化设置二级页面
         initLockDialog();
         initSecurityDialog();
-
+        initMusicDialog();
     }
 
     //开始执行service
@@ -689,7 +698,100 @@ public class MyMainActivity extends FragmentActivity {
         mWindow.setAttributes(params);
     }
 
-    //二级页面的点击事件
+    //---------------------------音乐dialog-------------------------
+
+    private View viewMusic;
+    private TextView tvMusicTitle;
+    private TextView tvMusicArea;
+    private TextView tvMusicSearch;
+    private TextView tvMusicLibrary;
+    private ImageView ivMusicPlayModel;
+    private ImageView ivMusicPrevious;   //上一曲
+    private ImageView ivMusicPlay;
+    private ImageView ivMusicNext;  //下一曲
+    private ImageView ivMusicRedHeart;  //红心歌曲
+    private ListView lvMusicDialog;
+    private void initMusicDialog() {
+        dialogMusic = new Dialog(this, R.style.CustomDialog);
+        viewMusic = LayoutInflater.from(this).inflate(R.layout.music_dialog, null);
+
+        tvMusicTitle = (TextView) viewMusic.findViewById(R.id.tv_music_title);
+        tvMusicArea = (TextView) viewMusic.findViewById(R.id.tv_music_area);
+        tvMusicSearch = (TextView) viewMusic.findViewById(R.id.tv_music_search);
+        tvMusicLibrary = (TextView) viewMusic.findViewById(R.id.tv_music_library);
+        ivMusicPlayModel = (ImageView) viewMusic.findViewById(R.id.iv_music_play_model);
+        ivMusicPrevious = (ImageView) viewMusic.findViewById(R.id.iv_music_previous);
+        ivMusicPlay = (ImageView) viewMusic.findViewById(R.id.iv_music_play_pause);
+        ivMusicNext = (ImageView) viewMusic.findViewById(R.id.iv_music_next);
+        ivMusicRedHeart = (ImageView) viewMusic.findViewById(R.id.iv_music_red_heart);
+        lvMusicDialog = (ListView) viewMusic.findViewById(R.id.lv_music_dialog);
+        tvMusicTitle.setTypeface(typeFace);
+        tvMusicArea.setTypeface(typeFace);
+        tvMusicSearch.setTypeface(typeFace);
+        tvMusicLibrary.setTypeface(typeFace);
+
+        dialogMusic.setContentView(viewMusic);
+        dialogMusic.setCanceledOnTouchOutside(true);//点击外部，弹框消失
+        dialogMusic.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialog) {   //dialog消失时触发监听
+                ObjectAnimator.ofFloat(rlMain, "scaleX", 0.92f, 1f).setDuration(500).start();
+                ObjectAnimator.ofFloat(rlMain, "scaleY", 0.92f, 1f).setDuration(500).start();
+                //ObjectAnimator.ofFloat(viewSecurity,"translationY",0,400).setDuration(500).start();
+                //ObjectAnimator.ofFloat(ivBlackFront, "alpha", 0.7f, 0f).setDuration(500).start();
+
+            }
+        });
+        WindowManager.LayoutParams params = dialogMusic.getWindow().getAttributes();
+        params.width = width;
+        params.height = (int) (height*0.8);   //设置dialog的宽高
+        Window mWindow = dialogMusic.getWindow();
+        mWindow.setGravity(Gravity.BOTTOM);
+        mWindow.setAttributes(params);
+    }
+
+    //-------------------------音乐一级页面点击事件--------------------------
+    private int playFlag = 0;
+    private int redHeartFlag = 0;
+    public void musicClick(View view){
+        switch (view.getId()){
+            case R.id.tv_music_area:
+                break;
+            case R.id.tv_music_search:
+                break;
+            case R.id.tv_music_library:
+                Intent intent = new Intent(MyMainActivity.this,MusicActivity.class);
+                startActivity(intent);
+                break;
+            case R.id.iv_music_play_model:
+
+                break;
+            case R.id.iv_music_previous:
+                break;
+            case R.id.iv_music_play_pause:
+                if (playFlag==0){
+                    ivMusicPlay.setImageResource(R.mipmap.theme2_yinyue_zanting_3x);
+                    playFlag = 1;
+                }else if (playFlag==1){
+                    ivMusicPlay.setImageResource(R.mipmap.theme2_yinyue_bofang_3x);
+                    playFlag = 0;
+                }
+                break;
+            case R.id.iv_music_next:
+                break;
+            case R.id.iv_music_red_heart:
+                if (redHeartFlag==0){
+                    ivMusicRedHeart.setImageResource(R.mipmap.theme2_music_heart_full_in_detail_view_3x);
+                    redHeartFlag = 1;
+                }else if (redHeartFlag==1){
+                    ivMusicRedHeart.setImageResource(R.mipmap.theme2_music_heart_empty_in_detail_view_3x);
+                    redHeartFlag = 0;
+                }
+                break;
+        }
+    }
+
+    //---------------------二级页面的点击事件----------------------------
     public void secondaryClick(View view){
         switch (view.getId()){
             case R.id.tv_setting_exit:
@@ -733,6 +835,85 @@ public class MyMainActivity extends FragmentActivity {
                 startActivity(intent);
                 this.finish();
                 break;
+        }
+    }
+
+
+    //------------------------------------------------------音乐的网络操作---------------------------------------------------------
+    private String musicId = "186017";      //三年二班
+    private String musicTopTypeNew = "new";      //排行榜类型 new 新歌
+    private String musicTopTypeHot = "hot";      //排行榜类型 hot 热歌
+    private String musicTopTypeOrigin = "origin";      //排行榜类型 origin 原创
+    private String musicTopTypeSoar = "soar";      //排行榜类型 soar 飙升
+
+    private String musicRecommendUrl = "http://115.29.97.189:11912/recomm/music";        //推荐歌曲url    http://115.29.97.189:11912/
+    private String musicRecommendPlayListUrl = "http://115.29.97.189:11912/recomm/playlist";       //推荐歌单url
+    private String musicDetailSongUrl = "http://115.29.97.189:11912/detail/song/"+musicId;        //根据歌曲id，获取歌曲信息url
+    private String musicTopListUrlNew = "http://115.29.97.189:11912/toplist/"+musicTopTypeNew;         //排行榜类型, new: 新歌, hot: 热歌, origin: 原创, soar: 飙升
+    private String musicTopListUrlHot = "http://115.29.97.189:11912/toplist/"+musicTopTypeHot;
+    private String musicTopListUrlOrigin = "http://115.29.97.189:11912/toplist/"+musicTopTypeOrigin;
+    private String musicTopListUrlSoar = "http://115.29.97.189:11912/toplist/"+musicTopTypeSoar;
+
+    private void musicOkhttpGet(final int type, String url){
+        OkHttpClient client = new OkHttpClient();
+        Request request = new Request.Builder().url(url).build();
+        Call call = client.newCall(request);
+        call.enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                Toast.makeText(MyMainActivity.this, "音乐网络不可用", Toast.LENGTH_SHORT).show();
+                Log.i("music_hy", "onFailure: "+e.toString());
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                String str = response.body().string();
+                LongLogCatUtil.logE("music_hy", "onResponse:--------------"+str);
+                switch (type){
+                    case 1:
+                        parseRecommendSongs(str);
+                        break;
+                    case 2:
+                        break;
+                    case 3:
+                        break;
+                    case 4:
+                        break;
+                }
+            }
+        });
+    }
+
+    //解析推荐歌曲json
+    private List<String> musicNameList;
+    private List<String> musicArtistList;
+    private List<String> musicIdList;
+
+    private void parseRecommendSongs(String strJson){
+        musicNameList = new ArrayList<>();
+        musicArtistList = new ArrayList<>();
+        musicIdList = new ArrayList<>();
+        try {
+            JSONObject obj = new JSONObject(strJson);
+            JSONArray array = obj.getJSONArray("music_list");
+            for (int i=0;i<array.length();i++){
+                JSONObject jsonObj = array.getJSONObject(i);
+                musicNameList.add(jsonObj.getString("music_name"));
+                musicArtistList.add(jsonObj.getString("music_artist"));
+                musicIdList.add(jsonObj.getString("music_id"));
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    //解析推荐歌单json
+    private void parseRecommendList(String strJson){
+        try {
+            JSONArray array = new JSONArray(strJson);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
     }
 
@@ -806,9 +987,20 @@ public class MyMainActivity extends FragmentActivity {
         public void onClick(View view) {
             switch (view.getId()) {
                 case R.id.iv_music:
+                    musicOkhttpGet(1,musicRecommendUrl);      //获取推荐歌曲列表
+
                     Toast.makeText(MyMainActivity.this, "音乐", Toast.LENGTH_SHORT).show();
-                    Log.i(TAG, "onClick: 获取外网的tcp连接状态："+tcpLongSocketWAN.getConnectStatus());
-                    Toast.makeText(MyMainActivity.this, "获取外网的tcp连接状态："+tcpLongSocketWAN.getConnectStatus(), Toast.LENGTH_SHORT).show();
+                    ObjectAnimator.ofFloat(rlMain, "scaleX", 1f, 0.92f).setDuration(500).start();
+                    ObjectAnimator obj2 = new ObjectAnimator().ofFloat(rlMain, "scaleY", 1f, 0.92f).setDuration(500);
+                    obj2.addListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            super.onAnimationEnd(animation);
+                            ObjectAnimator.ofFloat(viewMusic,"translationY",(float) (height*0.8),0).setDuration(500).start();
+                            dialogMusic.show();
+                        }
+                    });
+                    obj2.start();
                     break;
                 case R.id.iv_media:
                     Toast.makeText(MyMainActivity.this, "媒体", Toast.LENGTH_SHORT).show();

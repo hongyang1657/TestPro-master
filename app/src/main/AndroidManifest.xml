@@ -58,6 +58,7 @@
         <activity android:name=".activity.EzCameraActivity"
             android:screenOrientation="landscape"/>
         <activity android:name=".activity.LoginExplainActivity"/>
+        <activity android:name=".activity.MusicActivity"/>
 
 <!--service-->
         <service android:name=".service.UDPBroadcastService"/>

@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:scrollbars="none"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+<LinearLayout
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <LinearLayout
+        android:orientation="horizontal"
+        android:weightSum="2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <LinearLayout
+            android:id="@+id/ll_music_my_collection"
+            android:orientation="vertical"
+            android:layout_weight="1"
+            android:clickable="true"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/iv_music_my_collection"
+                android:src="@mipmap/music_big_album_collection_3x"
+                android:padding="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="200dp" />
+
+            <TextView
+                android:id="@+id/tv_music_my_collection"
+                android:text="我的收藏"
+                android:gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/ll_music_songmenu1"
+            android:orientation="vertical"
+            android:layout_weight="1"
+            android:clickable="true"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/iv_music_songmenu1"
+                android:src="@mipmap/songmenu2"
+                android:padding="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="200dp" />
+
+            <TextView
+                android:id="@+id/tv_music_songmenu1"
+                android:text="歌单1"
+                android:gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:weightSum="2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <LinearLayout
+            android:id="@+id/ll_music_songmenu2"
+            android:orientation="vertical"
+            android:layout_weight="1"
+            android:clickable="true"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/iv_music_songmenu2"
+                android:src="@mipmap/songmenu1"
+                android:padding="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="200dp" />
+
+            <TextView
+                android:id="@+id/tv_music_songmenu2"
+                android:text="歌单2"
+                android:gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/ll_music_songmenu3"
+            android:orientation="vertical"
+            android:layout_weight="1"
+            android:clickable="true"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/iv_music_songmenu3"
+                android:src="@mipmap/songmenu2"
+                android:padding="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="200dp" />
+
+            <TextView
+                android:id="@+id/tv_music_songmenu3"
+                android:text="歌单3"
+                android:gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tv_hot_songs_recommend"
+        android:padding="10dp"
+        android:text="热门歌曲推荐"
+        android:textSize="18sp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <com.byids.hy.testpro.View.MusicHotListView
+        android:id="@+id/lv_music_hot_recommend"
+        android:scrollbars="none"
+        android:padding="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    </com.byids.hy.testpro.View.MusicHotListView>
+</LinearLayout>
+</ScrollView>

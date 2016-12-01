@@ -38,7 +38,9 @@ import com.videogo.openapi.bean.EZDeviceRecordFile;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -105,6 +107,7 @@ public class EzCameraActivity extends BaseActivity{
     private boolean isLvVideoRoomsShow = false;
     private boolean isFullScreen = false;
     private boolean isStartPlay;    //是否开始实时预览
+    private boolean isStartPlayVideo;       //是否在播放录像
     private boolean isHandlerMessage;
     private boolean isSetSurfaceHold;
     private boolean isPlayPreview = true;      //true：实时预览；false：录像
@@ -115,7 +118,7 @@ public class EzCameraActivity extends BaseActivity{
     private ListView lvRoom;
     private JianKongRoomAdapter roomAdapter;
     private int cameraNumber;
-    private int cameraIndex = 1;   //当前播放的摄像头
+    private int cameraIndex = 0;   //第一个播放的摄像头
     private int cameraDatePosition;    //选择的录像日期 posirion
     private LayoutInflater inflater = null;
     private int month;
@@ -138,12 +141,14 @@ public class EzCameraActivity extends BaseActivity{
                     Log.i("hongyang", "handleMessage:-------kaishishijian "+mStartTime.getTime().toString()+"jieshushijian"+mEndTime.getTime().toString()+"ezopensdk"+ezOpenSDK);
                     try {
                         EzDeviceFileList = ezOpenSDK.searchRecordFileFromDevice(cameraId,mStartTime,mEndTime);
+                        Collections.reverse(EzDeviceFileList);     //倒置视频列表顺序
                         if (EzDeviceFileList!=null){
                             //此摄像头有本地录像
                             Log.i("hongyang", "handleMessage: ---------------------------此摄像头的录像个数:"+EzDeviceFileList.size()+"-------====id:===="+cameraId);
                             Log.i("hongyang", "handleMessage:@@@@@ 第一个录像的开始时间："+EzDeviceFileList.get(0).getStartTime().getTime().toString()+"@@@@结束时间："+EzDeviceFileList.get(0).getStopTime().getTime().toString());
                             dateList = new String[EzDeviceFileList.size()];
                             dateList = getDeviceFileInfo(EzDeviceFileList);       //获取各个录像片段的信息（开始时间，结束时间，录像片段个数等）
+                            //Collections.reverse(Arrays.asList(dateList));
                         }else if (EzDeviceFileList==null){
                             //此摄像头没有本地录像
                             Log.i("hongyang", "handleMessage:------此摄像头没有录像信息，可能没有内存卡------- ");
@@ -152,19 +157,27 @@ public class EzCameraActivity extends BaseActivity{
                     } catch (BaseException e) {
                         e.printStackTrace();
                         Log.e("hongyang", "handleMessage:---------------获取EzDeviceFileList的错误码 ："+e.getErrorCode()+"----错误信息"+e.toString());
-                        cameraIndex++;
-                        initCameraPlayer(cameraIndex);
+                        if (e.getErrorCode()==380121){      //可能是摄像头未连接
+                            Log.e("hongyang", "handleMessage: ---------摄像头不在线----------");
+                            dateList = new String[]{"摄像头不在线"};
+                            Toast.makeText(EzCameraActivity.this, "摄像头不在线", Toast.LENGTH_SHORT).show();
+                        }
+                        /*cameraIndex++;
+                        initCameraPlayer(cameraIndex);*/
                     }
 
                     if (pickTimeAdapter==null){       //第一次点击时初始化listview
                         Log.i("hongyang", "handleMessage: __________________________________初始化listview______________________________________");
                         //1-------------------初始化选择视频片段的listview----------------------
+
+                        Log.i("hongyang", "handleMessage:date "+Arrays.toString(dateList));
                         pickTimeAdapter = new PickTimeAdapter(0,EzCameraActivity.this,dateList,roomsName);  //传入选择的那一天的录像片段
                         lvVideoPart.setAdapter(pickTimeAdapter);
 
                         lvVideoPart.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                             @Override
                             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                                sbProgress = 0;     //将进度指示置零
                                 pickTimeAdapter.changeSelected(position);
                                 loadingAnimation();  //旋转等待
                                 cameraDatePosition = position;
@@ -226,9 +239,9 @@ public class EzCameraActivity extends BaseActivity{
                         isDevicePlay = ezPlayerCloud.startPlayback(ezDeviceRecordFile);
                     }
                     break;
-                case 3:
-                    Log.i("hongyang", "handleMessage: ----------"+msg.arg1);
-
+                case 3:             //实时更新录像进度
+                    Log.i("hongyang", "handleMessage: ------进度----"+msg.arg1);
+                    setTvTimeProgress(msg.arg1);
                     sbJiankong.setProgress(msg.arg1);
                     break;
                 default:
@@ -237,6 +250,7 @@ public class EzCameraActivity extends BaseActivity{
         }
     };
     //监控播放handler
+    boolean isVideoFinish = false;     //录像是否播放完毕
     private Handler cameraHandler = new Handler(){
         @Override
         public void handleMessage(Message msg) {
@@ -255,10 +269,16 @@ public class EzCameraActivity extends BaseActivity{
                 case 207:
                     Log.i("hongyang", "handleMessage: ################历史录像视屏开始播放###############207");
                     isPlayPreview = false;       //开始播放录像
+                    isVideoFinish = false;
+                    isStartPlayVideo = true;
+                    ivPlay.setImageResource(R.mipmap.camera_stop_3x);
                     ivCameraLoading.setVisibility(View.GONE);
                     //显示进度条
                     llPlayStatus.setVisibility(View.VISIBLE);
                     setCurrentProgress(cameraDatePosition);      //设置进度条
+                    break;
+                case 205:
+                    Log.i("hongyang", "handleMessage: ################历史录像视屏暂停后又开始播放###############205");
                     break;
                 /*case 201:
                     Log.i("hongyang", "handleMessage: ################这个历史录像视屏播放完毕###############201");
@@ -268,7 +288,14 @@ public class EzCameraActivity extends BaseActivity{
                 case 208:
                     Log.i("hongyang", "handleMessage: ################这个历史录像视屏播放完毕###############208");
                     isPlayingVideo = false;
-                    Toast.makeText(EzCameraActivity.this, "这个录像视频播放完毕208", Toast.LENGTH_SHORT).show();
+                    ivPlay.setImageResource(R.mipmap.play_3x);
+                    //isStartPlayVideo = false;
+                    progressThread = null;    //计数线程置空，准备重新开始
+                    sbJiankong.setProgress(sbJiankong.getMax());       //播放完毕后，进度条设定到最后
+                    if (!isVideoFinish){
+                        Toast.makeText(EzCameraActivity.this, "这个录像视频播放完毕208", Toast.LENGTH_SHORT).show();
+                        isVideoFinish = true;
+                    }
                     break;
                 default:
                     break;
@@ -332,6 +359,7 @@ public class EzCameraActivity extends BaseActivity{
         mEndTime = Calendar.getInstance();
         setCalendarDay(mStartTime.get(Calendar.DAY_OF_MONTH));
         Log.i("hongyang", "initView: !!!!!!!!!!!!!!!!!"+mStartTime.getTime().toString());
+
         initCameraPlayer(cameraIndex);  //初始化第一个摄像头
     }
 
@@ -424,33 +452,24 @@ public class EzCameraActivity extends BaseActivity{
 
     }*/
 
-    private void initTimesPickPopWindow(){
-
-    }
-
-
-
     public void cameraClick(View v){
         switch (v.getId()){
 
             case R.id.iv_play:
-                /*if (isStartPlay==true){
-                    ezPlayer.stopRealPlay();         //暂停播放
-                    isStartPlay = false;
-                    //ivCapture.setVisibility(View.VISIBLE);   //截图设为可见
+                if (isStartPlayVideo){
+                    ezPlayerCloud.pausePlayback();         //暂停播放录像
+                    isStartPlayVideo = false;
                     ivPlay.setImageResource(R.mipmap.play_3x);
-                }else if (isStartPlay==false){
-                    playCamera(cameraIndex);
-                    loadingAnimation();
-                }*/
-
+                }else if (!isStartPlayVideo){
+                    ezPlayerCloud.resumePlayback();         //开始播放
+                    ivPlay.setImageResource(R.mipmap.camera_stop_3x);
+                    isStartPlayVideo = true;
+                }
                 break;
             case R.id.sfv_camera:
                 setfullscreen();          //设置全屏或退出全屏
                 break;
             case R.id.tv_switch_vcr:      //选择录像片段
-
-
                 if (isLvVideoPartShow){
                     tvSwitchVcr.setBackgroundResource(R.drawable.camera_switch_button);
                     lvVideoPart.setVisibility(View.GONE);
@@ -465,7 +484,6 @@ public class EzCameraActivity extends BaseActivity{
                 }
                 break;
             case R.id.tv_switch_room:     //选择房间
-
                 if (isLvVideoRoomsShow){
                     tvSwitchRoom.setBackgroundResource(R.drawable.camera_switch_button_right);
                     lvCamera.setVisibility(View.GONE);
@@ -480,8 +498,14 @@ public class EzCameraActivity extends BaseActivity{
                 }
                 break;
             case R.id.iv_camera_back:
-                ezPlayer.stopRealPlay();         //暂停播放
-                ezOpenSDK.releasePlayer(ezPlayer);        //关闭视屏播放（释放内存）
+                if (ezPlayer!=null){
+                    ezPlayer.stopRealPlay();         //暂停播放
+                    ezOpenSDK.releasePlayer(ezPlayer);        //关闭视屏播放（释放内存）
+                }
+                if (ezPlayerCloud!=null){
+                    ezPlayerCloud.stopPlayback();
+                    ezOpenSDK.releasePlayer(ezPlayerCloud);
+                }
                 finish();
                 break;
             default:
@@ -524,6 +548,9 @@ public class EzCameraActivity extends BaseActivity{
     }
 
     //设置当前进度条进度
+    private int sbProgress;
+    private boolean isHavingProgressThread = false;
+    private Thread progressThread;
     private void setCurrentProgress(int position){
         //-------------获取录像视频的时长-------------设置时间显示-----------
         final int totalDuration = videoDuration[position]/1000;      //总时长（单位：秒）
@@ -551,54 +578,37 @@ public class EzCameraActivity extends BaseActivity{
         }
         tvTotalTime.setText(h+":"+m+":"+s);
 
-        /*isPlayingVideo = true;
-        new Thread(){
-            @Override
-            public void run() {
-                super.run();
-                int sbProgress = 0;
-                sbJiankong.setMax(totalDuration);
-                while (isPlayingVideo){
-                    try {
-                        sleep(500);
-                        Message message = new Message();
-                        message.what = 3;
-                        message.arg1 = sbProgress;
-                        handler.sendMessage(message);
-                        sbProgress++;           //发送进度，每隔半秒，进度加一
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+        isPlayingVideo = true;
+
+        sbJiankong.setMax(totalDuration);
+
+        Log.i("hongyang", "setCurrentProgress: 线程是不是空："+progressThread);
+        if (progressThread==null||isVideoFinish==true){            //线程只开一次
+            progressThread = new Thread(){
+                @Override
+                public void run() {
+                    super.run();
+
+                    sbProgress = 0;
+                    sbJiankong.setMax(totalDuration);
+                    while (isPlayingVideo){
+                        try {
+                            sleep(1000);
+                            Message message = new Message();
+                            message.what = 3;
+                            message.arg1 = sbProgress;
+                            handler.sendMessage(message);
+                            if (isStartPlayVideo){
+                                sbProgress++;           //发送进度，每隔一秒，进度加一
+                            }
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
-            }
-        }.start();*/
-
-        //getosdTime
-        /*new Thread(){
-            @Override
-            public void run() {
-                super.run();
-                sbJiankong.setMax(totalDuration);
-                while (isPlayingVideo){
-                    try {
-                        sleep(1000);
-                        Calendar calendar = ezPlayerCloud.getOSDTime();
-
-                        int hour = calendar.get(Calendar.HOUR_OF_DAY);
-                        int min = calendar.get(Calendar.MINUTE);
-                        int second = calendar.get(Calendar.SECOND);
-                        Log.i("hongyang", "playCamera: 时间"+hour+"时"+min+"分"+second+"秒");
-                        Message message = new Message();
-                        message.what = 3;
-                        //message.arg1 = sbProgress;
-                        handler.sendMessage(message);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }.start();*/
-
+            };
+            progressThread.start();
+        }
 
 
         //sbJiankong.setProgress(0);
@@ -611,6 +621,34 @@ public class EzCameraActivity extends BaseActivity{
         //sbJiankong.setProgress(minOfDay);
 
     }
+
+    //----------------------设置显示进度控件的动态值-------------------------------
+    private void setTvTimeProgress(int time){
+        int hour = time/3600;          //每段视频的时长 小时
+        int min = time/60%60;          //分钟
+        int second = time%60;          //秒
+        String h;
+        String m;
+        String s;
+        Log.i("hongyang", "setCurrentProgress: -----------小时："+hour+"分钟："+min+"秒："+second);
+        if (hour<10){
+            h = "0"+hour;
+        }else {
+            h = String.valueOf(hour);
+        }
+        if (min<10){
+            m = "0"+min;
+        }else {
+            m = String.valueOf(min);
+        }
+        if (second<10){
+            s = "0"+second;
+        }else {
+            s = String.valueOf(second);
+        }
+        tvCurrentlyTime.setText(h+":"+m+":"+s);
+    }
+
 
     //-----------------获取各个录像片段的信息（开始时间，结束时间，录像片段个数等）------------------
     private int[] videoDuration;
@@ -659,22 +697,43 @@ public class EzCameraActivity extends BaseActivity{
         }.start();
     }
 
-    //进度条
+    //---------------------------------------------主动拖动进度条---------------------------------------------
     SeekBar.OnSeekBarChangeListener seekBarListener = new SeekBar.OnSeekBarChangeListener() {
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-
+            Log.i("hongyang", "onProgressChanged: -----11111111111---");
         }
 
         @Override
         public void onStartTrackingTouch(SeekBar seekBar) {
+            //获取当前的进度
+            Log.i("hongyang", "onProgressChanged: -----22222222222---"+sbProgress);
 
         }
 
         @Override
         public void onStopTrackingTouch(SeekBar seekBar) {
-            Log.i("hongyang", "onProgressChanged: ------------松手-------------"+seekBar.getProgress());
-            //ezPlayerCloud.seekPlayback()
+            isStartPlayVideo = false;
+            int putProgress = seekBar.getProgress();
+            Log.i("hongyang", "onProgressChanged: ------------松手时的进度-------------"+putProgress);
+            sbProgress = putProgress;       //把进度赋值给计数线程
+            int currentProgress = (int) (ezPlayerCloud.getOSDTime().getTime().getTime()/1000);
+            int setProgress = currentProgress+putProgress;      //需要设定的开始播放的时间
+            Calendar calendar = ezPlayerCloud.getOSDTime();    //获取当前时间
+            int hour = calendar.get(Calendar.HOUR_OF_DAY);
+            int min = calendar.get(Calendar.MINUTE);
+            int second = calendar.get(Calendar.SECOND);
+
+            Log.i("hongyang", "onStopTrackingTouch: -------------------获取当前播放进度"+currentProgress+"-----拖动进度条后-----"+setProgress);
+            long a = (long) setProgress;
+            long b = a*1000;
+            Log.i("hongyang", "onStopTrackingTouch: $$$$$$$$$"+b);
+            Log.i("hongyang", "playCamera: 时间"+hour+"时"+min+"分"+second+"秒");
+
+
+            Calendar cal = Calendar.getInstance();
+            cal.setTimeInMillis(b);
+            ezPlayerCloud.seekPlayback(cal);
         }
     };
 
@@ -690,10 +749,15 @@ public class EzCameraActivity extends BaseActivity{
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode==KeyEvent.KEYCODE_BACK&&!isFullScreen&&ezPlayer!=null){
-            ezPlayer.stopRealPlay();         //暂停播放
-            ezOpenSDK.releasePlayer(ezPlayer);        //关闭视屏播放（释放内存）
-            ezPlayerCloud.stopPlayback();
-            ezOpenSDK.releasePlayer(ezPlayerCloud);
+            if (ezPlayer!=null){
+                ezPlayer.stopRealPlay();         //暂停播放
+                ezOpenSDK.releasePlayer(ezPlayer);        //关闭视屏播放（释放内存）
+            }
+            if (ezPlayerCloud!=null){
+                ezPlayerCloud.stopPlayback();
+                ezOpenSDK.releasePlayer(ezPlayerCloud);
+            }
+            finish();
 
 
         }else if (isFullScreen){    //如果在全屏页面返回选择页面

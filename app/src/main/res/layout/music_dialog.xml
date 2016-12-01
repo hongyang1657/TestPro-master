@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/tv_music_title"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="背景音乐"
+            android:textColor="@color/colorWhite"
+            android:textSize="28sp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/tv_music_area"
+            android:background="@drawable/music_button"
+            android:text="区域"
+            android:padding="6dp"
+            android:layout_margin="6dp"
+            android:textSize="18sp"
+            android:clickable="true"
+            android:onClick="musicClick"
+            android:gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/tv_music_search"
+            android:background="@drawable/music_button"
+            android:text="搜索"
+            android:padding="6dp"
+            android:clickable="true"
+            android:onClick="musicClick"
+            android:layout_margin="6dp"
+            android:textSize="18sp"
+            android:gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/tv_music_library"
+            android:background="@drawable/music_button"
+            android:text="音乐库"
+            android:clickable="true"
+            android:onClick="musicClick"
+            android:layout_margin="6dp"
+            android:padding="6dp"
+            android:textSize="18sp"
+            android:gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:weightSum="5"
+        android:background="@color/colorWhite"
+        android:paddingLeft="14dp"
+        android:paddingRight="14dp"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <ImageView
+            android:id="@+id/iv_music_play_model"
+            android:src="@mipmap/theme2_yinyue_xunhuan_3x"
+            android:padding="16dp"
+            android:layout_weight="1"
+            android:clickable="true"
+            android:onClick="musicClick"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content" />
+        <ImageView
+            android:id="@+id/iv_music_previous"
+            android:src="@mipmap/theme2_yinyue_shangyiqu_3x"
+            android:padding="16dp"
+            android:clickable="true"
+            android:onClick="musicClick"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content" />
+        <ImageView
+            android:id="@+id/iv_music_play_pause"
+            android:src="@mipmap/theme2_yinyue_bofang_3x"
+            android:padding="16dp"
+            android:layout_weight="1"
+            android:clickable="true"
+            android:onClick="musicClick"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content" />
+        <ImageView
+            android:id="@+id/iv_music_next"
+            android:src="@mipmap/theme2_yinyue_xiayiqu_3x"
+            android:padding="16dp"
+            android:layout_weight="1"
+            android:clickable="true"
+            android:onClick="musicClick"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content" />
+        <ImageView
+            android:id="@+id/iv_music_red_heart"
+            android:src="@mipmap/theme2_music_heart_empty_in_detail_view_3x"
+            android:padding="16dp"
+            android:layout_weight="1"
+            android:clickable="true"
+            android:onClick="musicClick"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+    <ListView
+        android:id="@+id/lv_music_dialog"
+        android:background="@color/colorWhite"
+        android:paddingLeft="20dp"
+        android:scrollbars="none"
+        android:paddingRight="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    </ListView>
+</LinearLayout>

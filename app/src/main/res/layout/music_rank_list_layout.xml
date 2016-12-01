@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RadioGroup
+        android:id="@+id/rg_music_rank"
+        android:weightSum="4"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <RadioButton
+            android:text="新 歌"
+            android:textColor="@drawable/music_rank_rg_selecter"
+            android:button="@null"
+            android:padding="16dp"
+            android:checked="true"
+            android:gravity="center"
+            android:id="@+id/rb_music_new_songs"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content" />
+        <RadioButton
+            android:text="热 歌"
+            android:button="@null"
+            android:textColor="@drawable/music_rank_rg_selecter"
+            android:padding="16dp"
+            android:gravity="center"
+            android:id="@+id/rb_music_hot_songs"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content" />
+        <RadioButton
+            android:text="经 典"
+            android:button="@null"
+            android:textColor="@drawable/music_rank_rg_selecter"
+            android:padding="16dp"
+            android:gravity="center"
+            android:id="@+id/rb_music_classics_songs"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content" />
+        <RadioButton
+            android:text="网 络"
+            android:button="@null"
+            android:textColor="@drawable/music_rank_rg_selecter"
+            android:padding="16dp"
+            android:gravity="center"
+            android:id="@+id/rb_music_net_songs"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content" />
+    </RadioGroup>
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/vp_music_rank"
+        android:layout_weight="1"
+        android:layout_width="match_parent"
+        android:layout_height="0dp">
+
+    </android.support.v4.view.ViewPager>
+</LinearLayout>

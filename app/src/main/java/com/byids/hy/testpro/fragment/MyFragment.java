@@ -1345,8 +1345,15 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                     EventBus.getDefault().post(new MyEventBus("4"));
                     break;
                 case R.id.bt_jiankong:
-                    EventBus.getDefault().post(new MyEventBus("jiankong"));
-                    EZOpenSDK.getInstance().openLoginPage();
+                    //延迟250毫秒跳转监控页面
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            EZOpenSDK.getInstance().openLoginPage();
+                            EventBus.getDefault().post(new MyEventBus("jiankong"));
+                        }
+                    },250);
+
                     break;
                 case R.id.bt_mensuo:
                     EventBus.getDefault().post(new MyEventBus("5"));
