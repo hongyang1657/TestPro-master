@@ -2,8 +2,6 @@ package com.byids.hy.testpro;
 
 import android.util.Log;
 
-import com.byids.hy.testpro.utils.AES;
-
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -11,7 +9,6 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /*
@@ -77,7 +74,7 @@ public class TcpLongSocket {
 	}
 
 
-	public void sendData(byte[] data) {
+	private void sendData(byte[] data) {
 		if (out != null) {
 			try {
 				out.write(data);
@@ -177,7 +174,7 @@ public class TcpLongSocket {
 	class RecThrad extends Thread {
 
 		//------------------------发送byte[]---------------------------
-		private String testDecryptByte(byte[] sendByte){
+		/*private String testDecryptByte(byte[] sendByte){
 			byte[] new_sendByte = Arrays.copyOfRange(sendByte,12,sendByte.length);
 			byte[] nnew_sendByte = Arrays.copyOfRange(new_sendByte,0,new_sendByte.length-4);
 			Log.i(TAG, "test: ************************newsendByte"+nnew_sendByte.length);
@@ -192,7 +189,7 @@ public class TcpLongSocket {
 			String strRoomInfo = new String(a);
 			Log.i(TAG, "testDecryptByte: !!!!!!!!!!!!!!!!!!!!!!!!!!!!"+a.length+"!!!!!!!!"+strRoomInfo);
 			return strRoomInfo;
-		}
+		}*/
 
 		//测试，用来显示byte[]
 		private String byteStringLog(byte[] bs){

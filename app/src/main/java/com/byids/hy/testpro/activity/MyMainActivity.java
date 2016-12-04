@@ -150,7 +150,7 @@ public class MyMainActivity extends FragmentActivity {
             super.handleMessage(msg);
             switch (msg.what){
                 case 1:         //外网
-                    Log.i("hahaha", "run:外网连接状态 "+tcpLongSocketWAN.getConnectStatus());
+                    Log.i("hongyang", "run:外网连接状态 "+tcpLongSocketWAN.getConnectStatus());
                     if (tcpLongSocketWAN.getConnectStatus()){
                         EventBus.getDefault().post(new MyEventBus2("12"));
                     }else {
@@ -158,11 +158,11 @@ public class MyMainActivity extends FragmentActivity {
                     }
                     break;
                 case 2:         //内网
-                    Log.i("hahaha", "run:内网连接状态 "+tcplongSocket.getConnectStatus());
+                    Log.i("hongyang", "run:内网连接状态 "+tcplongSocket.getConnectStatus());
                     if (tcplongSocket.getConnectStatus()){
-                        EventBus.getDefault().post(new MyEventBus2("11"));
+                        EventBus.getDefault().post(new MyEventBus2("11"));    //内网连接
                     }else {
-                        EventBus.getDefault().post(new MyEventBus2("22"));
+                        EventBus.getDefault().post(new MyEventBus2("22"));    //外网连接
                     }
                     break;
                 default:
@@ -180,7 +180,7 @@ public class MyMainActivity extends FragmentActivity {
         setContentView(R.layout.my_main_layout);
         //注册EventBus
         EventBus.getDefault().register(this);
-        initView();
+        initView();    //初始化界面，布局
         reciveIntent();
         //startTcpService();
 
@@ -242,11 +242,11 @@ public class MyMainActivity extends FragmentActivity {
         pwd = getIntent().getStringExtra("pwd");
         host_ip = getIntent().getStringExtra("host_ip");
         token = getIntent().getStringExtra("token");
-        Log.i("hongyang", "reciveIntent: ---MyMainActivity--------获取uname，pwd-------------"+uname+"-------"+pwd);
+        Log.i("hongyang", "reciveIntent: ---MyMainActivity--------获取uname:"+uname+"-------pwd:"+pwd);
         if (uname!=null){
             saveUserInform(uname,pwd);     //本地储存
         }
-        Log.i(TAG, "reciveIntent: !!!!!!!!!!!host_ip!!!!!!!!!!"+host_ip);
+        Log.i("hongyang", "reciveIntent: !!!!!!!!!!!host_ip:"+host_ip+"!!!!token"+token);
         //host_ip = null;    //连外网,以后删除
         new Thread(){
             @Override
@@ -254,7 +254,7 @@ public class MyMainActivity extends FragmentActivity {
                 super.run();
                 if (host_ip==null||host_ip.equals("")){
                     //Toast.makeText(this, "内网不通，尝试连接外网", Toast.LENGTH_SHORT).show();
-                    Log.i(TAG, "reciveIntent: 内网不通，尝试连接外网");
+                    Log.i("hongyang", "reciveIntent: 内网不通，尝试连接外网");
                     //外网Tcp连接
                     tcpLongSocketWAN = new TcpLongSocket(new ConnectTcpWAN());
                     tcpLongSocketWAN.startConnect(ip_WAN,DEFAULT_PORT_WAN);
@@ -263,7 +263,7 @@ public class MyMainActivity extends FragmentActivity {
                     handler.sendMessageDelayed(message,3000);
                 }else {
                     //Toast.makeText(this, "连接内网", Toast.LENGTH_SHORT).show();
-                    Log.i(TAG, "reciveIntent: 连接内网");
+                    Log.i("hongyang", "reciveIntent: 连接内网");
                     //内网Tcp连接
                     tcplongSocket = new TcpLongSocket(new ConnectTcp());
                     tcplongSocket.startConnect(host_ip, DEFAULT_PORT);
@@ -370,17 +370,17 @@ public class MyMainActivity extends FragmentActivity {
             System.arraycopy(data3,0,data,0,data3.length);
             System.arraycopy(postLenth,0,data,data3.length,postLenth.length);
 
-            Log.i(TAG, "connected: -----token-------"+token);
-            String tokenStr = null;
+            Log.i("hongyang", "connected: -----token-------"+token);
+            /*String tokenStr = null;
             try {
                 JSONObject obj = new JSONObject(token);
                 tokenStr = obj.getString("token");
             } catch (JSONException e) {
                 e.printStackTrace();
-            }
+            }*/
 
             //把十六进制token转byte数组
-            byte[] tokenBytes = hexStr2Bytes(tokenStr);
+            byte[] tokenBytes = hexStr2Bytes(token);
             Log.i(TAG, "onClick: --------"+byteStringLog(tokenBytes));
 
             byte[] toConnectTcpLong = new byte[data.length+tokenBytes.length];
@@ -478,9 +478,8 @@ public class MyMainActivity extends FragmentActivity {
         }*/
 
 
-
         //初始化activity给fragment传递的数据
-        roomNameList = new String[]{"测试房间1","测试房间2","测试房间3","测试房间4","测试房间5"};
+        roomNameList = new String[]{"客厅","卧室","书房","淋浴间","客房"};
         roomDBNameList = new String[]{"cs1","cs2","cs3","cs4","cs5"};
 
         for (int i = 0; i < roomNameList.length; i++) {
@@ -935,7 +934,7 @@ public class MyMainActivity extends FragmentActivity {
                 dialogSwitchRoom.show();
                 break;
             case SETTING_DIALOG:     //弹出设置dialog
-                initExitDialog();  //确认是否退出的三级页面
+                initExitDialog();    //确认是否退出的三级页面
                 //ObjectAnimator.ofFloat(ivBlackFront, "alpha", 0f, 0.7f).setDuration(500).start();
                 ObjectAnimator.ofFloat(rlMain, "scaleX", 1f, 0.92f).setDuration(500).start();
                 ObjectAnimator obj = new ObjectAnimator().ofFloat(rlMain, "scaleY", 1f, 0.92f).setDuration(500);

@@ -557,7 +557,7 @@ public class NewLoginActivity extends BaseActivity{
             return;
         }else {         //外网请求
             loginPost();    //新版
-            postAndInitData();   //旧版，日后删除
+            //postAndInitData();   //旧版，日后删除
         }
     }
 
@@ -586,6 +586,7 @@ public class NewLoginActivity extends BaseActivity{
                     @Override
                     public void onFailure(Call call, IOException e) {
                         Log.i(TAG, "onFailure: -----------请求失败------------："+e.toString());
+
                     }
 
                     @Override

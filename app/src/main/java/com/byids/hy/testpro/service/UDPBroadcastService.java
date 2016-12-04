@@ -10,6 +10,7 @@ import android.util.Log;
 import com.byids.hy.testpro.utils.UDPSocket;
 
 /**
+ * 在wifi情况下后台连续发送udp广播，寻找
  * Created by gqgz2 on 2016/11/11.
  */
 
@@ -46,7 +47,7 @@ public class UDPBroadcastService extends Service{
             public void run() {
                 super.run();
                 while (isSendingUDP){
-                    Log.i(TAG, "run: --------------开始循环发送udp-------------"+isUdpThreadOn);
+                    //Log.i(TAG, "run: --------------开始循环发送udp-------------"+isUdpThreadOn);
                     udpSocket.sendEncryptUdp();
                     try {
                         sleep(2000);

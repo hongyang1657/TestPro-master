@@ -153,7 +153,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
 
     //---------------------控制部分 上---------------------
     private TextView tvRoomName;     //房间名部分
-    private TextView tvLocalTemp;       //当地的气温
+    //private TextView tvLocalTemp;       //当地的气温
     private Button btShezhi;
     private Button btJiankong;
     private Button btMensuo;
@@ -552,7 +552,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
 
         //控制部分  上
         tvRoomName = (TextView) view.findViewById(R.id.tv_blank);
-        tvLocalTemp = (TextView) view.findViewById(R.id.tv_local_temp);
+        //tvLocalTemp = (TextView) view.findViewById(R.id.tv_local_temp);
         btShezhi = (Button) view.findViewById(R.id.bt_shezhi);
         btJiankong = (Button) view.findViewById(R.id.bt_jiankong);
         btMensuo = (Button) view.findViewById(R.id.bt_mensuo);
@@ -1264,7 +1264,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         controlCurtain(CONTROL_PROTOCOL_HDL,MACHINE_NAME_CURTAIN,-1,1,-1,"all_both_pause");
         changeColorStop(R.mipmap.theme2_chuanglian_zanting_active_3x,R.color.colorTextActive);
         ObjectAnimator.ofFloat(view,"scaleX",1f,0.8f,1f).setDuration(600).start();
-        ObjectAnimator objectAnimator =new ObjectAnimator().ofFloat(view,"scaleY",1f,0.8f,1f).setDuration(600);
+        ObjectAnimator objectAnimator = new ObjectAnimator().ofFloat(view,"scaleY",1f,0.8f,1f).setDuration(600);
         objectAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {

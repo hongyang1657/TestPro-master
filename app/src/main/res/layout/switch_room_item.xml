@@ -8,6 +8,7 @@
     <TextView
         android:id="@+id/tv_room_name_item"
         android:text="客厅"
+        android:textSize="22sp"
         android:textColor="@color/colorText"
         android:padding="12dp"
         android:gravity="center"

@@ -9,6 +9,8 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
 /**
+ *  ----------------------udp 用来获取主机ip --------------------------
+ *
  * Created by gqgz2 on 2016/11/9.
  */
 
@@ -21,6 +23,7 @@ public class UDPSocket {
     private static final int MAX_DATA_PACKET_LENGTH = 100;
     private String udpCheck = "";
     private String ip;    //接收到的ip地址
+    private String[] ipList;       //因为一个端口下可能有不止一个主机，所以创建一个存放ip的数组
     private String sendContent;
 
     public UDPSocket(String sendContent) {
@@ -72,8 +75,8 @@ public class UDPSocket {
                     udpSocket.setReuseAddress(true);
                     udpSocket.bind(new InetSocketAddress(DEFAULT_PORT));
                 }
-                dataPacket = new DatagramPacket(buffer, MAX_DATA_PACKET_LENGTH);
-                receiveData= new DatagramPacket(buffer,MAX_DATA_PACKET_LENGTH);
+                dataPacket = new DatagramPacket(buffer, MAX_DATA_PACKET_LENGTH);       //发送数据
+                receiveData= new DatagramPacket(buffer,MAX_DATA_PACKET_LENGTH);        //接收数据
                 if (this.dataByte == null){
                     return;
                 }
@@ -97,42 +100,45 @@ public class UDPSocket {
                 Log.e(LOG_TAG, e.toString());
                 udpSocket.close();
             }
-            try {
-                udpSocket.receive(receiveData);
-                udpSocket.receive(receiveData);
-            } catch (Exception e) {
-// TODO Auto-generated catch block
-                Log.e(LOG_TAG, e.toString());
-                udpSocket.close();
-            }
-            if (null!=receiveData){
 
-                if( 0!=receiveData.getLength() ) {
-                    String codeString = new String( buffer, 0, receiveData.getLength() );
-                    /*String a = receiveData.getAddress().getHostAddress();  //主机ip地址
-                    int b = receiveData.getPort();      //主机端口号
-                    Log.i(TAG, "run: --------------主机的IP地址--------------"+a+"-------"+b);*/
-                    Log.i("result", "接收到数据为codeString: "+codeString);
-                    udpCheck = codeString.substring(2,4);   //用来判断是否找到主机
-                    Log.i("result", "接收到数据为: "+udpCheck);
-                    Log.i("result","recivedataIP地址为："+receiveData.getAddress().toString().substring(1));//此为IP地址
-                    //Log.i("result","recivedata_sock地址为："+receiveData.getAddress());//此为IP加端口号
 
-                    ip = receiveData.getAddress().getHostAddress();        //发送udp广播，收到的主机的ip地址
-                }
-            }else{
+            for (int i=0;i<3;i++){
                 try {
-                    udpSocket.send(dataPacket);
-                } catch (IOException e) {
-                    e.printStackTrace();
+                    udpSocket.receive(receiveData);
+                    //udpSocket.receive(receiveData);            //我的天，写几次就是用来区分同一个端口下的不同设备！！！神奇的代码。。。。。。
+                } catch (Exception e) {
+                    Log.e(LOG_TAG, e.toString());
+                    udpSocket.close();
+                }
+
+                if (null!=receiveData){
+
+                    if( 0!=receiveData.getLength() ) {
+                        String codeString = new String( buffer, 0, receiveData.getLength() );         //接收到的udp数据
+                        udpCheck = codeString.substring(2,4);   //用来判断是否找到主机
+                        Log.i("udp_search_ip", "接收到数据为: "+udpCheck);
+                        ip = receiveData.getAddress().getHostAddress();        //发送udp广播，收到的主机的ip地址
+                        //Log.i("result","recivedataIP地址为："+receiveData.getAddress().toString().substring(1));//此为IP地址
+                        Log.i("udp_search_ip", "run: "+ip+"----port"+receiveData.getPort());
+                    }
+                }else{
+                    try {
+                        udpSocket.send(dataPacket);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
+
+
+
             udpSocket.close();
         }
     }
 
     //获取主机ip地址
     public String getIp() {
+        Log.i("udp_search_ip", "getIp: -----------------------主机ip："+ip);
         return ip;
     }
 

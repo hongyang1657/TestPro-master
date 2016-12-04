@@ -289,6 +289,7 @@ public class EzCameraActivity extends BaseActivity{
                     Log.i("hongyang", "handleMessage: ################这个历史录像视屏播放完毕###############208");
                     isPlayingVideo = false;
                     ivPlay.setImageResource(R.mipmap.play_3x);
+                    ezPlayerCloud.stopPlayback();
                     //isStartPlayVideo = false;
                     progressThread = null;    //计数线程置空，准备重新开始
                     sbJiankong.setProgress(sbJiankong.getMax());       //播放完毕后，进度条设定到最后
@@ -549,11 +550,12 @@ public class EzCameraActivity extends BaseActivity{
 
     //设置当前进度条进度
     private int sbProgress;
+    private int totalDuration;
     private boolean isHavingProgressThread = false;
     private Thread progressThread;
     private void setCurrentProgress(int position){
         //-------------获取录像视频的时长-------------设置时间显示-----------
-        final int totalDuration = videoDuration[position]/1000;      //总时长（单位：秒）
+        totalDuration = videoDuration[position]/1000;      //总时长（单位：秒）
         int hour = totalDuration/3600;          //每段视频的时长 小时
         int min = totalDuration/60%60;          //分钟
         int second = totalDuration%60;          //秒
@@ -652,18 +654,23 @@ public class EzCameraActivity extends BaseActivity{
 
     //-----------------获取各个录像片段的信息（开始时间，结束时间，录像片段个数等）------------------
     private int[] videoDuration;
+    private int[] videoStartTimeList;
     private String[] getDeviceFileInfo(List<EZDeviceRecordFile> EzDeviceFileList){
         dateList = new String[EzDeviceFileList.size()];
         videoDuration = new int[EzDeviceFileList.size()];
+        videoStartTimeList = new int[EzDeviceFileList.size()];
         for (int i=0;i<EzDeviceFileList.size();i++){
             Date date = EzDeviceFileList.get(i).getStartTime().getTime();
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM-dd HH:mm:ss");
             dateList[i] = simpleDateFormat.format(date);
             Log.i("hongyang", "getDeviceFileInfo: %%%%%%%%%%%%%%"+dateList[i]);
             //获取每个录像片段的时长
+            int videoStartTime = (int) EzDeviceFileList.get(i).getStartTime().getTime().getTime();
             int a = (int) EzDeviceFileList.get(i).getStopTime().getTime().getTime() - (int) EzDeviceFileList.get(i).getStartTime().getTime().getTime();
             Log.i("hongyang", ": ------获取每个录像片段的时长------"+a);
             videoDuration[i] = a;
+            videoStartTimeList[i] = videoStartTime;
+            Log.i("ai_hy", "getDeviceFileInfo: "+videoStartTime+"--------"+a);
         }
         Log.i("hongyang", "getDeviceFileInfo: %%%%%%%%%%%%%%"+dateList[0]);
         return dateList;
@@ -698,27 +705,35 @@ public class EzCameraActivity extends BaseActivity{
     }
 
     //---------------------------------------------主动拖动进度条---------------------------------------------
+    int progressFlag = 0;      //用来记录滑动progress时手指第一次点击的进度值
     SeekBar.OnSeekBarChangeListener seekBarListener = new SeekBar.OnSeekBarChangeListener() {
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-            Log.i("hongyang", "onProgressChanged: -----11111111111---");
+            Log.i("hy_progress", "onProgressChanged: -----11111111111---"+progress);
+
         }
 
         @Override
         public void onStartTrackingTouch(SeekBar seekBar) {
             //获取当前的进度
-            Log.i("hongyang", "onProgressChanged: -----22222222222---"+sbProgress);
-
+            Log.i("hy_progress", "onProgressChanged: -----22222222222---"+seekBar.getProgress());
+            progressFlag = seekBar.getProgress();
+            isStartPlayVideo = false;   //暂停进度数字
+            ezPlayerCloud.pausePlayback();         //暂停播放录像
         }
 
         @Override
         public void onStopTrackingTouch(SeekBar seekBar) {
-            isStartPlayVideo = false;
+            isStartPlayVideo = true;
+            ezPlayerCloud.resumePlayback();            //开始播放录像
             int putProgress = seekBar.getProgress();
-            Log.i("hongyang", "onProgressChanged: ------------松手时的进度-------------"+putProgress);
+            Log.i("hy_progress", "onProgressChanged: ------------松手时的进度-------------"+putProgress);
             sbProgress = putProgress;       //把进度赋值给计数线程
-            int currentProgress = (int) (ezPlayerCloud.getOSDTime().getTime().getTime()/1000);
-            int setProgress = currentProgress+putProgress;      //需要设定的开始播放的时间
+            int hehe = putProgress - progressFlag;
+            int currentProgress = (int) (ezPlayerCloud.getOSDTime().getTime().getTime()/1000);      //获取当前播放的进度
+            Log.i("ai_hy", "onStopTrackingTouch: --------"+currentProgress);
+            //int currentProgress1 =
+            int setProgress = currentProgress+hehe;      //需要设定的开始播放的时间
             Calendar calendar = ezPlayerCloud.getOSDTime();    //获取当前时间
             int hour = calendar.get(Calendar.HOUR_OF_DAY);
             int min = calendar.get(Calendar.MINUTE);

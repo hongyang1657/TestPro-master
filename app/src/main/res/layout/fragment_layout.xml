@@ -85,7 +85,7 @@
             <ImageView
                 android:id="@+id/id_iv"
                 android:layout_below="@id/linear_menu"
-                android:src="@mipmap/back_5"
+                android:src="@mipmap/bg_img_3"
                 android:scaleType="centerCrop"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
@@ -166,7 +166,7 @@
                     android:layout_alignLeft="@id/tv_blank"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
-                <TextView
+                <!--<TextView
                     android:id="@+id/tv_local_temp"
                     android:text="27°"
                     android:textSize="32sp"
@@ -175,7 +175,7 @@
                     android:layout_alignParentRight="true"
                     android:padding="10dp"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content" />-->
             </RelativeLayout>
 
             <TextView
