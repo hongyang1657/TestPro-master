@@ -179,6 +179,17 @@
             </RelativeLayout>
 
             <TextView
+                android:id="@+id/tv_panel_name"
+                android:background="@mipmap/mohu"
+                android:text="面 板"
+                android:textColor="@color/colorText"
+                android:clickable="true"
+                android:padding="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <include layout="@layout/panel_layout"/>
+
+            <TextView
                 android:id="@+id/tv_scene_name"
                 android:background="@mipmap/mohu"
                 android:text="场 景"
@@ -211,7 +222,7 @@
                 android:layout_height="wrap_content" />
             <include layout="@layout/curtain_layout"/>
 
-            <TextView
+            <!--<TextView
                 android:id="@+id/tv_roller_curtain"
                 android:text="卷 帘"
                 android:textColor="@color/colorText"
@@ -220,7 +231,17 @@
                 android:padding="10dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
-            <include layout="@layout/roller_curtain_layout"/>
+            <include layout="@layout/roller_curtain_layout"/>-->
+            <TextView
+                android:id="@+id/tv_television"
+                android:text="电 视"
+                android:textColor="@color/colorText"
+                android:background="@mipmap/mohu"
+                android:clickable="true"
+                android:padding="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <include layout="@layout/television_layout"/>
 
             <TextView
                 android:id="@+id/tv_air_condition"
@@ -257,7 +278,7 @@
         android:focusable="true"
         android:layout_margin="3dp"
         android:clickable="true"
-        android:background="@mipmap/myhomeback_s"
+        android:background="@mipmap/home_3x"
         android:layout_centerInParent="true"
         android:layout_alignParentTop="true"
         android:layout_width="wrap_content"

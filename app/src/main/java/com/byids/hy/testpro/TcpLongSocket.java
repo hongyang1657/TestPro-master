@@ -224,6 +224,7 @@ public class TcpLongSocket {
 					}*/
 					try {
 						int flag = 1;
+
 						while ((len = in.read(buffer)) > 0) {
 							Log.i(TAG, "run: ---------len------------"+len);
 							tmpBuffer = new byte[len];
@@ -239,17 +240,22 @@ public class TcpLongSocket {
 								allTmpBuffer = spliceBytes(allTmpBuffer,tmpBuffer);
 								if (len<1024){
 									buffer = new byte[]{};
+									Log.i(TAG, "run: @@@@@@@@@@@@@@len小于1024了@@@@@@@@@@@@@@@");
 								}
 							}
 							flag++;
 						}
 						//拼接tmpBuffer
-						Log.i(TAG, "run: 跳出循环？？？？？？？？？？？？拼接后的byte[]"+byteStringLog(allTmpBuffer));
-						/*String strRoomInfo = testDecryptByte(allTmpBuffer);
-						LongLogCatUtil.logE("result",strRoomInfo);*/
-						callBack.receive(allTmpBuffer);
-
-						allTmpBuffer = null;
+						if (allTmpBuffer==null){
+							Log.i(TAG, "run: --------接收到的allTmpBuffer为空---------");
+							return;
+						}else {
+							Log.i(TAG, "run: 跳出循环？？？？？？？？？？？？拼接后的byte[]:"+byteStringLog(allTmpBuffer));
+						 	/*String strRoomInfo = testDecryptByte(allTmpBuffer);
+							LongLogCatUtil.logE("result",strRoomInfo);*/
+							callBack.receive(allTmpBuffer);
+							allTmpBuffer = null;
+						}
 
 					} catch (IOException e) {
 						e.printStackTrace();

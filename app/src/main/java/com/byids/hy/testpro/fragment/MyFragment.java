@@ -41,6 +41,7 @@ import com.byids.hy.testpro.PullDownMenuListener;
 import com.byids.hy.testpro.PullUpMenuListener;
 import com.byids.hy.testpro.R;
 import com.byids.hy.testpro.ScrollViewListener;
+import com.byids.hy.testpro.View.LightValueScrollView;
 import com.byids.hy.testpro.View.MyCustomScrollView;
 import com.byids.hy.testpro.View.MyPullUpScrollView;
 import com.byids.hy.testpro.activity.MyMainActivity;
@@ -88,14 +89,19 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
     private int pagerScrollState;     //viewpager滑动状态
 
     private TextView tvScene;       //场景
-    private LinearLayout linearScene;    //场景控制部分
+    private LinearLayout linearPanel;    //场景控制部分
     private TextView tvLight;           //灯光
+
+    //电视
+    private LinearLayout llTelevision;
+    private TextView tvTelevision;
+
     //控制模块，灯光，窗帘
     private LinearLayout llLight;
     private TextView tvChuanglian;
     private LinearLayout llChuanglian;
-    private TextView tvJuanLian;
-    private LinearLayout llJuanlian;
+    /*private TextView tvJuanLian;
+    private LinearLayout llJuanlian;*/
     private TextView tvAirCondition;
     private LinearLayout llAirCondition;
     //上拉菜单初始化浮现的部分（最上面上三个部分）的高度
@@ -122,7 +128,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
     private String roomDBName;    //房间拼音名
     private RoomAttr roomAttr;   //房间拥有的各个产品信息
     //private RoomDevMesg roomAttr;
-    private String hid;
+    private String token;
     private String uname;
     private String pwd;
 
@@ -159,6 +165,25 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
     private Button btMensuo;
     private Button btBufang;
 
+    //面板
+    private TextView tvPanelTitle;
+    private RelativeLayout rlPanel1;
+    private ImageView ivPanel1;
+    private TextView tvPanel1;
+
+    private RelativeLayout rlPanel2;
+    private ImageView ivPanel2;
+    private TextView tvPanel2;
+
+    private RelativeLayout rlPanel3;
+    private ImageView ivPanel3;
+    private TextView tvPanel3;
+
+    private RelativeLayout rlPanel4;
+    private ImageView ivPanel4;
+    private TextView tvPanel4;
+
+
     //场景
     private RelativeLayout rlXiuxian;
     private ImageView ivXiuxianOut;      //内部图片和文字
@@ -183,7 +208,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
 
 
     //灯光
-    private HorizontalScrollView hsLightValue;
+    private LightValueScrollView hsLightValue;
     private RelativeLayout rlLightValue;
     private ImageView ivLightValue1;      //黄色指针
     private ImageView ivLightValue2;      //灰色指针
@@ -211,6 +236,9 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
     private ImageView ivAll,ivStop,ivAllJuan,ivStopJuan;
     private TextView tvAll,tvStop,tvAllJuan,tvStopJuan;
 
+    //电视
+    private ImageView ivTelevisionOn;
+    private ImageView ivTelevisionOff;
 
     //空调
     private RelativeLayout rlKongtiao;
@@ -284,13 +312,13 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
     public MyFragment(){}
 
     private int[] backList;  //背景图片组
-    public MyFragment(int roomIndex, String roomName, String roomDBName, int[] backList, String hid, String uname, String pwd) {
+    public MyFragment(int roomIndex, String roomName, String roomDBName, int[] backList, String token, String uname, String pwd) {
         this.roomIndex = roomIndex;
         this.roomName = roomName;
         this.roomDBName = roomDBName;
         this.backList = backList;
         this.roomAttr = roomAttr;
-        this.hid = hid;
+        this.token = token;
         this.uname = uname;
         this.pwd = pwd;
     }
@@ -345,10 +373,12 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                 return true;
             }
 
+            //scrollView停止滚动
             private void handleStop(Object view) {
                 ScrollView scroller = (ScrollView) view;
                 mScrollY = scroller.getScrollY();
-                //Log.i(TAG, "handleStop: ----------mScrollY----------"+mScrollY);
+                Log.i("scroll_hy", "handleStop: ----------mScrollY----------"+mScrollY);
+                Log.i("scroll_hy", "handleStop: ----------isInitPosition----------"+isInitPosition);
 
                 if (isInitPosition==true){
                     if (mScrollY>(btHeight_X3/2)&&mScrollY<=btHeight_X3){
@@ -376,6 +406,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         /*svPullUpMenu.setOnScrollChangeListener(new View.OnScrollChangeListener() {
             @Override
             public void onScrollChange(View view, int i, int i1, int i2, int i3) {
+                Log.i("kankan", "onScrollChange: i:"+i+"i1:"+i1+"i2:"+i2+"i3:"+i3);
                 if (i1==btHeight_X3){
                     isInitPosition = true;
                 }else if (i1>btHeight_X3){
@@ -384,6 +415,23 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                 position = i1;
             }
         });*/
+
+        //兼容android 23以下
+        svPullUpMenu.setScrollViewListenner(new MyPullUpScrollView.ScrollViewListenner() {
+            @Override
+            public void onScrollChanged(MyPullUpScrollView view, int l, int t, int oldl, int oldt) {
+            Log.i("scroll_hy", "onScrollChange: t:"+t);
+                Log.i("scroll_hy", "onScrollChange: btHeight_X3:::"+btHeight_X3);
+                if (t==btHeight_X3){
+                    isInitPosition = true;
+                }else if (t>btHeight_X3){
+                    isInitPosition = false;
+                }
+                position = t;
+            }
+        });
+
+
 
         //获取控件高度
         int w = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
@@ -399,11 +447,11 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
 
         //获取浮现的三个部分的高度
         tvScene.measure(w,h);
-        linearScene.measure(w,h);
-        tvLight.measure(w,h);
+        linearPanel.measure(w,h);
+        tvPanelTitle.measure(w,h);
         tvSceneHeight = tvScene.getMeasuredHeight();
-        linearSceneHeight = linearScene.getMeasuredHeight();
-        tvLightHeight = tvLight.getMeasuredHeight();
+        linearSceneHeight = linearPanel.getMeasuredHeight();
+        tvLightHeight = tvPanelTitle.getMeasuredHeight();
         initFloatHeight = tvSceneHeight+linearSceneHeight+tvLightHeight;  //app打开时下面浮动部分的高度
         //Log.i(TAG, "onCreateView:app打开时下面浮动部分的高度 "+tvSceneHeight+"-----------"+linearSceneHeight+"-----------------"+tvLightHeight);
 
@@ -466,6 +514,11 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         ViewGroup.LayoutParams layoutParams = linearClick.getLayoutParams();
         layoutParams.height = btHeight;
         linearClick.setLayoutParams(layoutParams);
+
+        //设置电视模块高度
+        ViewGroup.LayoutParams lpTV = llTelevision.getLayoutParams();
+        lpTV.height = linearSceneHeight;
+        llTelevision.setLayoutParams(lpTV);
 
         //设置字体
         typeFace = Typeface.createFromAsset(getActivity().getAssets(),"fonts/xiyuanti.ttf");
@@ -564,15 +617,69 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
 //        linearClick.
 
         initControler();    //初始化控制部分  下
+        initPanelIcon();     //初始化面板图标
 
 
     }
 
+    //初始化不同房间的面板图标
+    private void initPanelIcon(){
+        switch (roomDBName){
+            case "keting":
+                setDifferentRoomsPanelIcon(R.mipmap.entertainment_dark_3x,R.mipmap.yule_mianban_dark_3x,R.mipmap.music_dark_3x,"休 闲","娱 乐","音 乐");
+                break;
+            case "zhuwo":
+                setDifferentRoomsPanelIcon(R.mipmap.read_dark_3x,R.mipmap.game_dark_3x,R.mipmap.music_dark_3x,"阅 读","娱 乐","音 乐");
+                break;
+            case "ciwo":
+                setDifferentRoomsPanelIcon(R.mipmap.read_dark_3x,R.mipmap.game_dark_3x,R.mipmap.music_dark_3x,"阅 读","娱 乐","音 乐");
+                break;
+            case "chufang":
+                setDifferentRoomsPanelIcon(R.mipmap.clean_up_dark_3x,R.mipmap.cook_dark_3x,R.mipmap.music_dark_3x,"清 洁","烹 饪","音 乐");
+                break;
+            case "canting":
+                setDifferentRoomsPanelIcon(R.mipmap.dinner_dark_3x,R.mipmap.snack_dark_3x,R.mipmap.afternoon_tea_dark_3x,"正 餐","夜 宵","午 茶");
+                break;
+            case "weiyu":
+                setDifferentRoomsPanelIcon(R.mipmap.wash_dark_3x,R.mipmap.toilet_dark_3x,R.mipmap.shower_dark_3x,"洗 漱","如 厕","淋 浴");
+                break;
+        }
+    }
+
+    //不同的房间设置不同的面板图标    (一共四个，最后一个是离开，不用设置)
+    private void setDifferentRoomsPanelIcon(int r1,int r2,int r3,String s1,String s2,String s3){
+        ivPanel1.setImageResource(r1);
+        ivPanel2.setImageResource(r2);
+        ivPanel3.setImageResource(r3);
+        tvPanel1.setText(s1);
+        tvPanel2.setText(s2);
+        tvPanel3.setText(s3);
+    }
+
     private void initControler(){
         //初始化 浮现的部分
+        tvPanelTitle = (TextView) view.findViewById(R.id.tv_panel_name);
+        linearPanel = (LinearLayout) view.findViewById(R.id.linear_panel_dining);
         tvScene = (TextView) view.findViewById(R.id.tv_scene_name);
-        linearScene = (LinearLayout) view.findViewById(R.id.linear_scene);
+
+        //面板
         tvLight = (TextView) view.findViewById(R.id.tv_light);
+        rlPanel1 = (RelativeLayout) view.findViewById(R.id.rl_panel_1);
+        ivPanel1 = (ImageView) view.findViewById(R.id.iv_panel_1);
+        tvPanel1 = (TextView) view.findViewById(R.id.tv_panel_1);
+        rlPanel2 = (RelativeLayout) view.findViewById(R.id.rl_panel_2);
+        ivPanel2 = (ImageView) view.findViewById(R.id.iv_panel_2);
+        tvPanel2 = (TextView) view.findViewById(R.id.tv_panel_2);
+        rlPanel3 = (RelativeLayout) view.findViewById(R.id.rl_panel_3);
+        ivPanel3 = (ImageView) view.findViewById(R.id.iv_panel_3);
+        tvPanel3 = (TextView) view.findViewById(R.id.tv_panel_3);
+        rlPanel4 = (RelativeLayout) view.findViewById(R.id.rl_panel_4);
+        ivPanel4 = (ImageView) view.findViewById(R.id.iv_panel_4);
+        tvPanel4 = (TextView) view.findViewById(R.id.tv_panel_4);
+        rlPanel1.setOnClickListener(controlListener);
+        rlPanel2.setOnClickListener(controlListener);
+        rlPanel3.setOnClickListener(controlListener);
+        rlPanel4.setOnClickListener(controlListener);
 
         //场景
          rlXiuxian = (RelativeLayout) view.findViewById(R.id.rl_xiuxian);
@@ -587,10 +694,16 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         rlAll = (RelativeLayout) view.findViewById(R.id.rl_quanguan);
         rlStop = (RelativeLayout) view.findViewById(R.id.rl_tingzhi);
         //卷帘
-        rlJuanlian = (RelativeLayout) view.findViewById(R.id.rl_juanlian);
+        /*rlJuanlian = (RelativeLayout) view.findViewById(R.id.rl_juanlian);
         rlJuanlianR = (RelativeLayout) view.findViewById(R.id.rl_juanlian_r);
         rlAllJuan = (RelativeLayout) view.findViewById(R.id.rl_quanguan_juanlian);
-        rlStopJuan = (RelativeLayout) view.findViewById(R.id.rl_tingzhi_juanlian);
+        rlStopJuan = (RelativeLayout) view.findViewById(R.id.rl_tingzhi_juanlian);*/
+        //电视
+        llTelevision = (LinearLayout) view.findViewById(R.id.ll_television);
+        tvTelevision = (TextView) view.findViewById(R.id.tv_television);
+        ivTelevisionOn = (ImageView) view.findViewById(R.id.iv_television_on);
+        ivTelevisionOff = (ImageView) view.findViewById(R.id.iv_television_off);
+
         //空调
         rlKongtiao = (RelativeLayout) view.findViewById(R.id.rl_kongtiao_kaiguan);
         rlKongtiaoMoshi = (RelativeLayout) view.findViewById(R.id.rl_kongtiao_moshi);
@@ -619,7 +732,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         ivLikai = (ImageView) view.findViewById(R.id.iv_likai);
         tvLikai = (TextView) view.findViewById(R.id.tv_likai);
         //灯光
-        hsLightValue = (HorizontalScrollView) view.findViewById(R.id.hs_light_point);
+        hsLightValue = (LightValueScrollView) view.findViewById(R.id.hs_light_point);
         rlLightValue = (RelativeLayout) view.findViewById(R.id.relative_light_control);
         ivLightValue1 = (ImageView) view.findViewById(R.id.iv_light_point1);
         ivLightValue2 = (ImageView) view.findViewById(R.id.iv_light_point2);
@@ -685,10 +798,10 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         //控制模块（灯，窗帘，空调等）
         llLight = (LinearLayout) view.findViewById(R.id.ll_light);
         llChuanglian = (LinearLayout) view.findViewById(R.id.ll_chuanglian);
-        llJuanlian = (LinearLayout) view.findViewById(R.id.ll_juanlian);
+        //llJuanlian = (LinearLayout) view.findViewById(R.id.ll_juanlian);
         llAirCondition = (LinearLayout) view.findViewById(R.id.ll_air_condition);
         tvChuanglian = (TextView) view.findViewById(R.id.tv_curtain);
-        tvJuanLian = (TextView) view.findViewById(R.id.tv_roller_curtain);
+        //tvJuanLian = (TextView) view.findViewById(R.id.tv_roller_curtain);
         tvAirCondition = (TextView) view.findViewById(R.id.tv_air_condition);
 
         //加入改字体的列表
@@ -711,11 +824,12 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         tvList.add(tvShalian);
         tvList.add(tvAll);
         tvList.add(tvStop);
-        tvList.add(tvJuanLian);
-        tvList.add(tvJuanlian);
-        tvList.add(tvJuanlianR);
-        tvList.add(tvAllJuan);
-        tvList.add(tvStopJuan);
+        tvList.add(tvTelevision);
+        //tvList.add(tvJuanLian);
+        //tvList.add(tvJuanlian);
+        //tvList.add(tvJuanlianR);
+        //tvList.add(tvAllJuan);
+        //tvList.add(tvStopJuan);
         tvList.add(tvAirCondition);
         tvList.add(tvKongtiaoSwitch);
         tvList.add(tvKongtiaoTemp);
@@ -724,6 +838,11 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         tvList.add(tvAirControl1);
         tvList.add(tvAirControl2);
         tvList.add(tvAirControl3);
+        tvList.add(tvPanelTitle);
+        tvList.add(tvPanel1);
+        tvList.add(tvPanel2);
+        tvList.add(tvPanel3);
+        tvList.add(tvPanel4);
         //tvList.add(tvLocalTemp);
 
 
@@ -748,10 +867,10 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         rlShalian.setOnClickListener(controlListener);
         rlAll.setOnClickListener(controlListener);
         rlStop.setOnClickListener(controlListener);
-        rlJuanlian.setOnClickListener(controlListener);
+        /*rlJuanlian.setOnClickListener(controlListener);
         rlJuanlianR.setOnClickListener(controlListener);
         rlAllJuan.setOnClickListener(controlListener);
-        rlStopJuan.setOnClickListener(controlListener);
+        rlStopJuan.setOnClickListener(controlListener);*/
 
         rlKongtiao.setOnClickListener(controlListener);
         rlKongtiaoMoshi.setOnClickListener(controlListener);
@@ -759,11 +878,15 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         rlAirControl2.setOnClickListener(controlListener);
         rlAirControl3.setOnClickListener(controlListener);
         tvRoomName.setOnClickListener(controlListener);
+        ivTelevisionOn.setOnClickListener(controlListener);
+        ivTelevisionOff.setOnClickListener(controlListener);
 
 
         sbTemp.setOnSeekBarChangeListener(tempSeekBarListener);  //空调调温SeekBar
         //hsLightValue.setOnScrollChangeListener(hsChangeListener);       //android 23 以上才能用
-        //判断hsScrollView是否停下
+        hsLightValue.setScrollViewListenner(hsChangeListener);
+
+        //判断hsScrollView是否停下------------发送灯光的控制命令-------------
         hsLightValue.setOnTouchListener(new View.OnTouchListener() {
             private int lastX = 0;
             private int touchEventId = -9983762;
@@ -922,6 +1045,22 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         @Override
         public void onClick(View view) {
             switch (view.getId()){
+                case R.id.rl_panel_1:
+                    clickPanel(1);
+                    setScaleAnimation(rlPanel1);
+                    break;
+                case R.id.rl_panel_2:
+                    clickPanel(2);
+                    setScaleAnimation(rlPanel2);
+                    break;
+                case R.id.rl_panel_3:
+                    clickPanel(3);
+                    setScaleAnimation(rlPanel3);
+                    break;
+                case R.id.rl_panel_4:
+                    clickPanel(4);
+                    setScaleAnimation(rlPanel4);
+                    break;
                 case R.id.tv_blank:      //点击弹出切换房间dialog
                     clickRoomName();
                     break;
@@ -951,7 +1090,6 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                     clickLightSwitch();
                     break;
                 case R.id.rl_bulian:
-
                     EventBus.getDefault().post(new MyEventBus(roomName+"bulian"));
                     setScaleAnimation(rlBulian);
                     clickBulian();
@@ -970,7 +1108,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                     EventBus.getDefault().post(new MyEventBus(roomName+"stop"));
                     setCurtainStopAnimation(rlStop);
                     break;
-                case R.id.rl_juanlian:
+                /*case R.id.rl_juanlian:
                     EventBus.getDefault().post(new MyEventBus(roomName+"juanlian"));
                     setScaleAnimation(rlJuanlian);
                     clickJuanlian();
@@ -988,6 +1126,12 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                 case R.id.rl_tingzhi_juanlian:
                     EventBus.getDefault().post(new MyEventBus(roomName+"stop_juanlian"));
                     setCurtainJuanStopAnimation(rlStopJuan);
+                    break;*/
+                case R.id.iv_television_on:
+                    setScaleAnimation(ivTelevisionOn);
+                    break;
+                case R.id.iv_television_off:
+                    setScaleAnimation(ivTelevisionOff);
                     break;
                 case R.id.rl_kongtiao_kaiguan:
                     EventBus.getDefault().post(new MyEventBus(roomName+"kongtiao"));
@@ -1002,10 +1146,8 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                         }
                     });
                     objectAnimator.start();
-
                     break;
                 case R.id.rl_kongtiao_moshi:
-
                     setScaleAnimation(rlKongtiaoMoshi);
                     Toast.makeText(activity, "睡眠 模式", Toast.LENGTH_SHORT).show();
                     break;
@@ -1025,9 +1167,338 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         }
     };
 
+    //设置不同房间面板点击后变色
+    private void clickPanel(int index){
+        switch (roomDBName){
+            case "keting":
+                changePanelKeting(index);
+                break;
+            case "zhuwo":
+                changePanelZhuwo(index);
+                break;
+            case "ciwo":
+                changePanelZhuwo(index);
+                break;
+            case "chufang":
+                changePanelChufang(index);
+                break;
+            case "canting":
+                changePanelCanting(index);
+                break;
+            case "weiyu":
+                changePanelWeiyu(index);
+                break;
+        }
+    }
+
+
+    //客厅面板点击变色
+    private void changePanelKeting(int i){
+        switch (i){
+            case 1:
+                ivPanel1.setImageResource(R.mipmap.entertainment_copy_3x);
+                tvPanel1.setTextColor(activity.getResources().getColor(R.color.colorTextActive));
+                ivPanel2.setImageResource(R.mipmap.yule_mianban_dark_3x);
+                tvPanel2.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel3.setImageResource(R.mipmap.music_dark_3x);
+                tvPanel3.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel4.setImageResource(R.mipmap.get_out_dark_3x);
+                tvPanel4.setTextColor(activity.getResources().getColor(R.color.colorText));
+                break;
+            case 2:
+                ivPanel1.setImageResource(R.mipmap.entertainment_dark_3x);
+                tvPanel1.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel2.setImageResource(R.mipmap.yule_mianban_3x);
+                tvPanel2.setTextColor(activity.getResources().getColor(R.color.colorTextActive));
+                ivPanel3.setImageResource(R.mipmap.music_dark_3x);
+                tvPanel3.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel4.setImageResource(R.mipmap.get_out_dark_3x);
+                tvPanel4.setTextColor(activity.getResources().getColor(R.color.colorText));
+                break;
+            case 3:
+                ivPanel1.setImageResource(R.mipmap.entertainment_dark_3x);
+                tvPanel1.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel2.setImageResource(R.mipmap.yule_mianban_dark_3x);
+                tvPanel2.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel3.setImageResource(R.mipmap.music_3x);
+                tvPanel3.setTextColor(activity.getResources().getColor(R.color.colorTextActive));
+                ivPanel4.setImageResource(R.mipmap.get_out_dark_3x);
+                tvPanel4.setTextColor(activity.getResources().getColor(R.color.colorText));
+                break;
+            case 4:
+                ivPanel1.setImageResource(R.mipmap.entertainment_dark_3x);
+                tvPanel1.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel2.setImageResource(R.mipmap.yule_mianban_dark_3x);
+                tvPanel2.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel3.setImageResource(R.mipmap.music_dark_3x);
+                tvPanel3.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel4.setImageResource(R.mipmap.get_out_3x);
+                tvPanel4.setTextColor(activity.getResources().getColor(R.color.colorTextActive));
+                break;
+        }
+    }
+
+    //主卧面板点击变色
+    private void changePanelZhuwo(int i){
+        switch (i){
+            case 1:
+                ivPanel1.setImageResource(R.mipmap.read_3x);
+                tvPanel1.setTextColor(activity.getResources().getColor(R.color.colorTextActive));
+                ivPanel2.setImageResource(R.mipmap.game_dark_3x);
+                tvPanel2.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel3.setImageResource(R.mipmap.music_dark_3x);
+                tvPanel3.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel4.setImageResource(R.mipmap.get_out_dark_3x);
+                tvPanel4.setTextColor(activity.getResources().getColor(R.color.colorText));
+                break;
+            case 2:
+                ivPanel1.setImageResource(R.mipmap.read_dark_3x);
+                tvPanel1.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel2.setImageResource(R.mipmap.game_3x);
+                tvPanel2.setTextColor(activity.getResources().getColor(R.color.colorTextActive));
+                ivPanel3.setImageResource(R.mipmap.music_dark_3x);
+                tvPanel3.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel4.setImageResource(R.mipmap.get_out_dark_3x);
+                tvPanel4.setTextColor(activity.getResources().getColor(R.color.colorText));
+                break;
+            case 3:
+                ivPanel1.setImageResource(R.mipmap.read_dark_3x);
+                tvPanel1.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel2.setImageResource(R.mipmap.game_dark_3x);
+                tvPanel2.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel3.setImageResource(R.mipmap.music_3x);
+                tvPanel3.setTextColor(activity.getResources().getColor(R.color.colorTextActive));
+                ivPanel4.setImageResource(R.mipmap.get_out_dark_3x);
+                tvPanel4.setTextColor(activity.getResources().getColor(R.color.colorText));
+                break;
+            case 4:
+                ivPanel1.setImageResource(R.mipmap.read_dark_3x);
+                tvPanel1.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel2.setImageResource(R.mipmap.game_dark_3x);
+                tvPanel2.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel3.setImageResource(R.mipmap.music_dark_3x);
+                tvPanel3.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel4.setImageResource(R.mipmap.get_out_3x);
+                tvPanel4.setTextColor(activity.getResources().getColor(R.color.colorTextActive));
+                break;
+        }
+    }
+
+
+    //厨房面板点击变色
+    private void changePanelChufang(int i){
+        switch (i){
+            case 1:
+                ivPanel1.setImageResource(R.mipmap.clean_up_3x);
+                tvPanel1.setTextColor(activity.getResources().getColor(R.color.colorTextActive));
+                ivPanel2.setImageResource(R.mipmap.cook_dark_3x);
+                tvPanel2.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel3.setImageResource(R.mipmap.music_dark_3x);
+                tvPanel3.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel4.setImageResource(R.mipmap.get_out_dark_3x);
+                tvPanel4.setTextColor(activity.getResources().getColor(R.color.colorText));
+                break;
+            case 2:
+                ivPanel1.setImageResource(R.mipmap.clean_up_dark_3x);
+                tvPanel1.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel2.setImageResource(R.mipmap.cook_3x);
+                tvPanel2.setTextColor(activity.getResources().getColor(R.color.colorTextActive));
+                ivPanel3.setImageResource(R.mipmap.music_dark_3x);
+                tvPanel3.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel4.setImageResource(R.mipmap.get_out_dark_3x);
+                tvPanel4.setTextColor(activity.getResources().getColor(R.color.colorText));
+                break;
+            case 3:
+                ivPanel1.setImageResource(R.mipmap.clean_up_dark_3x);
+                tvPanel1.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel2.setImageResource(R.mipmap.cook_dark_3x);
+                tvPanel2.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel3.setImageResource(R.mipmap.music_3x);
+                tvPanel3.setTextColor(activity.getResources().getColor(R.color.colorTextActive));
+                ivPanel4.setImageResource(R.mipmap.get_out_dark_3x);
+                tvPanel4.setTextColor(activity.getResources().getColor(R.color.colorText));
+                break;
+            case 4:
+                ivPanel1.setImageResource(R.mipmap.clean_up_dark_3x);
+                tvPanel1.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel2.setImageResource(R.mipmap.cook_dark_3x);
+                tvPanel2.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel3.setImageResource(R.mipmap.music_dark_3x);
+                tvPanel3.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel4.setImageResource(R.mipmap.get_out_3x);
+                tvPanel4.setTextColor(activity.getResources().getColor(R.color.colorTextActive));
+                break;
+        }
+    }
+
+    //餐厅面板点击变色
+    private void changePanelCanting(int i){
+        switch (i){
+            case 1:
+                ivPanel1.setImageResource(R.mipmap.dinner_3x);
+                tvPanel1.setTextColor(activity.getResources().getColor(R.color.colorTextActive));
+                ivPanel2.setImageResource(R.mipmap.snack_dark_3x);
+                tvPanel2.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel3.setImageResource(R.mipmap.afternoon_tea_dark_3x);
+                tvPanel3.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel4.setImageResource(R.mipmap.get_out_dark_3x);
+                tvPanel4.setTextColor(activity.getResources().getColor(R.color.colorText));
+                break;
+            case 2:
+                ivPanel1.setImageResource(R.mipmap.dinner_dark_3x);
+                tvPanel1.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel2.setImageResource(R.mipmap.snack_3x);
+                tvPanel2.setTextColor(activity.getResources().getColor(R.color.colorTextActive));
+                ivPanel3.setImageResource(R.mipmap.afternoon_tea_dark_3x);
+                tvPanel3.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel4.setImageResource(R.mipmap.get_out_dark_3x);
+                tvPanel4.setTextColor(activity.getResources().getColor(R.color.colorText));
+                break;
+            case 3:
+                ivPanel1.setImageResource(R.mipmap.dinner_dark_3x);
+                tvPanel1.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel2.setImageResource(R.mipmap.snack_dark_3x);
+                tvPanel2.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel3.setImageResource(R.mipmap.afternoon_tea_3x);
+                tvPanel3.setTextColor(activity.getResources().getColor(R.color.colorTextActive));
+                ivPanel4.setImageResource(R.mipmap.get_out_dark_3x);
+                tvPanel4.setTextColor(activity.getResources().getColor(R.color.colorText));
+                break;
+            case 4:
+                ivPanel1.setImageResource(R.mipmap.dinner_dark_3x);
+                tvPanel1.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel2.setImageResource(R.mipmap.snack_dark_3x);
+                tvPanel2.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel3.setImageResource(R.mipmap.afternoon_tea_dark_3x);
+                tvPanel3.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel4.setImageResource(R.mipmap.get_out_3x);
+                tvPanel4.setTextColor(activity.getResources().getColor(R.color.colorTextActive));
+                break;
+        }
+    }
+
+    //卫浴面板点击变色
+    private void changePanelWeiyu(int i){
+        switch (i){
+            case 1:
+                ivPanel1.setImageResource(R.mipmap.wash_3x);
+                tvPanel1.setTextColor(activity.getResources().getColor(R.color.colorTextActive));
+                ivPanel2.setImageResource(R.mipmap.toilet_dark_3x);
+                tvPanel2.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel3.setImageResource(R.mipmap.shower_dark_3x);
+                tvPanel3.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel4.setImageResource(R.mipmap.get_out_dark_3x);
+                tvPanel4.setTextColor(activity.getResources().getColor(R.color.colorText));
+                break;
+            case 2:
+                ivPanel1.setImageResource(R.mipmap.wash_dark_3x);
+                tvPanel1.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel2.setImageResource(R.mipmap.toilet_3x);
+                tvPanel2.setTextColor(activity.getResources().getColor(R.color.colorTextActive));
+                ivPanel3.setImageResource(R.mipmap.shower_dark_3x);
+                tvPanel3.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel4.setImageResource(R.mipmap.get_out_dark_3x);
+                tvPanel4.setTextColor(activity.getResources().getColor(R.color.colorText));
+                break;
+            case 3:
+                ivPanel1.setImageResource(R.mipmap.wash_dark_3x);
+                tvPanel1.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel2.setImageResource(R.mipmap.toilet_dark_3x);
+                tvPanel2.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel3.setImageResource(R.mipmap.shower_3x);
+                tvPanel3.setTextColor(activity.getResources().getColor(R.color.colorTextActive));
+                ivPanel4.setImageResource(R.mipmap.get_out_dark_3x);
+                tvPanel4.setTextColor(activity.getResources().getColor(R.color.colorText));
+                break;
+            case 4:
+                ivPanel1.setImageResource(R.mipmap.wash_dark_3x);
+                tvPanel1.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel2.setImageResource(R.mipmap.toilet_dark_3x);
+                tvPanel2.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel3.setImageResource(R.mipmap.shower_dark_3x);
+                tvPanel3.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel4.setImageResource(R.mipmap.get_out_3x);
+                tvPanel4.setTextColor(activity.getResources().getColor(R.color.colorTextActive));
+                break;
+        }
+    }
+
+
     //灯光亮度调节监听
     private boolean isLightOpen = false;
-    /*View.OnScrollChangeListener hsChangeListener = new View.OnScrollChangeListener() {
+    LightValueScrollView.ScrollViewListenner hsChangeListener = new LightValueScrollView.ScrollViewListenner() {
+        @Override
+        public void onScrollChanged(LightValueScrollView view, int l, int t, int oldl, int oldt) {
+            lightSVPosition = l;
+            //Log.i(TAG, "onScrollChange: "+i);
+            if(lightSVPosition<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*0.5){
+                tvLightValue.setText("0");
+                isLightOpen = false;
+            }else if (lightSVPosition>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*0.5 && lightSVPosition<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*1.5){
+                tvLightValue.setText("5");
+                isLightOpen = true;
+            }else if (lightSVPosition>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*1.5 && lightSVPosition<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*2.5){
+                tvLightValue.setText("10");
+                isLightOpen = true;
+            }else if (lightSVPosition>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*2.5 && lightSVPosition<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*3.5){
+                tvLightValue.setText("15");
+                isLightOpen = true;
+            }else if (lightSVPosition>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*3.5 && lightSVPosition<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*4.5){
+                tvLightValue.setText("20");
+                isLightOpen = true;
+            }else if (lightSVPosition>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*4.5 && lightSVPosition<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*5.5){
+                tvLightValue.setText("25");
+                isLightOpen = true;
+            }else if (lightSVPosition>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*5.5 && lightSVPosition<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*6.5){
+                tvLightValue.setText("30");
+                isLightOpen = true;
+            }else if (lightSVPosition>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*6.5 && lightSVPosition<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*7.5){
+                tvLightValue.setText("35");
+                isLightOpen = true;
+            }else if (lightSVPosition>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*7.5 && lightSVPosition<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*8.5){
+                tvLightValue.setText("40");
+                isLightOpen = true;
+            }else if (lightSVPosition>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*8.5 && lightSVPosition<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*9.5){
+                tvLightValue.setText("45");
+                isLightOpen = true;
+            }else if (lightSVPosition>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*9.5 && lightSVPosition<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*10.5){
+                tvLightValue.setText("50");
+                isLightOpen = true;
+            }else if (lightSVPosition>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*10.5 && lightSVPosition<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*11.5){
+                tvLightValue.setText("55");
+                isLightOpen = true;
+            }else if (lightSVPosition>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*11.5 && lightSVPosition<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*12.5){
+                tvLightValue.setText("60");
+                isLightOpen = true;
+            }else if (lightSVPosition>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*12.5 && lightSVPosition<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*13.5){
+                tvLightValue.setText("65");
+                isLightOpen = true;
+            }else if (lightSVPosition>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*13.5 && lightSVPosition<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*14.5){
+                tvLightValue.setText("70");
+                isLightOpen = true;
+            }else if (lightSVPosition>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*14.5 && lightSVPosition<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*15.5){
+                tvLightValue.setText("75");
+                isLightOpen = true;
+            }else if (lightSVPosition>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*15.5 && lightSVPosition<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*16.5){
+                tvLightValue.setText("80");
+                isLightOpen = true;
+            }else if (lightSVPosition>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*16.5 && lightSVPosition<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*17.5){
+                tvLightValue.setText("85");
+                isLightOpen = true;
+            }else if (lightSVPosition>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*17.5 && lightSVPosition<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*18.5){
+                tvLightValue.setText("90");
+                isLightOpen = true;
+            }else if (lightSVPosition>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*18.5 && lightSVPosition<=lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*19.5){
+                tvLightValue.setText("95");
+                isLightOpen = true;
+            }else if (lightSVPosition>lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*19.5){
+                tvLightValue.setText("100");
+                isLightOpen = true;
+            }
+        }
+    };
+
+    /*View.OnScrollChangeListener hsChangeListener1 = new View.OnScrollChangeListener() {
         @Override
         public void onScrollChange(View view, int i, int i1, int i2, int i3) {
             lightSVPosition = i;
@@ -1530,6 +2001,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
     }
     //滑动到隐藏头
     private void scrollToBottom(){
+        Log.i("scroll_animation", "scrollToBottom: ==============能显示动画吗");
         isInitPosition = true;
         svPullUpMenu.smoothScrollToSlow(0,btHeight_X3,400);
         //svPullUpMenu.smoothScrollTo(0,btHeight_X3);
@@ -1724,12 +2196,12 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
 
     private void clickBulian(){
         if (bulianFlag==0){
-            animationBulianOpen();   //开窗动画
+            //animationBulianOpen();   //开窗动画
             changeColorBulian(R.mipmap.theme2_chuanglian_head_active_3x,R.mipmap.theme2_chuanglian_solidline_active_3x,R.color.colorTextActive,"布帘 开");
             controlCurtain(CONTROL_PROTOCOL_HDL,MACHINE_NAME_CURTAIN,-1,1,-1,"1_right_open");
             bulianFlag = 1;
         }else if (bulianFlag==1){
-            animationBulianClose();   //关窗动画
+            //animationBulianClose();   //关窗动画
             changeColorBulian(R.mipmap.theme2_chuanglian_head_3x,R.mipmap.chuanglian_solidline_3,R.color.colorText,"布帘 关");
             controlCurtain(CONTROL_PROTOCOL_HDL,MACHINE_NAME_CURTAIN,-1,1,-1,"1_right_close");
             bulianFlag = 0;
@@ -1901,7 +2373,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
             controlData.put("isServerAUTO", isServerAUTO);
             CommandData.put("controlSence", controlSence);
             CommandData.put("houseDBName", roomDBName);
-            String lightJson = CommandJsonUtils.getCommandJson(0, CommandData, hid, uname, pwd, String.valueOf(System.currentTimeMillis()));
+            String lightJson = CommandJsonUtils.getCommandJson(0, CommandData, token, uname, pwd, String.valueOf(System.currentTimeMillis()));
             EventBus.getDefault().post(new MyEventBus(lightJson));
             Log.i(TAG, "onClick: ------lightjson------" + lightJson);
         } catch (JSONException e) {
@@ -1921,7 +2393,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
             controlData.put("bulianStatus", bulianStatus);
             CommandData.put("controlSence", controlSence);
             CommandData.put("houseDBName", roomDBName);
-            String curtainJson = CommandJsonUtils.getCommandJson(0, CommandData, hid, uname, pwd, String.valueOf(System.currentTimeMillis()));
+            String curtainJson = CommandJsonUtils.getCommandJson(0, CommandData, token, uname, pwd, String.valueOf(System.currentTimeMillis()));
             EventBus.getDefault().post(new MyEventBus(curtainJson));
             Log.i(TAG, "onClick: ------lightjson------" + curtainJson);
         } catch (JSONException e) {

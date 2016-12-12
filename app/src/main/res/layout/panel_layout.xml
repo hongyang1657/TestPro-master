@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:id="@+id/linear_panel_dining"
+    android:background="@mipmap/mohu"
+    android:padding="8dp"
+    android:weightSum="4"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+<!--正餐-->
+    <RelativeLayout
+        android:id="@+id/rl_panel_1"
+        android:clickable="true"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/iv_panel_1"
+            android:src="@mipmap/dinner_dark_3x"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/tv_panel_1"
+            android:text="正 餐"
+            android:textSize="12sp"
+            android:textColor="@color/colorText"
+            android:paddingTop="6dp"
+            android:layout_alignRight="@id/iv_panel_1"
+            android:layout_alignLeft="@id/iv_panel_1"
+            android:layout_below="@id/iv_panel_1"
+            android:gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </RelativeLayout>
+
+    <!--夜宵-->
+    <RelativeLayout
+        android:id="@+id/rl_panel_2"
+        android:clickable="true"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <ImageView
+            android:id="@+id/iv_panel_2"
+            android:src="@mipmap/snack_dark_3x"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/tv_panel_2"
+            android:text="夜 宵"
+            android:textSize="12sp"
+            android:textColor="@color/colorText"
+            android:paddingTop="6dp"
+            android:layout_alignRight="@id/iv_panel_2"
+            android:layout_alignLeft="@id/iv_panel_2"
+            android:layout_below="@id/iv_panel_2"
+            android:gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </RelativeLayout>
+
+
+<!--午茶-->
+    <RelativeLayout
+        android:id="@+id/rl_panel_3"
+        android:clickable="true"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <ImageView
+            android:id="@+id/iv_panel_3"
+            android:src="@mipmap/afternoon_tea_dark_3x"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/tv_panel_3"
+            android:text="午 茶"
+            android:textColor="@color/colorText"
+            android:textSize="12sp"
+            android:paddingTop="6dp"
+            android:layout_alignRight="@id/iv_panel_3"
+            android:layout_alignLeft="@id/iv_panel_3"
+            android:layout_below="@id/iv_panel_3"
+            android:gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </RelativeLayout>
+
+<!--离开-->
+    <RelativeLayout
+        android:id="@+id/rl_panel_4"
+        android:clickable="true"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <ImageView
+            android:id="@+id/iv_panel_4"
+            android:src="@mipmap/get_out_dark_3x"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/tv_panel_4"
+            android:text="离 开"
+            android:textColor="@color/colorText"
+            android:textSize="12sp"
+            android:paddingTop="6dp"
+            android:layout_alignRight="@id/iv_panel_4"
+            android:layout_alignLeft="@id/iv_panel_4"
+            android:layout_below="@id/iv_panel_4"
+            android:gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </RelativeLayout>
+
+
+</LinearLayout>

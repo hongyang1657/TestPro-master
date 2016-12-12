@@ -8,6 +8,7 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 /**
+ ************************ 后台的Tcp连接 *************************
  * Created by gqgz2 on 2016/10/31.
  */
 

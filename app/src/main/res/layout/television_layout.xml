@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:id="@+id/ll_television"
+    android:background="@mipmap/mohu"
+    android:gravity="center_horizontal"
+    android:padding="8dp"
+    android:weightSum="10"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <!--电视开-->
+    <ImageView
+        android:id="@+id/iv_television_on"
+        android:clickable="true"
+        android:src="@mipmap/tel_on"
+        android:layout_weight="3"
+        android:gravity="center"
+        android:layout_gravity="center"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"/>
+
+
+    <ImageView
+        android:id="@+id/iv_television"
+        android:clickable="true"
+        android:layout_weight="4"
+        android:src="@mipmap/tel_icon_3x"
+        android:gravity="center"
+        android:layout_width="0dp"
+        android:layout_height="match_parent" />
+
+    <ImageView
+        android:id="@+id/iv_television_off"
+        android:clickable="true"
+        android:src="@mipmap/tel_off_3x"
+        android:layout_weight="3"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"/>
+
+</LinearLayout>

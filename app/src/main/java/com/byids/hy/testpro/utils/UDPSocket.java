@@ -33,7 +33,7 @@ public class UDPSocket {
     //测试  包装发送udp
     public void sendEncryptUdp(){
         String udpJson="{\"command\":\"find\",\"data\":{\"hid\":\""+sendContent+"\",\"loginName\":\"byids\"}}";
-        Log.i(TAG, "test: ------------------"+udpJson);
+        Log.i("hy_udp_service", "test: ------------------"+udpJson);
         byte[] enByte = AES.encrpt(udpJson);//加密
         if (enByte == null)
             return;

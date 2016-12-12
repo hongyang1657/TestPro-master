@@ -6,6 +6,7 @@ import android.animation.ObjectAnimator;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -28,32 +29,9 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
-import com.byids.hy.testpro.Bean.Aircondition;
-import com.byids.hy.testpro.Bean.Alarmclock;
-import com.byids.hy.testpro.Bean.Camera;
-import com.byids.hy.testpro.Bean.Camera_indoor;
-import com.byids.hy.testpro.Bean.Cinemaroom;
-import com.byids.hy.testpro.Bean.Curtain;
-import com.byids.hy.testpro.Bean.EzvizCamera;
-import com.byids.hy.testpro.Bean.Hiddendoor;
 import com.byids.hy.testpro.Bean.HomeAttr;
-import com.byids.hy.testpro.Bean.Ibeacon;
-import com.byids.hy.testpro.Bean.Light;
-import com.byids.hy.testpro.Bean.Lightbelt;
-import com.byids.hy.testpro.Bean.Lock;
-import com.byids.hy.testpro.Bean.Music;
-import com.byids.hy.testpro.Bean.Outdoorwaterflow;
-import com.byids.hy.testpro.Bean.Panel;
 import com.byids.hy.testpro.Bean.RoomAttr;
 import com.byids.hy.testpro.Bean.Rooms;
-import com.byids.hy.testpro.Bean.Securityalarm;
-import com.byids.hy.testpro.Bean.Sence;
 import com.byids.hy.testpro.R;
 import com.byids.hy.testpro.View.LoginHScrollView;
 import com.byids.hy.testpro.newBean.AllJsonData;
@@ -62,16 +40,12 @@ import com.byids.hy.testpro.utils.LongLogCatUtil;
 import com.byids.hy.testpro.utils.NetworkStateUtil;
 import com.byids.hy.testpro.utils.RunningTimeDialog;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -124,7 +98,6 @@ public class NewLoginActivity extends BaseActivity{
 
     private String userName;
     private String password;
-    private RequestQueue requestQueue;
     HomeAttr homeAttrBean;
     Rooms rs;
     List<Rooms> roomsList = new ArrayList<Rooms>();
@@ -145,7 +118,6 @@ public class NewLoginActivity extends BaseActivity{
     private AllJsonData allJsonData;
     private boolean isConnect;       //网络是否可用
     private boolean isMobileState;      //是否为数据流量状态（外网）
-    private String host_ip;
     private String token;
 
     private Handler handler = new Handler(){
@@ -161,14 +133,16 @@ public class NewLoginActivity extends BaseActivity{
                     String token = (String) msg.obj;
                     getToken(token);
 
-                    //加一个token
-                    intentLogin.putExtra("token",token);
-                    startActivity(intentLogin);
-                    finish();        //结束此activity，下一个activity返回时，直接退出
-
                     break;
                 case 3:      //获取用户信息
                     allJson = (String) msg.obj;
+                    LongLogCatUtil.logE("hongyang","外网登陆获取："+allJson);
+                    //跳转
+                    intentLogin.putExtra("isFirstLogin",true);
+                    intentLogin.putExtra("uname",userName);
+                    intentLogin.putExtra("pwd",password);
+                    startActivity(intentLogin);
+                    finish();        //结束此activity，下一个activity返回时，直接退出
                     break;
                 default:
                     break;
@@ -199,11 +173,10 @@ public class NewLoginActivity extends BaseActivity{
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);//去掉信息栏
         setContentView(R.layout.login_1_layout);
-        requestQueue = Volley.newRequestQueue(NewLoginActivity.this);
-        initView();
         //绑定service，实现通信
         Intent bindIntent = new Intent(this, UDPBroadcastService.class);
         bindService(bindIntent, connection, BIND_AUTO_CREATE); // 绑定服务
+        initView();
     }
 
     @Override
@@ -321,7 +294,6 @@ public class NewLoginActivity extends BaseActivity{
         params10.width = 1;
         tvTopHeightIn.setLayoutParams(params10);
 
-
         //获取控件宽度
         int w = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
         int h = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
@@ -353,8 +325,6 @@ public class NewLoginActivity extends BaseActivity{
         etUserName.setText(sp.getString("userName","").toString());
         etPassword.setText(sp.getString("password","").toString());*/
 
-
-        host_ip = getIntent().getStringExtra("ip");  //主机ip
     }
 
     public void loginClick(View v){
@@ -474,47 +444,6 @@ public class NewLoginActivity extends BaseActivity{
         }
     }
 
-    //网络操作，获取地址，获取天气信息
-    private void getLocationFromNet(){
-        String url = "";
-        OkHttpClient client = new OkHttpClient();
-        okhttp3.Request request = new okhttp3.Request.Builder().url(url).build();
-        Call call = client.newCall(request);
-        call.enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                Toast.makeText(NewLoginActivity.this, "网络获取失败", Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onResponse(Call call, okhttp3.Response response) throws IOException {
-                String[] nameList;//菜谱名数组
-                String[] imageUrlList;//菜谱图片url数组
-                String[] ingredientsList;//菜谱用料数组
-                try {
-                    JSONObject jsonObject = new JSONObject(response.body().string());
-                    JSONObject result = jsonObject.getJSONObject("result");
-                    JSONArray data = result.getJSONArray("data");
-                    nameList = new String[data.length()];
-                    imageUrlList = new String[data.length()];
-                    ingredientsList = new String[data.length()];
-                    for (int i=0;i<data.length();i++){
-                        JSONObject obj = data.getJSONObject(i);
-                        String name = obj.getString("title");//获取菜谱名字
-                        String content = obj.getString("ingredients");//获取菜谱用料
-                        String image = obj.getString("albums");//获取菜谱图片
-                        image = image.replaceAll("\\]|\"|\\[|\\\\","");//去掉图片uri中的多余字符
-                        nameList[i] = name;
-                        imageUrlList[i] = image;
-                        ingredientsList[i] = content;
-                    }
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-    }
 
     //登录页面的渐隐渐现动画
     private void fadeOutAnimation(View view, float from, float to, long duration, final View v, final boolean b){
@@ -549,7 +478,6 @@ public class NewLoginActivity extends BaseActivity{
     //-----------------------------登录----------------------------
     private void doLogin(){
         intentLogin = new Intent(NewLoginActivity.this, MyMainActivity.class);  //跳转的
-
         userName = etUserName.getText().toString().trim();
         password = etPassword.getText().toString().trim();    //获取用户名和密码
         if (TextUtils.isEmpty(userName)|| TextUtils.isEmpty(password)) {
@@ -561,11 +489,11 @@ public class NewLoginActivity extends BaseActivity{
         }
     }
 
-    /*//SharedPreferences本地储存用户信息
+    //SharedPreferences本地储存用户信息
     private void saveUserInform(String userName,String password){
         SharedPreferences sp = getSharedPreferences("user_inform",MODE_PRIVATE);        //文件名，文件类型
         sp.edit().putString("userName",userName).putString("password",password).commit();
-    }*/
+    }
     /*private void saveHomeJson(String homeJson){
         SharedPreferences sp = getSharedPreferences("homeJson",MODE_PRIVATE);        //文件名，文件类型
         sp.edit().putString("homeJson",homeJson).commit();
@@ -573,7 +501,7 @@ public class NewLoginActivity extends BaseActivity{
 
     //套包返回的json数据
     private void loginPost(){
-        final String url = "http://192.168.3.102:2000/api/user/login";
+        final String url = "http://192.168.10.230:2000/api/user/login";
         new Thread(){
             @Override
             public void run() {
@@ -608,6 +536,8 @@ public class NewLoginActivity extends BaseActivity{
             JSONObject obj = new JSONObject(response);
             token = obj.getString("token");      //获取token
             postToken(token);
+            //传一个token
+            intentLogin.putExtra("token",token);
             Log.i(TAG, "getToken: 新版token："+token);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -617,7 +547,7 @@ public class NewLoginActivity extends BaseActivity{
     //向服务器post token
     private void postToken(final String token){
         final String token1 = "00000000000000000000000000000000"; //暂时用
-        final String url = "http://192.168.3.102:2000/api/user/profile";
+        final String url = "http://192.168.10.230:2000/api/user/profile";
         new Thread(){
             @Override
             public void run() {
@@ -633,7 +563,7 @@ public class NewLoginActivity extends BaseActivity{
                     @Override
                     public void onResponse(Call call, okhttp3.Response response) throws IOException {
                         String resp = response.body().string();
-                        LongLogCatUtil.logE(TAG,"新版房间信息:"+resp);
+                        //LongLogCatUtil.logE(TAG,"新版房间信息:"+resp);
                         Message msg = new Message();
                         msg.what = 3;
                         msg.obj = resp;
@@ -645,7 +575,7 @@ public class NewLoginActivity extends BaseActivity{
     }
 
 
-    //根据用户名密码，返回用户家庭的json数据 -------------旧版--------------
+    /*//根据用户名密码，返回用户家庭的json数据 -------------旧版--------------
     private void postAndInitData(){
         String url="http://115.29.97.189:2737/api/login";
         Map<String,String> map=new HashMap<String, String>();
@@ -685,10 +615,10 @@ public class NewLoginActivity extends BaseActivity{
             }
         });
         requestQueue.add(request);
-    }
+    }*/
 
     //解析服务器返回的json数据    -----------------旧版的数据解析-------------------
-    private void doJsonParse(String jsonData){
+    /*private void doJsonParse(String jsonData){
         try {
             JSONObject obj1 = new JSONObject(jsonData);
             Iterator iterator = obj1.keys();
@@ -812,7 +742,7 @@ public class NewLoginActivity extends BaseActivity{
 
 
             //新版
-            /*int roomsNumNew = allJsonData.getCommandData().getProfile().getRooms().getArray().size();//房间数量
+            *//*int roomsNumNew = allJsonData.getCommandData().getProfile().getRooms().getArray().size();//房间数量
             String[] roomNameListNew = new String[roomsNumNew];//房间名字数组
             String[] roomDBNameListNew = new String[roomsNumNew];//房间名字数组
             for (int i=0;i<roomsNumNew;i++){
@@ -823,7 +753,7 @@ public class NewLoginActivity extends BaseActivity{
 
             intent.putExtra("roomNameList",roomNameListNew);
             intent.putExtra("roomDBNameList",roomDBNameListNew);
-            intent.putExtra("roomAttr",roomAttr);*/
+            intent.putExtra("roomAttr",roomAttr);*//*
 
 
 
@@ -844,7 +774,7 @@ public class NewLoginActivity extends BaseActivity{
             e.printStackTrace();
         }
         runningTimeDialog.progressDialog.dismiss();
-    }
+    }*/
 
     //测试  包装发送udp
     /*public void test(String hid){
@@ -983,7 +913,7 @@ public class NewLoginActivity extends BaseActivity{
 
 
     //解析房间数据
-    private void doParseRooms(String mRoomAttr){
+    /*private void doParseRooms(String mRoomAttr){
         //roomsList = new ArrayList<Rooms>();
 
         try {
@@ -1107,7 +1037,7 @@ public class NewLoginActivity extends BaseActivity{
             Log.i(TAG, "doParseRooms: "+e);
             e.printStackTrace();
         }
-    }
+    }*/
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {

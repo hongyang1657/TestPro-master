@@ -15,7 +15,7 @@ import com.byids.hy.testpro.utils.UDPSocket;
  */
 
 public class UDPBroadcastService extends Service{
-    private static final String TAG = "result";
+    private static final String TAG = "result_udp_hy";
     private static final String TAG_UDP_SERVICE = "udp_service";
     private UDPSocket udpSocket;
     private String udpCheck;
@@ -77,7 +77,6 @@ public class UDPBroadcastService extends Service{
     @Override
     public void onDestroy() {
         super.onDestroy();
-
         Log.i(TAG, "onCreate:--------------销毁Udp service------------------- ");
     }
 

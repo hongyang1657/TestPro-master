@@ -5,7 +5,6 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.TranslateAnimation;
@@ -20,6 +19,10 @@ import com.byids.hy.testpro.ScrollViewListener;
  * com.byids.hy.testpro.View.MyPullUpScrollView
  */
 public class MyPullUpScrollView extends ScrollView{
+
+    private Context context;
+    private ScrollViewListenner listenner;
+    private MyPullUpScrollView myPullUpScrollView;
 
     private PullUpMenuListener pullUpMenuListener;
     private View inner;
@@ -72,6 +75,7 @@ public class MyPullUpScrollView extends ScrollView{
     public void smoothScrollToSlow(int fx,int fy,int duration){
         int dx = fx - getScrollX();
         int dy = fy - getScrollY();
+        Log.i("scroll_animation", "smoothScrollToSlow: ==========dx"+dx+"====dy"+dy);
         smoothScrollBySlow(dx,dy,duration);
     }
 
@@ -182,6 +186,9 @@ public class MyPullUpScrollView extends ScrollView{
 
     @Override
     protected void onScrollChanged(int l, int t, int oldl, int oldt) {
+        if (null != listenner) {
+            this.listenner.onScrollChanged(myPullUpScrollView, l, t, oldl, oldt);
+        }
         super.onScrollChanged(l, t, oldl, oldt);
         if (pullUpMenuListener != null) {
             //*********两个ScrollView联动的倍率是3，这里如果做修改，MyFragment里的数值都需要修改***********
@@ -238,6 +245,7 @@ public class MyPullUpScrollView extends ScrollView{
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
+        myPullUpScrollView = this;
         if (inner==null){
             return super.onTouchEvent(ev);
             //return false;
@@ -263,6 +271,15 @@ public class MyPullUpScrollView extends ScrollView{
      */
     private boolean isCanPullUp() {
         return  contentView.getHeight() <= getHeight() + getScrollY();
+    }
+
+
+    public interface ScrollViewListenner {
+        public void onScrollChanged(MyPullUpScrollView view, int l, int t, int oldl, int oldt);
+    }
+
+    public void setScrollViewListenner(ScrollViewListenner listenner) {
+        this.listenner = listenner;
     }
 
 }

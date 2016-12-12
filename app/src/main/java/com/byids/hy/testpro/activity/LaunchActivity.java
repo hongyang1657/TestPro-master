@@ -66,6 +66,7 @@ public class LaunchActivity extends BaseActivity{
     private String allJson;
     private String tokenJson;
     private String token;
+    private String saveToken;     //本地保存的token,用来非第一次登陆的验证
 
     //长连接
     private TcpLongSocket tcplongSocket;
@@ -97,20 +98,29 @@ public class LaunchActivity extends BaseActivity{
                     startActivity(intent);
                     finish();        //结束此activity，下一个activity返回时，直接退出
                     break;*/
+                case 1:            //内网登录获取房间信息后跳转
+                    String strRoomInf = (String) msg.obj;
+                    LongLogCatUtil.logE("result","解密后的房间信息："+strRoomInf);     //多行打印logcat
+                    /*Intent intentByLAN = new Intent(LaunchActivity.this,MyMainActivity.class);
+                    intentByLAN.putExtra("host_ip",ip);
+                    startActivity(intentByLAN);
+                    finish();*/
+                    break;
                 case 2:
-                    //获取token
+                    //外网登陆获取token
                     tokenJson = (String) msg.obj;
                     Log.i(TAG, "handleMessage: handlllllllll"+tokenJson);
                     getToken(tokenJson);
                     break;
-                case 3:      //获取用户信息
+                case 3:      //外网登陆获取用户信息后跳转
                     VibratorUtil.Vibrate(LaunchActivity.this, 100);
                     //allJson = (String) msg.obj;
                     //解析数据后跳转
-                    Intent intent = new Intent(LaunchActivity.this,MyMainActivity.class);
-                    intent.putExtra("token",token);
-                    intent.putExtra("host_ip",ip);
-                    startActivity(intent);
+                    Intent intentByWAN = new Intent(LaunchActivity.this,MyMainActivity.class);
+                    intentByWAN.putExtra("token",token);
+                    intentByWAN.putExtra("host_ip",ip);
+                    intentByWAN.putExtra("isFirstLogin",false);
+                    startActivity(intentByWAN);
                     finish();
                     break;
 
@@ -163,6 +173,7 @@ public class LaunchActivity extends BaseActivity{
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        unbindService(connection);
     }
 
     private void init(){
@@ -187,13 +198,12 @@ public class LaunchActivity extends BaseActivity{
                 Log.i(TAG, "reciveIntent: -----------获取uname:"+userName+"，pwd:"+password+"-------------");
 
                 //userName = null;     //为了模拟每次都是第一次登陆，以后删除
-                userName = "byidstest";     //模拟非第一次登陆
-                password = "byids";
-                if (userName.equals("")){          //第一次登陆，必须外网，跳转登陆页面
+                //userName = "byidstest";     //模拟非第一次登陆
+                //password = "byids";
+                if ("".equals(userName)||userName==null){          //第一次登陆，必须外网，跳转登陆页面
                     Log.i(TAG, "run: ************************首次登陆，必须外网登陆，跳转登陆页************************");
                     Intent intent = new Intent(LaunchActivity.this,NewLoginActivity.class);
-                    //ip = null;     //删除
-                    intent.putExtra("ip",ip);       //后台udp广播获取主机ip，如果能获取，表示可以本地内网连接，如果没能获取，走外网连接
+                    intent.putExtra("ip",ip);       //                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          `// 后台udp广播获取主机ip，如果能获取，表示可以本地内网连接，如果没能获取，走外网连接
                     Log.i(TAG, "run: --------------获取到主机ip没：-------------"+ip);
                     startActivity(intent);
                     finish();
@@ -202,7 +212,7 @@ public class LaunchActivity extends BaseActivity{
                     if (udpCheck.equals("ip")){      //内网连通
                         Toast.makeText(LaunchActivity.this, "找到主机，内网登陆", Toast.LENGTH_SHORT).show();
                         Log.i(TAG, "run: ************************非首次登陆，找到主机，内网登陆************************");
-                        secondLoginLAN();    //内网Tcp获取房间信息
+                        secondLoginLAN();     //内网Tcp获取房间信息
                     }else {
                         //内网不通,走外网
                         Toast.makeText(LaunchActivity.this, "内网不通，外网登陆", Toast.LENGTH_SHORT).show();
@@ -226,13 +236,17 @@ public class LaunchActivity extends BaseActivity{
 
     //--------------非首次登录---------内网通过连接Tcp 获取房间信息-------------
     private void secondLoginLAN(){
+        SharedPreferences spToken = getSharedPreferences("user_token",MODE_PRIVATE);
+        saveToken = spToken.getString("token","");
+        ip = "192.168.10.167";                    //指定连接的主机，以后删除
+        //ip = "192.168.3.16";
         tcplongSocket = new TcpLongSocket(new ConnectTcp());
-
         tcplongSocket.startConnect(ip, DEFAULT_PORT);
         //解析数据后跳转（测试，直接加载假数据跳转，以后删除）
-        Intent intent = new Intent(LaunchActivity.this,MyMainActivity.class);
-        intent.putExtra("host_ip",ip);
-        startActivity(intent);
+        Intent intentByLAN = new Intent(LaunchActivity.this,MyMainActivity.class);
+        intentByLAN.putExtra("host_ip",ip);
+        intentByLAN.putExtra("isFirstLogin",false);
+        startActivity(intentByLAN);
         finish();
     }
 
@@ -258,7 +272,7 @@ public class LaunchActivity extends BaseActivity{
                 e.printStackTrace();
             }
 
-            String checkJson = CommandJsonUtils.getCommandJson(1, checkCommandData, hid, userName, password, String.valueOf(System.currentTimeMillis()));
+            String checkJson = CommandJsonUtils.getCommandJson(1, checkCommandData, saveToken, userName, password, String.valueOf(System.currentTimeMillis()));
             Log.i("result", "check" + checkJson);
             tcplongSocket.writeDate(Encrypt.encrypt(checkJson));
 
@@ -267,11 +281,14 @@ public class LaunchActivity extends BaseActivity{
         @Override
         public void receive(byte[] buffer) {             //接收主机信息
             /*
-            * ******************************从主机获取了房间信息*******************************用Gson处理
+            * ***********************从主机获取了房间信息**********************用Gson处理******跳转
             * */
             if (buffer.length>11){
                 String strRoomInfo = testDecryptByte(buffer);
-                LongLogCatUtil.logE("result",strRoomInfo);     //多行打印logcat
+                Message message = new Message();
+                message.what = 1;
+                message.obj = strRoomInfo;
+                handler.sendMessage(message);
             }
         }
 
@@ -279,6 +296,7 @@ public class LaunchActivity extends BaseActivity{
         public void disconnect() {
             tcplongSocket.close();
         }
+
     }
 
     //解密，返回json数据
@@ -314,7 +332,7 @@ public class LaunchActivity extends BaseActivity{
     //-------------------------------外网http请求-----------------------------------
     //post登录，返回token
     private void loginPost(){
-        final String url = "http://192.168.3.102:2000/api/user/login";
+        final String url = "http://192.168.10.230:2000/api/user/login";
         new Thread(){
             @Override
             public void run() {
@@ -358,7 +376,7 @@ public class LaunchActivity extends BaseActivity{
     //向服务器post token，获取房间信息
     private void postToken(final String token){
         final String token1 = "00000000000000000000000000000000"; //暂时用
-        final String url = "http://192.168.3.102:2000/api/user/profile";
+        final String url = "http://192.168.10.230:2000/api/user/profile";
         new Thread(){
             @Override
             public void run() {

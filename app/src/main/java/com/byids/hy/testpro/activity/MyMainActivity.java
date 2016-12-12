@@ -4,12 +4,15 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.app.Dialog;
+import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -114,20 +117,23 @@ public class MyMainActivity extends FragmentActivity {
     //背景图片
     private int[] ivBackList = { R.mipmap.back_13,R.mipmap.back_10, R.mipmap.back_5,R.mipmap.back_6,R.mipmap.back_2, R.mipmap.back_14, R.mipmap.back_8, R.mipmap.back_9,R.mipmap.back_12,  R.mipmap.back_1, R.mipmap.back_3, R.mipmap.back_4};
 
+
     //房间名数组kk
-    private String[] roomNameList = null;
-    private String[] roomDBNameList = null;
+    private String[] roomNameList = new String[]{"客厅","主卧","次卧","厨房","餐厅","卫浴"};
+    private String[] roomDBNameList = new String[]{"keting","zhuwo","ciwo","chufang","canting","weiyu"};
     private HomeAttr homeAttr = new HomeAttr();
+
 
 
     private MyFragment myFragment1;
 
     private String ip; //home  ip地址
-    private String uname = "@";
-    private String pwd = "@";
-    private String hid = "56e276f3736fb0872c69d876";
+    private boolean isFirstLogin;
+    private String uname = "byidstest";
+    private String pwd = "byids";
+    private String hid = "56e276f3736fb0872c69d876";        //换成主机发过来的token
     private String host_ip;     //主机地址
-    private String token;
+    private String token;     //外网登录服务器时给的token，只有当第二次登录时才会失效
 
     //----------------TCP socket内网通信---------------------
     public static final int DEFAULT_PORT = 57816;
@@ -136,7 +142,7 @@ public class MyMainActivity extends FragmentActivity {
 
     //---------------------TCP Socket外网通信------------------------
     private static final int DEFAULT_PORT_WAN = 3002;
-    private static final String ip_WAN = "192.168.3.102";
+    private static final String ip_WAN = "192.168.10.230";
     private TcpLongSocket tcpLongSocketWAN;   //外网通信的Tcp Socket长连接
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
@@ -152,7 +158,7 @@ public class MyMainActivity extends FragmentActivity {
                 case 1:         //外网
                     Log.i("hongyang", "run:外网连接状态 "+tcpLongSocketWAN.getConnectStatus());
                     if (tcpLongSocketWAN.getConnectStatus()){
-                        EventBus.getDefault().post(new MyEventBus2("12"));
+                        EventBus.getDefault().post(new MyEventBus2("12"));     //外网连接
                     }else {
                         EventBus.getDefault().post(new MyEventBus2("22"));
                     }
@@ -162,7 +168,7 @@ public class MyMainActivity extends FragmentActivity {
                     if (tcplongSocket.getConnectStatus()){
                         EventBus.getDefault().post(new MyEventBus2("11"));    //内网连接
                     }else {
-                        EventBus.getDefault().post(new MyEventBus2("22"));    //外网连接
+                        EventBus.getDefault().post(new MyEventBus2("22"));
                     }
                     break;
                 default:
@@ -172,6 +178,21 @@ public class MyMainActivity extends FragmentActivity {
     };
 
 
+    //-------------------activity与service通信----------------------
+    private UDPBroadcastService.UDPBinder udpBinder;      //绑定后台udp
+    private ServiceConnection connection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            udpBinder = (UDPBroadcastService.UDPBinder) service;
+            /*String a = udpBinder.getHostIp();
+            Log.i(TAG, "onServiceConnected: ------获取后台接受的主机ip------"+a);*/
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -180,8 +201,8 @@ public class MyMainActivity extends FragmentActivity {
         setContentView(R.layout.my_main_layout);
         //注册EventBus
         EventBus.getDefault().register(this);
-        initView();    //初始化界面，布局
         reciveIntent();
+        initView();    //初始化界面，布局
         //startTcpService();
 
         // ATTENTION: This was auto-generated to implement the App Indexing API.
@@ -203,7 +224,7 @@ public class MyMainActivity extends FragmentActivity {
         Log.i(TAG, "onDestroy: ----------------主界面退出--------------onDestroy---------------------------");
 
         //System.exit(0);          //确定该Activity销毁时就是程序退出时，才能调用该方法来关闭整个应用
-
+        unbindService(connection);
     }
 
     //接收登录页面传递过来的数据
@@ -241,12 +262,27 @@ public class MyMainActivity extends FragmentActivity {
         uname = getIntent().getStringExtra("uname");
         pwd = getIntent().getStringExtra("pwd");
         host_ip = getIntent().getStringExtra("host_ip");
+        host_ip = "192.168.10.167";
+        //host_ip = "192.168.3.16";
         token = getIntent().getStringExtra("token");
+        isFirstLogin = getIntent().getBooleanExtra("isFirstLogin",false);       //是否第一次登陆
+
+        //activity给fragment传递数据
+        for (int i = 0; i < roomNameList.length; i++) {
+            myFragment1 = new MyFragment(i, roomNameList[i], roomDBNameList[i], ivBackList, token, uname, pwd);         //房间id,房间名数组，房间拼音名数组，背景图片数组，活跃的控件数组,hid,uname,pwd
+            pullMenu(myFragment1);
+            viewList.add(myFragment1);
+        }
+
+        if (isFirstLogin){
+            SharedPreferences sp = getSharedPreferences("user_token",MODE_PRIVATE);        //文件名，文件类型
+            sp.edit().putString("token",token).commit();
+        }
         Log.i("hongyang", "reciveIntent: ---MyMainActivity--------获取uname:"+uname+"-------pwd:"+pwd);
         if (uname!=null){
             saveUserInform(uname,pwd);     //本地储存
         }
-        Log.i("hongyang", "reciveIntent: !!!!!!!!!!!host_ip:"+host_ip+"!!!!token"+token);
+        Log.i("hongyang", "reciveIntent: !!!!!!!!!!!MainActivity接收到的host_ip:"+host_ip+"!!!!外网第一次登陆获取的token："+token);
         //host_ip = null;    //连外网,以后删除
         new Thread(){
             @Override
@@ -298,10 +334,9 @@ public class MyMainActivity extends FragmentActivity {
                 e.printStackTrace();
             }
 
-            String checkJson = CommandJsonUtils.getCommandJson(1, checkCommandData, hid, uname, pwd, String.valueOf(System.currentTimeMillis()));
+            String checkJson = CommandJsonUtils.getCommandJson(1, checkCommandData, token, uname, pwd, String.valueOf(System.currentTimeMillis()));
             Log.i("result", "check" + checkJson);
             tcplongSocket.writeDate(Encrypt.encrypt(checkJson));
-
         }
 
         @Override
@@ -370,7 +405,7 @@ public class MyMainActivity extends FragmentActivity {
             System.arraycopy(data3,0,data,0,data3.length);
             System.arraycopy(postLenth,0,data,data3.length,postLenth.length);
 
-            Log.i("hongyang", "connected: -----token-------"+token);
+            Log.i(TAG, "connected: -----token-------"+token);
             /*String tokenStr = null;
             try {
                 JSONObject obj = new JSONObject(token);
@@ -379,8 +414,11 @@ public class MyMainActivity extends FragmentActivity {
                 e.printStackTrace();
             }*/
 
-            //把十六进制token转byte数组
-            byte[] tokenBytes = hexStr2Bytes(token);
+            //把十六进制token转byte数组,两个一转，一共16组
+            //byte[] tokenBytes = hexStr2Bytes(token);
+
+            //token转byte数组,一个一转，一共32组
+            byte[] tokenBytes = token.getBytes();
             Log.i(TAG, "onClick: --------"+byteStringLog(tokenBytes));
 
             byte[] toConnectTcpLong = new byte[data.length+tokenBytes.length];
@@ -397,10 +435,10 @@ public class MyMainActivity extends FragmentActivity {
         public void receive(byte[] buffer) {
 
             Log.i(TAG, "receive: buffer.length:"+buffer.length);
-            //Log.i(TAG, "receive: "+byteStringLog(buffer));
+            Log.i(TAG, "receive: 收到的buffer："+byteStringLog(buffer));
             //取最后一位，0：验证token成功；1：验证失败
             switch (buffer[buffer.length-1]){
-                case 0:
+                case -56:
                     Log.i(TAG, "receive: ---验证token成功---");
                     isConnectWAN = true;
                     new Thread(){
@@ -463,12 +501,15 @@ public class MyMainActivity extends FragmentActivity {
     }
 
 
-    private void initView() { 
+    private void initView() {
+
+        Intent bindIntent = new Intent(this, UDPBroadcastService.class);
+        bindService(bindIntent, connection, BIND_AUTO_CREATE); // 绑定服务
 
         typeFace = Typeface.createFromAsset(getAssets(), "fonts/xiyuanti.ttf");
         //获取房间信息
-        roomNameList = getIntent().getStringArrayExtra("roomNameList");
-        roomDBNameList = getIntent().getStringArrayExtra("roomDBNameList");
+        //roomNameList = getIntent().getStringArrayExtra("roomNameList");
+        //roomDBNameList = getIntent().getStringArrayExtra("roomDBNameList");
         homeAttr = (HomeAttr) getIntent().getSerializableExtra("homeAttr");
 
         /*Rooms rooms = new Rooms();
@@ -478,15 +519,6 @@ public class MyMainActivity extends FragmentActivity {
         }*/
 
 
-        //初始化activity给fragment传递的数据
-        roomNameList = new String[]{"客厅","卧室","书房","淋浴间","客房"};
-        roomDBNameList = new String[]{"cs1","cs2","cs3","cs4","cs5"};
-
-        for (int i = 0; i < roomNameList.length; i++) {
-            myFragment1 = new MyFragment(i, roomNameList[i], roomDBNameList[i], ivBackList, hid, uname, pwd);         //房间id,房间名数组，房间拼音名数组，背景图片数组，活跃的控件数组,hid,uname,pwd
-            pullMenu(myFragment1);
-            viewList.add(myFragment1);
-        }
 
         WindowManager wm = this.getWindowManager();
         width = wm.getDefaultDisplay().getWidth();
@@ -827,8 +859,15 @@ public class MyMainActivity extends FragmentActivity {
                 sp.edit().clear().commit();    //清除sharedPreference房间json数据
                 SharedPreferences spUser = getSharedPreferences("user_inform",MODE_PRIVATE);
                 spUser.edit().clear().commit();    //清除sharedPreference用户数据
+                SharedPreferences spToken = getSharedPreferences("user_token",MODE_PRIVATE);
+                spToken.edit().clear().commit();      //清除token
                 isConnectWAN = false;
-                tcpLongSocketWAN.close();    //关闭外网的连接
+                if (tcpLongSocketWAN!=null){
+                    tcpLongSocketWAN.close();    //关闭外网的连接
+                }
+                if (tcplongSocket!=null){
+                    tcplongSocket.close();      //关闭内网连接
+                }
 
                 Intent intent = new Intent(MyMainActivity.this,NewLoginActivity.class);
                 startActivity(intent);
@@ -919,6 +958,38 @@ public class MyMainActivity extends FragmentActivity {
 
 
     //-----------------------------接受fragment传来的消息--------------------------------
+    //拼接外网控制命令    ----->  数据长度（4个byte）+ 数据内容
+    private byte[] byidsHead = new byte[]{35,98,121,105,100,115,4};          //发送外网控制命令的数据头
+    private byte[] jointWANControlCommend(int byte_data_length,byte[] LANControlCommend){
+        //把int类型的控制命令长度转化成byte[4]
+        byte[] byte_length = changeIntToByte4(byte_data_length);      //4位byte[] 表示数据长度
+        byte[] a = byteMerger(byte_length,LANControlCommend);
+        return byteMerger(byidsHead,a);
+    }
+
+    //把int类型的控制命令长度转化成byte[4]
+    private static byte[] changeIntToByte4(int byte_data_length){
+        int a = byte_data_length/(256*256*256);
+        int b = byte_data_length/(256*256);
+        int c = byte_data_length/256;
+        int d = byte_data_length%256;
+        byte[] data_length = {(byte) a,(byte)b,(byte)c,(byte)d};
+        return data_length;
+    }
+
+
+
+    //拼接两个byte【】     拼接#byids（6个byte） + 4（1个byte） + 加密数据长度（4个byte）
+    public static byte[] byteMerger(byte[] byte_1, byte[] byte_2){
+        byte[] byte_3 = new byte[byte_1.length+byte_2.length];
+        System.arraycopy(byte_1, 0, byte_3, 0, byte_1.length);
+        System.arraycopy(byte_2, 0, byte_3, byte_1.length, byte_2.length);
+        return byte_3;
+    }
+
+
+
+
     @Subscribe
     public void onEventMainThread(MyEventBus event) {
         String msg = event.getmMsg();
@@ -926,7 +997,14 @@ public class MyMainActivity extends FragmentActivity {
         Log.i(TAG, "onEventMainThread: 接收到的json" + msg);
         //发送tcp Socket
         if (msg!=SWITCH_ROOM_DIALOG && msg!=SETTING_DIALOG && msg!=DOOR_LOCK_DIALOG && msg!=SECURITY_DIALOG) {
-            tcplongSocket.writeDate(Encrypt.encrypt(msg));
+            if (tcplongSocket!=null){
+                tcplongSocket.writeDate(Encrypt.encrypt(msg));     //内网发送控制命令
+            }
+            if (tcpLongSocketWAN!=null){
+                //拼接外网控制命令
+
+                tcpLongSocketWAN.writeDate(jointWANControlCommend(Encrypt.encrypt(msg).length,Encrypt.encrypt(msg)));  //外网发送控制命令,前面拼接#byids + 4 + 控制命令的长度 + 控制命令
+            }
         }
 
         switch (event.getmMsg()) {
@@ -1003,7 +1081,9 @@ public class MyMainActivity extends FragmentActivity {
                     break;
                 case R.id.iv_media:
                     Toast.makeText(MyMainActivity.this, "媒体", Toast.LENGTH_SHORT).show();
-                    tcpLongSocketWAN.writeDate(new byte[]{35,98,121,105,100,115,4,0,0,0,6,11,12,13,14,15,16});
+                    //tcpLongSocketWAN.writeDate(new byte[]{35,98,121,105,100,115,4,0,0,0,6,11,12,13,14,15,16});
+
+                    Log.i(TAG, "onClick: getUdpCheck::"+udpBinder.getUdpCheck()+"--------getHostIp::"+udpBinder.getHostIp());
                     break;
             }
         }

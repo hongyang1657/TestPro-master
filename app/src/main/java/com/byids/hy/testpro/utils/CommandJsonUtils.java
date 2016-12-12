@@ -9,7 +9,7 @@ import org.json.JSONObject;
  * Created by byids on 16/6/14.
  */
 public class CommandJsonUtils {
-    public static String getCommandJson(int CommandType , JSONObject commandData, String hid, String loginName, String password, String CommandTime){
+    public static String getCommandJson(int CommandType , JSONObject commandData, String token, String loginName, String password, String CommandTime){
         String resultJson="";
         JSONObject commandJson=new JSONObject();
         JSONObject commanduser=new JSONObject();
@@ -29,7 +29,7 @@ public class CommandJsonUtils {
 
 
             //commandUser
-            commanduser.put("hid",hid);
+            commanduser.put("token",token);
             commanduser.put("loginName",loginName);
             commanduser.put("password",password);
 
