@@ -2,16 +2,7 @@ package com.byids.hy.testpro.utils;
 
 import android.util.Log;
 
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-
-import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.KeyGenerator;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -80,7 +71,7 @@ public class AES {
         return b2;
     }
 
-    public static String byteStringLog(byte[] bs){
+    /*public static String byteStringLog(byte[] bs){
         String log = new String();
         for (int i = 0;i<bs.length;i++){
             int bi = (int)bs[i];
@@ -88,7 +79,7 @@ public class AES {
         }
         System.out.println(log);
         return log;
-    }
+    }*/
 
 
     public static byte[] generateIV(){
@@ -97,7 +88,7 @@ public class AES {
             int randInt = (int)(Math.random()*255);
             ivs[i] = (byte)randInt;
         }
-        byteStringLog(ivs);
+        //byteStringLog(ivs);
         return ivs;
     }
 
@@ -129,14 +120,14 @@ public class AES {
             return null;
         }
         byte[] jsonByte = json.getBytes();*/
-        Log.i("result", "decrypt: -------解密---------Byte[]:::"+byteStringLog(jsonByte));
+        //Log.i("result", "decrypt: -------解密---------Byte[]:::"+byteStringLog(jsonByte));
 
         IvParameterSpec piv = new IvParameterSpec(iv);
 
         byte[] idEncryptByte = null;
         try {
             idEncryptByte = decrypt(jsonByte, piv);
-            Log.i("result", "decrypt: $$$$$$$$$$idEncryptByte$$$$$$$$::"+idEncryptByte);
+            //Log.i("result", "decrypt: $$$$$$$$$$idEncryptByte$$$$$$$$::"+idEncryptByte);
         } catch (Exception e) {
             e.printStackTrace();
             Log.i("result", "decrypt: #######错误#####"+e.toString());

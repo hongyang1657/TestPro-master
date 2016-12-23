@@ -69,7 +69,7 @@ public class LaunchActivity extends BaseActivity{
     private String saveToken;     //本地保存的token,用来非第一次登陆的验证
 
     //长连接
-    private TcpLongSocket tcplongSocket;
+    private TcpLongSocket tcplongSocket = null;
 
     private boolean isConnect;
     private boolean isMobileState;
@@ -100,11 +100,28 @@ public class LaunchActivity extends BaseActivity{
                     break;*/
                 case 1:            //内网登录获取房间信息后跳转
                     String strRoomInf = (String) msg.obj;
-                    LongLogCatUtil.logE("result","解密后的房间信息："+strRoomInf);     //多行打印logcat
-                    /*Intent intentByLAN = new Intent(LaunchActivity.this,MyMainActivity.class);
-                    intentByLAN.putExtra("host_ip",ip);
-                    startActivity(intentByLAN);
-                    finish();*/
+                    LongLogCatUtil.logE("result","launchActivity解密后的房间信息："+strRoomInf);     //多行打印logcat
+                    //解析数据后跳转（测试，直接加载假数据跳转，以后删除）
+
+                        if ("Verify error".equals(judgeVerify(strRoomInf))){
+                            Toast.makeText(LaunchActivity.this, "内网验证没通过,尝试通过外网登录", Toast.LENGTH_SHORT).show();
+                            Log.i("result", "handleMessage: 内网验证没通过,尝试通过外网登录");
+                            secondLoginWAN();
+                        }
+                        if (strRoomInf.length()>200){           //获取房间信息
+                            tcplongSocket.close();
+                            Intent intentByLAN = new Intent(LaunchActivity.this,MyMainActivity.class);
+                            Log.i("putExtra_hy", "secondLoginLANlaunch:"+userName+"---"+password+"---"+ip+"---"+saveToken);
+                            intentByLAN.putExtra("uname",userName);
+                            intentByLAN.putExtra("pwd",password);
+                            intentByLAN.putExtra("host_ip",ip);
+                            intentByLAN.putExtra("isFirstLogin",false);
+                            intentByLAN.putExtra("token",saveToken);
+                            startActivity(intentByLAN);
+                            finish();
+                        }
+
+
                     break;
                 case 2:
                     //外网登陆获取token
@@ -117,9 +134,12 @@ public class LaunchActivity extends BaseActivity{
                     //allJson = (String) msg.obj;
                     //解析数据后跳转
                     Intent intentByWAN = new Intent(LaunchActivity.this,MyMainActivity.class);
+                    Log.i("putExtra_hy", "secondLoginLAN:"+userName+"---"+password+"---"+ip+"---"+token);
+                    intentByWAN.putExtra("uname",userName);
+                    intentByWAN.putExtra("pwd",password);
                     intentByWAN.putExtra("token",token);
                     intentByWAN.putExtra("host_ip",ip);
-                    intentByWAN.putExtra("isFirstLogin",false);
+                    intentByWAN.putExtra("isFirstLogin",true);
                     startActivity(intentByWAN);
                     finish();
                     break;
@@ -173,7 +193,27 @@ public class LaunchActivity extends BaseActivity{
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        unbindService(connection);
+        if (!isMobileState){
+            unbindService(connection);
+        }
+        if (tcplongSocket!=null){
+            tcplongSocket.close();
+        }
+    }
+
+    //判断是否验证通过
+    private String judgeVerify(String strRec){
+        String strVerify = null;
+        String strJson = strRec.substring(0,strRec.length()-16);
+        Log.i("judgeVerify", "judgeVerify: "+strJson);
+        try {
+            JSONObject jsonObject = new JSONObject(strJson);
+            strVerify = jsonObject.getString("CommandData");
+            Log.i(TAG, "judgeVerify:jsonObjectStr: "+strVerify);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return strVerify;
     }
 
     private void init(){
@@ -189,6 +229,7 @@ public class LaunchActivity extends BaseActivity{
             @Override
             public void run() {
                 //获取主机ip
+
                 ip = udpBinder.getHostIp();
                 udpCheck = udpBinder.getUdpCheck();
                 Log.i(TAG, "run: 启动页获取udp接受到的主机ip："+ip+"-----接受到的主机check："+udpCheck);
@@ -210,12 +251,12 @@ public class LaunchActivity extends BaseActivity{
                 }else{          //非第一次登陆
                     //udpCheck = "外网测试，故意让内网不通，测完删除";
                     if (udpCheck.equals("ip")){      //内网连通
-                        Toast.makeText(LaunchActivity.this, "找到主机，内网登陆", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(LaunchActivity.this, "内网找到主机，尝试通过内网登陆", Toast.LENGTH_SHORT).show();
                         Log.i(TAG, "run: ************************非首次登陆，找到主机，内网登陆************************");
                         secondLoginLAN();     //内网Tcp获取房间信息
                     }else {
                         //内网不通,走外网
-                        Toast.makeText(LaunchActivity.this, "内网不通，外网登陆", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(LaunchActivity.this, "内网找不到主机通，外网登陆", Toast.LENGTH_SHORT).show();
                         Log.i(TAG, "run: ************************非首次登陆，内网不通，外网登陆************************");
                         secondLoginWAN();    //外网http获取房间信息
                     }
@@ -235,19 +276,16 @@ public class LaunchActivity extends BaseActivity{
 
 
     //--------------非首次登录---------内网通过连接Tcp 获取房间信息-------------
+    private ConnectTcp connectTcp;
     private void secondLoginLAN(){
         SharedPreferences spToken = getSharedPreferences("user_token",MODE_PRIVATE);
         saveToken = spToken.getString("token","");
-        ip = "192.168.10.167";                    //指定连接的主机，以后删除
+        //ip = "192.168.10.167";                    //指定连接的主机，以后删除
         //ip = "192.168.3.16";
-        tcplongSocket = new TcpLongSocket(new ConnectTcp());
+        connectTcp = new ConnectTcp();
+        tcplongSocket = new TcpLongSocket(connectTcp);
         tcplongSocket.startConnect(ip, DEFAULT_PORT);
-        //解析数据后跳转（测试，直接加载假数据跳转，以后删除）
-        Intent intentByLAN = new Intent(LaunchActivity.this,MyMainActivity.class);
-        intentByLAN.putExtra("host_ip",ip);
-        intentByLAN.putExtra("isFirstLogin",false);
-        startActivity(intentByLAN);
-        finish();
+
     }
 
 
@@ -259,6 +297,7 @@ public class LaunchActivity extends BaseActivity{
 
 
     //---------------------------------内网Tcp获取房间信息---------------------------------------
+    private Message message;
     private class ConnectTcp implements TCPLongSocketCallback{
 
         @Override
@@ -283,12 +322,13 @@ public class LaunchActivity extends BaseActivity{
             /*
             * ***********************从主机获取了房间信息**********************用Gson处理******跳转
             * */
-            if (buffer.length>11){
-                String strRoomInfo = testDecryptByte(buffer);
-                Message message = new Message();
+            if (buffer.length>12){
+                message = new Message();
                 message.what = 1;
-                message.obj = strRoomInfo;
+                message.obj = testDecryptByte(buffer);
                 handler.sendMessage(message);
+            }else {
+                buffer = null;
             }
         }
 
@@ -300,21 +340,31 @@ public class LaunchActivity extends BaseActivity{
     }
 
     //解密，返回json数据
+    byte[] new_sendByte;
+    byte[] nnew_sendByte;
+    byte[] ivByte;
+    byte[] dataByte;
+    byte[] a;
+    String strRoomInfo;
     private String testDecryptByte(byte[] sendByte){
-        Log.i(TAG, "test: ************************newsendByte"+sendByte.length);
-        byte[] new_sendByte = Arrays.copyOfRange(sendByte,12,sendByte.length);
-        byte[] nnew_sendByte = Arrays.copyOfRange(new_sendByte,0,new_sendByte.length-4);
-        Log.i(TAG, "test: ************************newsendByte"+nnew_sendByte.length);
-        Log.i(TAG, "test: *************newsendByte**************"+byteStringLog(nnew_sendByte));
-        byte[] ivByte = Arrays.copyOfRange(nnew_sendByte,nnew_sendByte.length-16,nnew_sendByte.length);
-        byte[] dataByte = Arrays.copyOfRange(nnew_sendByte,0,nnew_sendByte.length-16);
-        Log.i(TAG, "test: *****************加密向量长度*******newsendByte"+ivByte.length);
-        Log.i(TAG, "test: *************newsendByte*****加密向量*********"+byteStringLog(ivByte));
-        Log.i(TAG, "test: *****************加密数据长度*******newsendByte"+dataByte.length);
-        Log.i(TAG, "test: *************newsendByte*****加密数据*********"+byteStringLog(dataByte));
-        byte[] a = AES.decrypt(dataByte,ivByte);
-        String strRoomInfo = new String(a);
-        Log.i(TAG, "testDecryptByte: !!!!!!!!!!!!!!!!!!!!!!!!!!!!"+a.length+"!!!!!!!!"+strRoomInfo);
+        //Log.i(TAG, "test: ************************newsendByte"+sendByte.length);
+        new_sendByte = Arrays.copyOfRange(sendByte,12,sendByte.length);
+        nnew_sendByte = Arrays.copyOfRange(new_sendByte,0,new_sendByte.length-4);
+        //Log.i(TAG, "test: ************************newsendByte"+nnew_sendByte.length);
+        //Log.i(TAG, "test: *************newsendByte**************"+byteStringLog(nnew_sendByte));
+        ivByte = Arrays.copyOfRange(nnew_sendByte,nnew_sendByte.length-16,nnew_sendByte.length);
+        dataByte = Arrays.copyOfRange(nnew_sendByte,0,nnew_sendByte.length-16);
+        //Log.i(TAG, "test: *****************加密向量长度*******newsendByte"+ivByte.length);
+        //Log.i(TAG, "test: *************newsendByte*****加密向量*********"+byteStringLog(ivByte));
+        //Log.i(TAG, "test: *****************加密数据长度*******newsendByte"+dataByte.length);
+        //Log.i(TAG, "test: *************newsendByte*****加密数据*********"+byteStringLog(dataByte));
+        a = AES.decrypt(dataByte,ivByte);
+        try {
+            strRoomInfo = new String(a);
+        }catch (Exception e){
+            Log.i(TAG, "testDecryptByte: 错误"+e.toString());
+        }
+        //Log.i(TAG, "testDecryptByte: !!!!!!!!!!!!!!!!!!!!!!!!!!!!"+a.length+"!!!!!!!!"+strRoomInfo);
         return strRoomInfo;
     }
 
@@ -332,13 +382,14 @@ public class LaunchActivity extends BaseActivity{
     //-------------------------------外网http请求-----------------------------------
     //post登录，返回token
     private void loginPost(){
-        final String url = "http://192.168.10.230:2000/api/user/login";
+        final String url = "http://192.168.10.230:20000/api/user/login";
+        //final String url = "http://115.29.97.189:20000/api/user/login";
         new Thread(){
             @Override
             public void run() {
                 super.run();
                 // 表单提交
-                RequestBody formBody = new FormBody.Builder().add("num", "100000").add("pwd", "smile2014").build();
+                RequestBody formBody = new FormBody.Builder().add("num", userName).add("pwd", password).build();
                 OkHttpClient client = new OkHttpClient();
                 okhttp3.Request request = new okhttp3.Request.Builder().url(url).addHeader("content-type", "application/x-www-form-urlencoded").post(formBody).build();
                 client.newCall(request).enqueue(new Callback() {
@@ -368,6 +419,7 @@ public class LaunchActivity extends BaseActivity{
             token = obj.getString("token");      //获取token
             postToken(token);
             Log.i(TAG, "getToken: 外网登陆获取的token："+token);
+            Log.i("hy_result", "run: 外网登陆获取的token:"+token);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -376,7 +428,8 @@ public class LaunchActivity extends BaseActivity{
     //向服务器post token，获取房间信息
     private void postToken(final String token){
         final String token1 = "00000000000000000000000000000000"; //暂时用
-        final String url = "http://192.168.10.230:2000/api/user/profile";
+        final String url = "http://192.168.10.230:20000/api/homeserver/profile";
+        //final String url = "http://115.29.97.189:20000/api/homeserver/profile";
         new Thread(){
             @Override
             public void run() {
@@ -392,7 +445,7 @@ public class LaunchActivity extends BaseActivity{
                     @Override
                     public void onResponse(Call call, okhttp3.Response response) throws IOException {
                         String resp = response.body().string();
-                        Log.i(TAG, "onResponse: 房间信息："+resp);
+                        //Log.i(TAG, "onResponse: 房间信息："+resp);
                         LongLogCatUtil.logE(TAG,resp);
                         Message msg = new Message();
                         msg.what = 3;

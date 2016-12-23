@@ -7,6 +7,7 @@ import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -45,6 +46,7 @@ import com.byids.hy.testpro.View.LightValueScrollView;
 import com.byids.hy.testpro.View.MyCustomScrollView;
 import com.byids.hy.testpro.View.MyPullUpScrollView;
 import com.byids.hy.testpro.activity.MyMainActivity;
+import com.byids.hy.testpro.activity.custom_scene_activity.CustomSceneMainActivity;
 import com.byids.hy.testpro.utils.CommandJsonUtils;
 import com.videogo.openapi.EZOpenSDK;
 
@@ -88,9 +90,10 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
     private boolean isInitPosition = true;      //界面是否在初始位置
     private int pagerScrollState;     //viewpager滑动状态
 
-    private TextView tvScene;       //场景
+    private LinearLayout llScene;       //场景
     private LinearLayout linearPanel;    //场景控制部分
     private TextView tvLight;           //灯光
+    private TextView tvCustomScene;          //自定义场景
 
     //电视
     private LinearLayout llTelevision;
@@ -159,6 +162,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
 
     //---------------------控制部分 上---------------------
     private TextView tvRoomName;     //房间名部分
+    private ImageView ivSwitchRoomIcon;
     //private TextView tvLocalTemp;       //当地的气温
     private Button btShezhi;
     private Button btJiankong;
@@ -185,6 +189,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
 
 
     //场景
+    private TextView tvScene;
     private RelativeLayout rlXiuxian;
     private ImageView ivXiuxianOut;      //内部图片和文字
     private ImageView ivXiuxianIn;
@@ -292,6 +297,9 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
             switch (msg.what){
                 case 1:
                     linearAirDetails.setVisibility(View.GONE);
+                    tvKongtiaoTemp.setText("  18°");
+                    sbTemp.setProgress(0);
+                    tvKongtiaoTemp.setTextColor(activity.getResources().getColor(R.color.colorText));
                     break;
                 default:
                     break;
@@ -324,7 +332,6 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
     }
 
 
-    //@TargetApi(Build.VERSION_CODES.M)
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -377,8 +384,8 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
             private void handleStop(Object view) {
                 ScrollView scroller = (ScrollView) view;
                 mScrollY = scroller.getScrollY();
-                Log.i("scroll_hy", "handleStop: ----------mScrollY----------"+mScrollY);
-                Log.i("scroll_hy", "handleStop: ----------isInitPosition----------"+isInitPosition);
+                //Log.i("scroll_hy", "handleStop: ----------mScrollY----------"+mScrollY);
+                //Log.i("scroll_hy", "handleStop: ----------isInitPosition----------"+isInitPosition);
 
                 if (isInitPosition==true){
                     if (mScrollY>(btHeight_X3/2)&&mScrollY<=btHeight_X3){
@@ -420,8 +427,8 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         svPullUpMenu.setScrollViewListenner(new MyPullUpScrollView.ScrollViewListenner() {
             @Override
             public void onScrollChanged(MyPullUpScrollView view, int l, int t, int oldl, int oldt) {
-            Log.i("scroll_hy", "onScrollChange: t:"+t);
-                Log.i("scroll_hy", "onScrollChange: btHeight_X3:::"+btHeight_X3);
+            //Log.i("scroll_hy", "onScrollChange: t:"+t);
+                //Log.i("scroll_hy", "onScrollChange: btHeight_X3:::"+btHeight_X3);
                 if (t==btHeight_X3){
                     isInitPosition = true;
                 }else if (t>btHeight_X3){
@@ -446,10 +453,10 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         btMenuHeight = linearMenu.getMeasuredHeight();
 
         //获取浮现的三个部分的高度
-        tvScene.measure(w,h);
+        llScene.measure(w,h);
         linearPanel.measure(w,h);
         tvPanelTitle.measure(w,h);
-        tvSceneHeight = tvScene.getMeasuredHeight();
+        tvSceneHeight = llScene.getMeasuredHeight();
         linearSceneHeight = linearPanel.getMeasuredHeight();
         tvLightHeight = tvPanelTitle.getMeasuredHeight();
         initFloatHeight = tvSceneHeight+linearSceneHeight+tvLightHeight;  //app打开时下面浮动部分的高度
@@ -602,9 +609,12 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         tvMonitoring = (TextView) view.findViewById(R.id.tv_monitoring);
         tvLock = (TextView) view.findViewById(R.id.tv_lock);
         tvSecurity = (TextView) view.findViewById(R.id.tv_security);
+        tvScene = (TextView) view.findViewById(R.id.tv_scene_name);
+        tvCustomScene = (TextView) view.findViewById(R.id.tv_scene_custom);
 
         //控制部分  上
         tvRoomName = (TextView) view.findViewById(R.id.tv_blank);
+        ivSwitchRoomIcon = (ImageView) view.findViewById(R.id.iv_switch_room_icon);
         //tvLocalTemp = (TextView) view.findViewById(R.id.tv_local_temp);
         btShezhi = (Button) view.findViewById(R.id.bt_shezhi);
         btJiankong = (Button) view.findViewById(R.id.bt_jiankong);
@@ -615,8 +625,8 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         btMensuo.setOnClickListener(clickListener);
         btBufang.setOnClickListener(clickListener);
 //        linearClick.
-
         initControler();    //初始化控制部分  下
+
         initPanelIcon();     //初始化面板图标
 
 
@@ -628,7 +638,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
             case "keting":
                 setDifferentRoomsPanelIcon(R.mipmap.entertainment_dark_3x,R.mipmap.yule_mianban_dark_3x,R.mipmap.music_dark_3x,"休 闲","娱 乐","音 乐");
                 break;
-            case "zhuwo":
+            case "woshi":
                 setDifferentRoomsPanelIcon(R.mipmap.read_dark_3x,R.mipmap.game_dark_3x,R.mipmap.music_dark_3x,"阅 读","娱 乐","音 乐");
                 break;
             case "ciwo":
@@ -660,7 +670,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         //初始化 浮现的部分
         tvPanelTitle = (TextView) view.findViewById(R.id.tv_panel_name);
         linearPanel = (LinearLayout) view.findViewById(R.id.linear_panel_dining);
-        tvScene = (TextView) view.findViewById(R.id.tv_scene_name);
+        llScene = (LinearLayout) view.findViewById(R.id.ll_scene_name);
 
         //面板
         tvLight = (TextView) view.findViewById(R.id.tv_light);
@@ -816,6 +826,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         tvList.add(tvJuhui);
         tvList.add(tvLikai);
         tvList.add(tvScene);
+        tvList.add(tvCustomScene);
         tvList.add(tvLight);
         tvList.add(tvLightSwitch);
         tvList.add(tvLightValue);
@@ -878,8 +889,10 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         rlAirControl2.setOnClickListener(controlListener);
         rlAirControl3.setOnClickListener(controlListener);
         tvRoomName.setOnClickListener(controlListener);
+        ivSwitchRoomIcon.setOnClickListener(controlListener);
         ivTelevisionOn.setOnClickListener(controlListener);
         ivTelevisionOff.setOnClickListener(controlListener);
+        tvCustomScene.setOnClickListener(controlListener);
 
 
         sbTemp.setOnSeekBarChangeListener(tempSeekBarListener);  //空调调温SeekBar
@@ -1064,48 +1077,46 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                 case R.id.tv_blank:      //点击弹出切换房间dialog
                     clickRoomName();
                     break;
+                case R.id.iv_switch_room_icon:
+                    clickRoomName();
+                    break;
                 case R.id.rl_xiuxian:
-                    EventBus.getDefault().post(new MyEventBus(roomName));
                     setScaleAnimation(rlXiuxian);
-                    //animationXiuxian();   //特殊动画
                     clickXiuxian();
+                    setPanelIconColor(roomDBName);
                     break;
                 case R.id.rl_yule:
-                    EventBus.getDefault().post(new MyEventBus(roomName+"yule"));
                     setScaleAnimation(rlYule);
                     clickYule();
+                    setPanelIconColor(roomDBName);
                     break;
                 case R.id.rl_juhui:
-                    EventBus.getDefault().post(new MyEventBus(roomName+"juhui"));
                     setScaleAnimation(rlJuhui);
                     clickJuhui();
+                    setPanelIconColor(roomDBName);
                     break;
                 case R.id.rl_likai:
-                    EventBus.getDefault().post(new MyEventBus(roomName+"likai"));
                     setScaleAnimation(rlLikai);
                     clickLikai();
+                    setPanelIconColor(roomDBName);
                     break;
                 case R.id.relative_light_switch:
                     setScaleAnimation(rlLight);
                     clickLightSwitch();
                     break;
                 case R.id.rl_bulian:
-                    EventBus.getDefault().post(new MyEventBus(roomName+"bulian"));
                     setScaleAnimation(rlBulian);
                     clickBulian();
                     break;
                 case R.id.rl_shalian:
-                    EventBus.getDefault().post(new MyEventBus(roomName+"shalian"));
                     setScaleAnimation(rlShalian);
                     clickShalian();
                     break;
                 case R.id.rl_quanguan:
-                    EventBus.getDefault().post(new MyEventBus(roomName+"all"));
                     setScaleAnimation(rlAll);
                     clickAll();
                     break;
                 case R.id.rl_tingzhi:
-                    EventBus.getDefault().post(new MyEventBus(roomName+"stop"));
                     setCurtainStopAnimation(rlStop);
                     break;
                 /*case R.id.rl_juanlian:
@@ -1134,7 +1145,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                     setScaleAnimation(ivTelevisionOff);
                     break;
                 case R.id.rl_kongtiao_kaiguan:
-                    EventBus.getDefault().post(new MyEventBus(roomName+"kongtiao"));
+                    //EventBus.getDefault().post(new MyEventBus(roomName+"kongtiao"));
                     rlKongtiao.setClickable(false);   //点击后设为不可点击
                     ObjectAnimator.ofFloat(rlKongtiao,"scaleX",1f,0.8f,1f).setDuration(600).start();
                     ObjectAnimator objectAnimator = new ObjectAnimator().ofFloat(rlKongtiao,"scaleY",1f,0.8f,1f).setDuration(600);
@@ -1163,6 +1174,11 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                     setScaleAnimation(rlAirControl3);
                     Toast.makeText(activity, "定时", Toast.LENGTH_SHORT).show();
                     break;
+                case R.id.tv_scene_custom:      //跳转场景自定义界面
+                    Intent intent = new Intent(getContext(), CustomSceneMainActivity.class);
+                    intent.putExtra("roomDBName",roomDBName);
+                    startActivity(intent);
+                    break;
             }
         }
     };
@@ -1173,7 +1189,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
             case "keting":
                 changePanelKeting(index);
                 break;
-            case "zhuwo":
+            case "woshi":
                 changePanelZhuwo(index);
                 break;
             case "ciwo":
@@ -1196,6 +1212,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
     private void changePanelKeting(int i){
         switch (i){
             case 1:
+                controlPanel(CONTROL_PROTOCOL_HDL,"panel","1");
                 ivPanel1.setImageResource(R.mipmap.entertainment_copy_3x);
                 tvPanel1.setTextColor(activity.getResources().getColor(R.color.colorTextActive));
                 ivPanel2.setImageResource(R.mipmap.yule_mianban_dark_3x);
@@ -1206,6 +1223,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                 tvPanel4.setTextColor(activity.getResources().getColor(R.color.colorText));
                 break;
             case 2:
+                controlPanel(CONTROL_PROTOCOL_HDL,"panel","2");
                 ivPanel1.setImageResource(R.mipmap.entertainment_dark_3x);
                 tvPanel1.setTextColor(activity.getResources().getColor(R.color.colorText));
                 ivPanel2.setImageResource(R.mipmap.yule_mianban_3x);
@@ -1216,6 +1234,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                 tvPanel4.setTextColor(activity.getResources().getColor(R.color.colorText));
                 break;
             case 3:
+                controlPanel(CONTROL_PROTOCOL_HDL,"panel","3");
                 ivPanel1.setImageResource(R.mipmap.entertainment_dark_3x);
                 tvPanel1.setTextColor(activity.getResources().getColor(R.color.colorText));
                 ivPanel2.setImageResource(R.mipmap.yule_mianban_dark_3x);
@@ -1226,6 +1245,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                 tvPanel4.setTextColor(activity.getResources().getColor(R.color.colorText));
                 break;
             case 4:
+                controlPanel(CONTROL_PROTOCOL_HDL,"panel","4");
                 ivPanel1.setImageResource(R.mipmap.entertainment_dark_3x);
                 tvPanel1.setTextColor(activity.getResources().getColor(R.color.colorText));
                 ivPanel2.setImageResource(R.mipmap.yule_mianban_dark_3x);
@@ -1242,6 +1262,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
     private void changePanelZhuwo(int i){
         switch (i){
             case 1:
+                controlPanel(CONTROL_PROTOCOL_HDL,"panel","1");
                 ivPanel1.setImageResource(R.mipmap.read_3x);
                 tvPanel1.setTextColor(activity.getResources().getColor(R.color.colorTextActive));
                 ivPanel2.setImageResource(R.mipmap.game_dark_3x);
@@ -1252,6 +1273,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                 tvPanel4.setTextColor(activity.getResources().getColor(R.color.colorText));
                 break;
             case 2:
+                controlPanel(CONTROL_PROTOCOL_HDL,"panel","2");
                 ivPanel1.setImageResource(R.mipmap.read_dark_3x);
                 tvPanel1.setTextColor(activity.getResources().getColor(R.color.colorText));
                 ivPanel2.setImageResource(R.mipmap.game_3x);
@@ -1262,6 +1284,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                 tvPanel4.setTextColor(activity.getResources().getColor(R.color.colorText));
                 break;
             case 3:
+                controlPanel(CONTROL_PROTOCOL_HDL,"panel","3");
                 ivPanel1.setImageResource(R.mipmap.read_dark_3x);
                 tvPanel1.setTextColor(activity.getResources().getColor(R.color.colorText));
                 ivPanel2.setImageResource(R.mipmap.game_dark_3x);
@@ -1272,6 +1295,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                 tvPanel4.setTextColor(activity.getResources().getColor(R.color.colorText));
                 break;
             case 4:
+                controlPanel(CONTROL_PROTOCOL_HDL,"panel","4");
                 ivPanel1.setImageResource(R.mipmap.read_dark_3x);
                 tvPanel1.setTextColor(activity.getResources().getColor(R.color.colorText));
                 ivPanel2.setImageResource(R.mipmap.game_dark_3x);
@@ -1289,6 +1313,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
     private void changePanelChufang(int i){
         switch (i){
             case 1:
+                controlPanel(CONTROL_PROTOCOL_HDL,"panel","1");
                 ivPanel1.setImageResource(R.mipmap.clean_up_3x);
                 tvPanel1.setTextColor(activity.getResources().getColor(R.color.colorTextActive));
                 ivPanel2.setImageResource(R.mipmap.cook_dark_3x);
@@ -1299,6 +1324,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                 tvPanel4.setTextColor(activity.getResources().getColor(R.color.colorText));
                 break;
             case 2:
+                controlPanel(CONTROL_PROTOCOL_HDL,"panel","2");
                 ivPanel1.setImageResource(R.mipmap.clean_up_dark_3x);
                 tvPanel1.setTextColor(activity.getResources().getColor(R.color.colorText));
                 ivPanel2.setImageResource(R.mipmap.cook_3x);
@@ -1309,6 +1335,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                 tvPanel4.setTextColor(activity.getResources().getColor(R.color.colorText));
                 break;
             case 3:
+                controlPanel(CONTROL_PROTOCOL_HDL,"panel","3");
                 ivPanel1.setImageResource(R.mipmap.clean_up_dark_3x);
                 tvPanel1.setTextColor(activity.getResources().getColor(R.color.colorText));
                 ivPanel2.setImageResource(R.mipmap.cook_dark_3x);
@@ -1319,6 +1346,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                 tvPanel4.setTextColor(activity.getResources().getColor(R.color.colorText));
                 break;
             case 4:
+                controlPanel(CONTROL_PROTOCOL_HDL,"panel","4");
                 ivPanel1.setImageResource(R.mipmap.clean_up_dark_3x);
                 tvPanel1.setTextColor(activity.getResources().getColor(R.color.colorText));
                 ivPanel2.setImageResource(R.mipmap.cook_dark_3x);
@@ -1335,6 +1363,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
     private void changePanelCanting(int i){
         switch (i){
             case 1:
+                controlPanel(CONTROL_PROTOCOL_HDL,"panel","1");
                 ivPanel1.setImageResource(R.mipmap.dinner_3x);
                 tvPanel1.setTextColor(activity.getResources().getColor(R.color.colorTextActive));
                 ivPanel2.setImageResource(R.mipmap.snack_dark_3x);
@@ -1345,6 +1374,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                 tvPanel4.setTextColor(activity.getResources().getColor(R.color.colorText));
                 break;
             case 2:
+                controlPanel(CONTROL_PROTOCOL_HDL,"panel","2");
                 ivPanel1.setImageResource(R.mipmap.dinner_dark_3x);
                 tvPanel1.setTextColor(activity.getResources().getColor(R.color.colorText));
                 ivPanel2.setImageResource(R.mipmap.snack_3x);
@@ -1355,6 +1385,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                 tvPanel4.setTextColor(activity.getResources().getColor(R.color.colorText));
                 break;
             case 3:
+                controlPanel(CONTROL_PROTOCOL_HDL,"panel","3");
                 ivPanel1.setImageResource(R.mipmap.dinner_dark_3x);
                 tvPanel1.setTextColor(activity.getResources().getColor(R.color.colorText));
                 ivPanel2.setImageResource(R.mipmap.snack_dark_3x);
@@ -1365,6 +1396,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                 tvPanel4.setTextColor(activity.getResources().getColor(R.color.colorText));
                 break;
             case 4:
+                controlPanel(CONTROL_PROTOCOL_HDL,"panel","4");
                 ivPanel1.setImageResource(R.mipmap.dinner_dark_3x);
                 tvPanel1.setTextColor(activity.getResources().getColor(R.color.colorText));
                 ivPanel2.setImageResource(R.mipmap.snack_dark_3x);
@@ -1381,6 +1413,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
     private void changePanelWeiyu(int i){
         switch (i){
             case 1:
+                controlPanel(CONTROL_PROTOCOL_HDL,"panel","1");
                 ivPanel1.setImageResource(R.mipmap.wash_3x);
                 tvPanel1.setTextColor(activity.getResources().getColor(R.color.colorTextActive));
                 ivPanel2.setImageResource(R.mipmap.toilet_dark_3x);
@@ -1391,6 +1424,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                 tvPanel4.setTextColor(activity.getResources().getColor(R.color.colorText));
                 break;
             case 2:
+                controlPanel(CONTROL_PROTOCOL_HDL,"panel","2");
                 ivPanel1.setImageResource(R.mipmap.wash_dark_3x);
                 tvPanel1.setTextColor(activity.getResources().getColor(R.color.colorText));
                 ivPanel2.setImageResource(R.mipmap.toilet_3x);
@@ -1401,6 +1435,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                 tvPanel4.setTextColor(activity.getResources().getColor(R.color.colorText));
                 break;
             case 3:
+                controlPanel(CONTROL_PROTOCOL_HDL,"panel","3");
                 ivPanel1.setImageResource(R.mipmap.wash_dark_3x);
                 tvPanel1.setTextColor(activity.getResources().getColor(R.color.colorText));
                 ivPanel2.setImageResource(R.mipmap.toilet_dark_3x);
@@ -1411,6 +1446,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                 tvPanel4.setTextColor(activity.getResources().getColor(R.color.colorText));
                 break;
             case 4:
+                controlPanel(CONTROL_PROTOCOL_HDL,"panel","4");
                 ivPanel1.setImageResource(R.mipmap.wash_dark_3x);
                 tvPanel1.setTextColor(activity.getResources().getColor(R.color.colorText));
                 ivPanel2.setImageResource(R.mipmap.toilet_dark_3x);
@@ -1422,6 +1458,79 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                 break;
         }
     }
+
+    //设置点击场景后，面板图标变灰色
+    private void setPanelIconColor(String roomDBName){
+        switch (roomDBName){
+            case "keting":
+                ivPanel1.setImageResource(R.mipmap.entertainment_dark_3x);
+                tvPanel1.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel2.setImageResource(R.mipmap.yule_mianban_dark_3x);
+                tvPanel2.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel3.setImageResource(R.mipmap.music_dark_3x);
+                tvPanel3.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel4.setImageResource(R.mipmap.get_out_dark_3x);
+                tvPanel4.setTextColor(activity.getResources().getColor(R.color.colorText));
+                break;
+            case "woshi":
+                ivPanel1.setImageResource(R.mipmap.read_dark_3x);
+                tvPanel1.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel2.setImageResource(R.mipmap.game_dark_3x);
+                tvPanel2.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel3.setImageResource(R.mipmap.music_dark_3x);
+                tvPanel3.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel4.setImageResource(R.mipmap.get_out_dark_3x);
+                tvPanel4.setTextColor(activity.getResources().getColor(R.color.colorText));
+                break;
+            case "ciwo":
+                ivPanel1.setImageResource(R.mipmap.read_dark_3x);
+                tvPanel1.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel2.setImageResource(R.mipmap.game_dark_3x);
+                tvPanel2.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel3.setImageResource(R.mipmap.music_dark_3x);
+                tvPanel3.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel4.setImageResource(R.mipmap.get_out_dark_3x);
+                tvPanel4.setTextColor(activity.getResources().getColor(R.color.colorText));
+                break;
+            case "chufang":
+                ivPanel1.setImageResource(R.mipmap.clean_up_dark_3x);
+                tvPanel1.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel2.setImageResource(R.mipmap.cook_dark_3x);
+                tvPanel2.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel3.setImageResource(R.mipmap.music_dark_3x);
+                tvPanel3.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel4.setImageResource(R.mipmap.get_out_dark_3x);
+                tvPanel4.setTextColor(activity.getResources().getColor(R.color.colorText));
+                break;
+            case "canting":
+                ivPanel1.setImageResource(R.mipmap.dinner_dark_3x);
+                tvPanel1.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel2.setImageResource(R.mipmap.snack_dark_3x);
+                tvPanel2.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel3.setImageResource(R.mipmap.afternoon_tea_dark_3x);
+                tvPanel3.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel4.setImageResource(R.mipmap.get_out_dark_3x);
+                tvPanel4.setTextColor(activity.getResources().getColor(R.color.colorText));
+                break;
+            case "weiyu":
+                ivPanel1.setImageResource(R.mipmap.wash_dark_3x);
+                tvPanel1.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel2.setImageResource(R.mipmap.toilet_dark_3x);
+                tvPanel2.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel3.setImageResource(R.mipmap.shower_dark_3x);
+                tvPanel3.setTextColor(activity.getResources().getColor(R.color.colorText));
+                ivPanel4.setImageResource(R.mipmap.get_out_dark_3x);
+                tvPanel4.setTextColor(activity.getResources().getColor(R.color.colorText));
+                break;
+
+        }
+    }
+
+    //设置点击面板后，场景图标变灰色
+    private void setSceneIconColor(){
+
+    }
+
 
 
     //灯光亮度调节监听
@@ -1821,7 +1930,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                         @Override
                         public void run() {
                             EZOpenSDK.getInstance().openLoginPage();
-                            EventBus.getDefault().post(new MyEventBus("jiankong"));
+                            //EventBus.getDefault().post(new MyEventBus("jiankong"));
                         }
                     },250);
 
@@ -2001,7 +2110,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
     }
     //滑动到隐藏头
     private void scrollToBottom(){
-        Log.i("scroll_animation", "scrollToBottom: ==============能显示动画吗");
+        //Log.i("scroll_animation", "scrollToBottom: ==============能显示动画吗");
         isInitPosition = true;
         svPullUpMenu.smoothScrollToSlow(0,btHeight_X3,400);
         //svPullUpMenu.smoothScrollTo(0,btHeight_X3);
@@ -2105,13 +2214,8 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         changeColorToActive4(R.mipmap.theme2_jiating_likai_active_ani_3x,R.color.colorTextActive);
     }
     private void clickLightSwitch(){
-        if (isLightOpen==true){
-            hsLightValue.smoothScrollTo(lightAxisinitValue,0);
-            controlLight(CONTROL_PROTOCOL_HDL,MACHINE_NAME_LIGHT,LIGHT_VALUE_0,IS_SERVER_AUTO,CONTROL_SENCE_ALL);
-        }else if (isLightOpen==false){
-            hsLightValue.smoothScrollTo(lightAxisinitValue+(lightValueHeight1+lightValueHeight2)*20,0);
-            controlLight(CONTROL_PROTOCOL_HDL,MACHINE_NAME_LIGHT,LIGHT_VALUE_100,IS_SERVER_AUTO,CONTROL_SENCE_ALL);
-        }
+        EventBus.getDefault().post(new MyEventBus(""));
+
     }
 
     //----------------------------------窗帘-----------------------------------
@@ -2358,10 +2462,30 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
      *    发送tcpSocket，控制部分的封装
      * @param controlProtocol  产品名称  hdl..
      * @param machineName      模块名称  light..
-     * @param value          需要设定的值  100..
-     * @param isServerAUTO     是否自动   0..
+     * @param //value          需要设定的值  100..
+     * @param //isServerAUTO     是否自动   0..
      * @param controlSence     控制信号   all..
      */
+    private void controlPanel(String controlProtocol, String machineName,String controlSence) {
+        JSONObject CommandData = new JSONObject();
+        JSONObject controlData = new JSONObject();
+        try {
+            CommandData.put("controlProtocol", controlProtocol);
+            CommandData.put("machineName", machineName);
+            CommandData.put("controlData", controlData);
+            controlData.put("", "");
+            controlData.put("", "");
+            CommandData.put("controlSence", controlSence);
+            CommandData.put("houseDBName", roomDBName);
+            String lightJson = CommandJsonUtils.getCommandJson(0, CommandData, token, uname, pwd, String.valueOf(System.currentTimeMillis()));
+            EventBus.getDefault().post(new MyEventBus(lightJson));
+            Log.i(TAG, "onClick: ------lightjson------" + lightJson);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+
     private void controlLight(String controlProtocol, String machineName, String value, String isServerAUTO, String controlSence) {
         JSONObject CommandData = new JSONObject();
         JSONObject controlData = new JSONObject();

@@ -117,7 +117,11 @@ public class UDPSocket {
                         String codeString = new String( buffer, 0, receiveData.getLength() );         //接收到的udp数据
                         udpCheck = codeString.substring(2,4);   //用来判断是否找到主机
                         Log.i("udp_search_ip", "接收到数据为: "+udpCheck);
-                        ip = receiveData.getAddress().getHostAddress();        //发送udp广播，收到的主机的ip地址
+                        try{
+                            ip = receiveData.getAddress().getHostAddress();        //发送udp广播，收到的主机的ip地址
+                        }catch (Exception e){
+                            ip = "网络中断";
+                        }
                         //Log.i("result","recivedataIP地址为："+receiveData.getAddress().toString().substring(1));//此为IP地址
                         Log.i("udp_search_ip", "run: "+ip+"----port"+receiveData.getPort());
                     }

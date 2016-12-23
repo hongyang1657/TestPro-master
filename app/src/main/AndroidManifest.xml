@@ -59,6 +59,10 @@
             android:screenOrientation="landscape"/>
         <activity android:name=".activity.LoginExplainActivity"/>
         <activity android:name=".activity.MusicActivity"/>
+        <activity android:name=".activity.custom_scene_activity.CustomSceneMainActivity"/>
+        <activity android:name=".activity.custom_scene_activity.CustomSceneSecondActivity"/>
+        <activity android:name=".activity.custom_scene_activity.CustomSceneSelectIconActivity"/>
+        <activity android:name=".activity.custom_scene_activity.CustomSceneLightActivity"/>
 
 <!--service-->
         <service android:name=".service.UDPBroadcastService"/>

@@ -51,7 +51,9 @@ import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.FormBody;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import okhttp3.RequestBody;
+import okhttp3.Response;
 
 /**
  * Created by gqgz2 on 2016/9/23.
@@ -130,17 +132,19 @@ public class NewLoginActivity extends BaseActivity{
                     //runningTimeDialog.runningTimeProgressDialog1(NewLoginActivity.this);
                     break;
                 case 2:       //获取token
-                    String token = (String) msg.obj;
-                    getToken(token);
-
+                    String token1 = (String) msg.obj;
+                    getToken(token1);
                     break;
                 case 3:      //获取用户信息
                     allJson = (String) msg.obj;
                     LongLogCatUtil.logE("hongyang","外网登陆获取："+allJson);
+                    runningTimeDialog.progressDialog.dismiss();     //转圈圈消失
                     //跳转
+                    Log.i("putExtra_hy", "secondLoginLAN:"+userName+"---"+password+"---"+ip+"---"+token);
                     intentLogin.putExtra("isFirstLogin",true);
                     intentLogin.putExtra("uname",userName);
                     intentLogin.putExtra("pwd",password);
+                    intentLogin.putExtra("host_ip",ip);
                     startActivity(intentLogin);
                     finish();        //结束此activity，下一个activity返回时，直接退出
                     break;
@@ -156,8 +160,8 @@ public class NewLoginActivity extends BaseActivity{
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             udpBinder = (UDPBroadcastService.UDPBinder) service;
-            String a = udpBinder.getHostIp();
-            Log.i(TAG, "onServiceConnected: -----获取后台接受的主机ip------"+a);
+            ip = udpBinder.getHostIp();
+            Log.i(TAG, "onServiceConnected: -----获取后台接受的主机ip------"+ip);
         }
 
         @Override
@@ -182,6 +186,7 @@ public class NewLoginActivity extends BaseActivity{
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        unbindService(connection);
         setContentView(R.layout.view_null);
     }
 
@@ -501,15 +506,17 @@ public class NewLoginActivity extends BaseActivity{
 
     //套包返回的json数据
     private void loginPost(){
-        final String url = "http://192.168.10.230:2000/api/user/login";
+        //final String url = "http://115.29.97.189:20000/api/user/login";
+        final String url = "http://192.168.10.230:20000/api/user/login";
         new Thread(){
             @Override
             public void run() {
                 super.run();
                 // 表单提交
-                RequestBody formBody = new FormBody.Builder().add("num", "100000").add("pwd", "smile2014").build();
+                Log.i(TAG, "run:!!!!!!!!! userName:"+userName);
+                RequestBody formBody = new FormBody.Builder().add("num", userName).add("pwd", password).build();
                 OkHttpClient client = new OkHttpClient();
-                okhttp3.Request request = new okhttp3.Request.Builder().url(url).addHeader("content-type", "application/x-www-form-urlencoded").post(formBody).build();
+                Request request = new Request.Builder().url(url).addHeader("content-type", "application/x-www-form-urlencoded").post(formBody).build();
                 client.newCall(request).enqueue(new Callback() {
                     @Override
                     public void onFailure(Call call, IOException e) {
@@ -518,7 +525,7 @@ public class NewLoginActivity extends BaseActivity{
                     }
 
                     @Override
-                    public void onResponse(Call call, okhttp3.Response response) throws IOException {
+                    public void onResponse(Call call, Response response) throws IOException {
                         String token = response.body().string();
                         Log.i(TAG, "onResponse: 获取新版token："+token);
                         Message msg = new Message();
@@ -547,7 +554,8 @@ public class NewLoginActivity extends BaseActivity{
     //向服务器post token
     private void postToken(final String token){
         final String token1 = "00000000000000000000000000000000"; //暂时用
-        final String url = "http://192.168.10.230:2000/api/user/profile";
+        //final String url = "http://115.29.97.189:20000/api/homeserver/profile";
+        final String url = "http://192.168.10.230:20000/api/homeserver/profile";
         new Thread(){
             @Override
             public void run() {

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:background="@mipmap/mohu"
+    android:background="@color/colorAlphaBlack"
     android:id="@+id/ll_light"
     android:orientation="horizontal"
     android:padding="8dp"

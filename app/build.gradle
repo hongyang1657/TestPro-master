@@ -1,4 +1,6 @@
 apply plugin: 'com.android.application'
+apply plugin: 'android-apt'
+
 
 android {
     compileSdkVersion 24
@@ -35,10 +37,11 @@ dependencies {
     compile 'com.squareup.okhttp3:okhttp:3.4.1'
     compile files('libs/EZOpenSDK.jar')
     compile 'com.squareup.picasso:picasso:2.5.2'
-    compile 'com.google.android.gms:play-services-appindexing:8.1.0'
+    compile 'com.google.android.gms:play-services-appindexing:8.4.0'
     compile 'com.github.johnpersano:supertoasts:1.3.4.1'
     compile 'com.google.code.gson:gson:2.7'
-    compile 'com.jakewharton:butterknife:8.4.0'
+    compile'com.jakewharton:butterknife:8.2.1'
+    apt 'com.jakewharton:butterknife-compiler:8.2.1'
     compile 'com.android.support:design:25.0.0'
 }
 

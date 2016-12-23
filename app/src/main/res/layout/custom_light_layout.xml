@@ -1,0 +1,567 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:weightSum="25"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:weightSum="18"
+        android:orientation="horizontal"
+        android:layout_weight="2"
+        android:background="@color/colorTextActive"
+        android:gravity="center_vertical"
+        android:layout_width="match_parent"
+        android:layout_height="0dp">
+
+        <ImageView
+            android:id="@+id/iv_custom_light_back"
+            android:layout_weight="3"
+            android:clickable="true"
+            android:onClick="customClick"
+            android:src="@mipmap/custom_return_3x"
+            android:layout_width="0dp"
+            android:paddingLeft="-20dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/tv_custom_light_title"
+            android:layout_weight="12"
+            android:text="灯光"
+            android:textSize="18sp"
+            android:textColor="@color/colorWhite"
+            android:gravity="center"
+            android:layout_width="0dp"
+            android:layout_height="match_parent" />
+
+        <TextView
+            android:id="@+id/tv_custom_light_save"
+            android:layout_weight="3"
+            android:text="保存"
+            android:padding="10dp"
+            android:textColor="@color/colorWhite"
+            android:clickable="true"
+            android:onClick="customClick"
+            android:gravity="center"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_weight="23"
+        android:layout_width="match_parent"
+        android:layout_height="0dp">
+        <LinearLayout
+            android:weightSum="100"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <RelativeLayout
+                android:layout_weight="7"
+                android:padding="4dp"
+                android:gravity="center_vertical"
+                android:layout_width="match_parent"
+                android:layout_height="0dp">
+
+                <TextView
+                    android:id="@+id/tv_custom_light_channel_all"
+                    android:text="全部"
+                    android:gravity="center_vertical"
+                    android:textColor="@color/colorText"
+                    android:padding="10dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+                <Switch
+                    android:id="@+id/sw_custom_light_channel_all"
+                    android:padding="10dp"
+                    android:layout_toRightOf="@id/tv_custom_light_channel_all"
+                    android:layout_alignParentRight="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </RelativeLayout>
+            <RadioGroup
+                android:id="@+id/rg_custom_light_channel_all"
+                android:layout_weight="7"
+                android:orientation="horizontal"
+                android:weightSum="3"
+                android:background="@drawable/custom_light_rg_shape"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="4dp"
+                android:gravity="center"
+                android:layout_width="match_parent"
+                android:layout_height="0dp">
+
+                <RadioButton
+                    android:id="@+id/rb_custom_light_channel_all_1"
+                    android:text="微弱"
+                    android:textColor="@drawable/custom_light_textcolor_selecter"
+                    android:gravity="center"
+                    android:button="@null"
+                    android:checked="true"
+                    android:background="@drawable/custom_light_button_selecter_left"
+                    android:layout_weight="1"
+                    android:layout_margin="1dp"
+                    android:padding="4dp"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+
+                <RadioButton
+                    android:id="@+id/rb_custom_light_channel_all_2"
+                    android:text="舒适"
+                    android:textColor="@drawable/custom_light_textcolor_selecter"
+                    android:background="@drawable/custom_light_button_selecter_mid"
+                    android:gravity="center"
+                    android:button="@null"
+                    android:layout_weight="1"
+                    android:layout_marginTop="1dp"
+                    android:layout_marginBottom="1dp"
+                    android:padding="4dp"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+                <RadioButton
+                    android:id="@+id/rb_custom_light_channel_all_3"
+                    android:text="明亮"
+                    android:textColor="@drawable/custom_light_textcolor_selecter"
+                    android:background="@drawable/custom_light_button_selecter_right"
+                    android:gravity="center"
+                    android:button="@null"
+                    android:layout_margin="1dp"
+                    android:padding="4dp"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+            </RadioGroup>
+            <TextView
+                android:background="@color/colorCutOffLine"
+                android:layout_width="match_parent"
+                android:layout_height="1px" />
+            <TextView
+                android:background="@color/colorLoginBack"
+                android:layout_width="match_parent"
+                android:layout_height="14px" />
+            <RelativeLayout
+                android:layout_weight="7"
+                android:padding="4dp"
+                android:gravity="center_vertical"
+                android:layout_width="match_parent"
+                android:layout_height="0dp">
+
+                <TextView
+                    android:id="@+id/tv_custom_light_channel_1"
+                    android:text="门头玄关"
+                    android:gravity="center_vertical"
+                    android:textColor="@color/colorText"
+                    android:padding="10dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true" />
+                <Switch
+                    android:id="@+id/sw_custom_light_channel_1"
+                    android:padding="10dp"
+                    android:layout_toRightOf="@id/tv_custom_light_channel_1"
+                    android:layout_alignParentRight="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </RelativeLayout>
+            <RadioGroup
+                android:id="@+id/rg_custom_light_channel_1"
+                android:layout_weight="7"
+                android:orientation="horizontal"
+                android:weightSum="3"
+                android:background="@drawable/custom_light_rg_shape"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="4dp"
+                android:gravity="center"
+                android:visibility="gone"
+                android:layout_width="match_parent"
+                android:layout_height="0dp">
+
+                <RadioButton
+                    android:id="@+id/rb_custom_light_channel_1_1"
+                    android:text="微弱"
+                    android:textColor="@drawable/custom_light_textcolor_selecter"
+                    android:gravity="center"
+                    android:button="@null"
+                    android:background="@drawable/custom_light_button_selecter_left"
+                    android:layout_weight="1"
+                    android:checked="true"
+                    android:layout_margin="1dp"
+                    android:padding="4dp"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+
+                <RadioButton
+                    android:id="@+id/rb_custom_light_channel_1_2"
+                    android:text="舒适"
+                    android:textColor="@drawable/custom_light_textcolor_selecter"
+                    android:background="@drawable/custom_light_button_selecter_mid"
+                    android:gravity="center"
+                    android:button="@null"
+                    android:layout_weight="1"
+                    android:layout_marginTop="1dp"
+                    android:layout_marginBottom="1dp"
+                    android:padding="4dp"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+                <RadioButton
+                    android:id="@+id/rb_custom_light_channel_1_3"
+                    android:text="明亮"
+                    android:textColor="@drawable/custom_light_textcolor_selecter"
+                    android:background="@drawable/custom_light_button_selecter_right"
+                    android:gravity="center"
+                    android:button="@null"
+                    android:layout_margin="1dp"
+                    android:padding="4dp"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+            </RadioGroup>
+            <TextView
+                android:background="@color/colorCutOffLine2"
+                android:layout_width="match_parent"
+                android:layout_height="1px" />
+            <RelativeLayout
+                android:layout_weight="7"
+                android:padding="4dp"
+                android:gravity="center_vertical"
+                android:layout_width="match_parent"
+                android:layout_height="0dp">
+
+                <TextView
+                    android:id="@+id/tv_custom_light_channel_2"
+                    android:text="中心主灯"
+                    android:gravity="center_vertical"
+                    android:textColor="@color/colorText"
+                    android:padding="10dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+                <Switch
+                    android:id="@+id/sw_custom_light_channel_2"
+                    android:padding="10dp"
+                    android:layout_toRightOf="@id/tv_custom_light_channel_2"
+                    android:layout_alignParentRight="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </RelativeLayout>
+            <RadioGroup
+                android:id="@+id/rg_custom_light_channel_2"
+                android:layout_weight="7"
+                android:orientation="horizontal"
+                android:weightSum="3"
+                android:background="@drawable/custom_light_rg_shape"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="4dp"
+                android:gravity="center"
+                android:visibility="gone"
+                android:layout_width="match_parent"
+                android:layout_height="0dp">
+
+                <RadioButton
+                    android:id="@+id/rb_custom_light_channel_2_1"
+                    android:text="微弱"
+                    android:gravity="center"
+                    android:button="@null"
+                    android:checked="true"
+                    android:textColor="@drawable/custom_light_textcolor_selecter"
+                    android:background="@drawable/custom_light_button_selecter_left"
+                    android:layout_weight="1"
+                    android:layout_margin="1dp"
+                    android:padding="4dp"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+
+                <RadioButton
+                    android:id="@+id/rb_custom_light_channel_2_2"
+                    android:text="舒适"
+                    android:textColor="@drawable/custom_light_textcolor_selecter"
+                    android:background="@drawable/custom_light_button_selecter_mid"
+                    android:gravity="center"
+                    android:button="@null"
+                    android:layout_weight="1"
+                    android:layout_marginTop="1dp"
+                    android:layout_marginBottom="1dp"
+                    android:padding="4dp"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+
+                <RadioButton
+                    android:id="@+id/rb_custom_light_channel_2_3"
+                    android:text="明亮"
+                    android:textColor="@drawable/custom_light_textcolor_selecter"
+                    android:background="@drawable/custom_light_button_selecter_right"
+                    android:gravity="center"
+                    android:button="@null"
+                    android:layout_margin="1dp"
+                    android:padding="4dp"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+            </RadioGroup>
+            <TextView
+                android:background="@color/colorCutOffLine2"
+                android:layout_width="match_parent"
+                android:layout_height="1px" />
+            <RelativeLayout
+                android:layout_weight="7"
+                android:padding="4dp"
+                android:gravity="center_vertical"
+                android:layout_width="match_parent"
+                android:layout_height="0dp">
+
+                <TextView
+                    android:id="@+id/tv_custom_light_channel_3"
+                    android:text="沙发顶灯"
+                    android:gravity="center_vertical"
+                    android:textColor="@color/colorText"
+                    android:padding="10dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true" />
+                <Switch
+                    android:id="@+id/sw_custom_light_channel_3"
+                    android:padding="10dp"
+                    android:layout_toRightOf="@id/tv_custom_light_channel_3"
+                    android:layout_alignParentRight="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </RelativeLayout>
+            <RadioGroup
+                android:id="@+id/rg_custom_light_channel_3"
+                android:layout_weight="7"
+                android:orientation="horizontal"
+                android:weightSum="3"
+                android:background="@drawable/custom_light_rg_shape"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="4dp"
+                android:gravity="center"
+                android:visibility="gone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <RadioButton
+                    android:id="@+id/rb_custom_light_channel_3_1"
+                    android:text="微弱"
+                    android:textColor="@drawable/custom_light_textcolor_selecter"
+                    android:background="@drawable/custom_light_button_selecter_left"
+                    android:gravity="center"
+                    android:checked="true"
+                    android:button="@null"
+                    android:layout_weight="1"
+                    android:layout_margin="1dp"
+                    android:padding="4dp"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+
+                <RadioButton
+                    android:id="@+id/rb_custom_light_channel_3_2"
+                    android:text="舒适"
+                    android:textColor="@drawable/custom_light_textcolor_selecter"
+                    android:background="@drawable/custom_light_button_selecter_mid"
+                    android:gravity="center"
+                    android:button="@null"
+                    android:layout_weight="1"
+                    android:layout_marginTop="1dp"
+                    android:layout_marginBottom="1dp"
+                    android:padding="4dp"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+                <RadioButton
+                    android:id="@+id/rb_custom_light_channel_3_3"
+                    android:text="明亮"
+                    android:textColor="@drawable/custom_light_textcolor_selecter"
+                    android:background="@drawable/custom_light_button_selecter_right"
+                    android:gravity="center"
+                    android:button="@null"
+                    android:layout_margin="1dp"
+                    android:padding="4dp"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+            </RadioGroup>
+            <TextView
+                android:background="@color/colorCutOffLine2"
+                android:layout_width="match_parent"
+                android:layout_height="1px" />
+            <RelativeLayout
+                android:layout_weight="7"
+                android:padding="4dp"
+                android:gravity="center_vertical"
+                android:layout_width="match_parent"
+                android:layout_height="0dp">
+
+                <TextView
+                    android:id="@+id/tv_custom_light_channel_4"
+                    android:text="主灯带"
+                    android:gravity="center_vertical"
+                    android:textColor="@color/colorText"
+                    android:padding="10dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+                <Switch
+                    android:id="@+id/sw_custom_light_channel_4"
+                    android:padding="10dp"
+                    android:layout_toRightOf="@id/tv_custom_light_channel_4"
+                    android:layout_alignParentRight="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </RelativeLayout>
+            <RadioGroup
+                android:id="@+id/rg_custom_light_channel_4"
+                android:layout_weight="7"
+                android:orientation="horizontal"
+                android:weightSum="3"
+                android:background="@drawable/custom_light_rg_shape"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="4dp"
+                android:gravity="center"
+                android:visibility="gone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <RadioButton
+                    android:id="@+id/rb_custom_light_channel_4_1"
+                    android:text="微弱"
+                    android:textColor="@drawable/custom_light_textcolor_selecter"
+                    android:background="@drawable/custom_light_button_selecter_left"
+                    android:gravity="center"
+                    android:checked="true"
+                    android:button="@null"
+                    android:layout_weight="1"
+                    android:layout_margin="1dp"
+                    android:padding="4dp"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+
+                <RadioButton
+                    android:id="@+id/rb_custom_light_channel_4_2"
+                    android:text="舒适"
+                    android:textColor="@drawable/custom_light_textcolor_selecter"
+                    android:background="@drawable/custom_light_button_selecter_mid"
+                    android:gravity="center"
+                    android:button="@null"
+                    android:layout_weight="1"
+                    android:layout_marginTop="1dp"
+                    android:layout_marginBottom="1dp"
+                    android:padding="4dp"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+                <RadioButton
+                    android:id="@+id/rb_custom_light_channel_4_3"
+                    android:text="明亮"
+                    android:textColor="@drawable/custom_light_textcolor_selecter"
+                    android:background="@drawable/custom_light_button_selecter_right"
+                    android:gravity="center"
+                    android:button="@null"
+                    android:layout_margin="1dp"
+                    android:padding="4dp"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+            </RadioGroup>
+            <TextView
+                android:background="@color/colorCutOffLine2"
+                android:layout_width="match_parent"
+                android:layout_height="1px" />
+            <RelativeLayout
+                android:layout_weight="7"
+                android:padding="4dp"
+                android:gravity="center_vertical"
+                android:layout_width="match_parent"
+                android:layout_height="0dp">
+
+                <TextView
+                    android:id="@+id/tv_custom_light_channel_5"
+                    android:text="辅灯"
+                    android:gravity="center_vertical"
+                    android:textColor="@color/colorText"
+                    android:padding="10dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+                <Switch
+                    android:id="@+id/sw_custom_light_channel_5"
+                    android:padding="10dp"
+                    android:layout_toRightOf="@id/tv_custom_light_channel_5"
+                    android:layout_alignParentRight="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </RelativeLayout>
+            <RadioGroup
+                android:id="@+id/rg_custom_light_channel_5"
+                android:layout_weight="7"
+                android:orientation="horizontal"
+                android:weightSum="3"
+                android:background="@drawable/custom_light_rg_shape"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="4dp"
+                android:gravity="center"
+                android:visibility="gone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <RadioButton
+                    android:id="@+id/rb_custom_light_channel_5_1"
+                    android:text="微弱"
+                    android:textColor="@drawable/custom_light_textcolor_selecter"
+                    android:background="@drawable/custom_light_button_selecter_left"
+                    android:gravity="center"
+                    android:checked="true"
+                    android:button="@null"
+                    android:layout_weight="1"
+                    android:layout_margin="1dp"
+                    android:padding="4dp"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+
+                <RadioButton
+                    android:id="@+id/rb_custom_light_channel_5_2"
+                    android:text="舒适"
+                    android:textColor="@drawable/custom_light_textcolor_selecter"
+                    android:background="@drawable/custom_light_button_selecter_mid"
+                    android:gravity="center"
+                    android:button="@null"
+                    android:layout_weight="1"
+                    android:layout_marginTop="1dp"
+                    android:layout_marginBottom="1dp"
+                    android:padding="4dp"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+
+                <RadioButton
+                    android:id="@+id/rb_custom_light_channel_5_3"
+                    android:text="明亮"
+                    android:textColor="@drawable/custom_light_textcolor_selecter"
+                    android:background="@drawable/custom_light_button_selecter_right"
+                    android:gravity="center"
+                    android:button="@null"
+                    android:layout_margin="1dp"
+                    android:padding="4dp"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+            </RadioGroup>
+            <TextView
+                android:background="@color/colorCutOffLine2"
+                android:layout_width="match_parent"
+                android:layout_height="1px" />
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

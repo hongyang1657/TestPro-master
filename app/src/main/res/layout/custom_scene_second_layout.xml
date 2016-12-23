@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:weightSum="25"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:weightSum="18"
+        android:orientation="horizontal"
+        android:layout_weight="2"
+        android:background="@color/colorTextActive"
+        android:gravity="center_vertical"
+        android:layout_width="match_parent"
+        android:layout_height="0dp">
+
+        <ImageView
+            android:id="@+id/iv_custom_back_second"
+            android:layout_weight="3"
+            android:clickable="true"
+            android:onClick="customClick"
+            android:src="@mipmap/custom_return_3x"
+            android:layout_gravity="center"
+            android:layout_width="0dp"
+            android:paddingLeft="-20dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/tv_custom_title_second"
+            android:layout_weight="12"
+            android:text="未定义"
+            android:textSize="18sp"
+            android:textColor="@color/colorWhite"
+            android:gravity="center"
+            android:layout_width="0dp"
+            android:layout_height="match_parent" />
+
+        <TextView
+            android:id="@+id/tv_custom_save_second"
+            android:layout_weight="3"
+            android:text="保存"
+            android:padding="10dp"
+            android:textColor="@color/colorWhite"
+            android:clickable="true"
+            android:onClick="customClick"
+            android:gravity="center"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_weight="23"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="0dp">
+
+        <LinearLayout
+            android:id="@+id/ll_custom_second_name"
+            android:clickable="true"
+            android:orientation="horizontal"
+            android:padding="2dp"
+            android:gravity="center_vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/iv_custom_name"
+                android:text="名称"
+                android:layout_weight="1"
+                android:textColor="@color/colorText"
+                android:paddingLeft="10dp"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:id="@+id/tv_custom_bianji1"
+                android:text="编辑"
+                android:textColor="@color/colorText"
+                android:drawableRight="@mipmap/custom_trangle_3x"
+                android:drawablePadding="8dp"
+                android:padding="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+        <TextView
+            android:background="@color/colorLoginBack"
+            android:layout_width="match_parent"
+            android:layout_height="1px" />
+        <LinearLayout
+            android:id="@+id/ll_custom_second_icon"
+            android:clickable="true"
+            android:orientation="horizontal"
+            android:padding="2dp"
+            android:gravity="center_vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/tv_custom_icon"
+                android:text="图标"
+                android:layout_weight="1"
+                android:textColor="@color/colorText"
+                android:paddingLeft="10dp"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:id="@+id/tv_custom_bianji2"
+                android:text="编辑"
+                android:textColor="@color/colorText"
+                android:drawableRight="@mipmap/custom_trangle_3x"
+                android:drawablePadding="8dp"
+                android:padding="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+        <TextView
+            android:background="@color/colorLoginBack"
+            android:layout_width="match_parent"
+            android:layout_height="1px" />
+        <LinearLayout
+            android:id="@+id/ll_custom_second_light"
+            android:clickable="true"
+            android:orientation="horizontal"
+            android:padding="2dp"
+            android:gravity="center_vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/tv_custom_light"
+                android:text="灯光"
+                android:layout_weight="1"
+                android:textColor="@color/colorText"
+                android:paddingLeft="10dp"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:id="@+id/tv_custom_bianji3"
+                android:text="编辑"
+                android:textColor="@color/colorText"
+                android:drawableRight="@mipmap/custom_trangle_3x"
+                android:drawablePadding="8dp"
+                android:padding="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+        <TextView
+            android:background="@color/colorLoginBack"
+            android:layout_width="match_parent"
+            android:layout_height="1px" />
+        <LinearLayout
+            android:id="@+id/ll_custom_second_curtain"
+            android:clickable="true"
+            android:orientation="horizontal"
+            android:padding="2dp"
+            android:gravity="center_vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/tv_custom_curtain"
+                android:text="窗帘"
+                android:layout_weight="1"
+                android:textColor="@color/colorText"
+                android:paddingLeft="10dp"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content" />
+            <Switch
+                android:id="@+id/sw_custom_curtain"
+                android:textColor="@color/colorText"
+                android:drawablePadding="8dp"
+                android:padding="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+        <TextView
+            android:background="@color/colorLoginBack"
+            android:layout_width="match_parent"
+            android:layout_height="1px" />
+        <LinearLayout
+            android:id="@+id/ll_custom_second_music"
+            android:clickable="true"
+            android:orientation="horizontal"
+            android:padding="2dp"
+            android:gravity="center_vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/tv_custom_music"
+                android:text="音乐"
+                android:layout_weight="1"
+                android:textColor="@color/colorText"
+                android:paddingLeft="10dp"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:id="@+id/tv_custom_bianji4"
+                android:text="编辑"
+                android:textColor="@color/colorText"
+                android:drawableRight="@mipmap/custom_trangle_3x"
+                android:drawablePadding="8dp"
+                android:padding="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+        <TextView
+            android:background="@color/colorLoginBack"
+            android:layout_width="match_parent"
+            android:layout_height="1px" />
+        <LinearLayout
+            android:id="@+id/ll_custom_second_television"
+            android:clickable="true"
+            android:orientation="horizontal"
+            android:padding="2dp"
+            android:gravity="center_vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/tv_custom_television"
+                android:text="电视"
+                android:layout_weight="1"
+                android:textColor="@color/colorText"
+                android:paddingLeft="10dp"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content" />
+            <Switch
+                android:id="@+id/sw_custom_tv"
+                android:textColor="@color/colorText"
+                android:drawablePadding="8dp"
+                android:padding="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+        <TextView
+            android:background="@color/colorLoginBack"
+            android:layout_width="match_parent"
+            android:layout_height="1px" />
+        <LinearLayout
+            android:id="@+id/ll_custom_second_ac"
+            android:clickable="true"
+            android:orientation="horizontal"
+            android:padding="2dp"
+            android:gravity="center_vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/tv_custom_ac"
+                android:text="空调"
+                android:layout_weight="1"
+                android:textColor="@color/colorText"
+                android:paddingLeft="10dp"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:id="@+id/tv_custom_bianji5"
+                android:text="编辑"
+                android:textColor="@color/colorText"
+                android:drawableRight="@mipmap/custom_trangle_3x"
+                android:drawablePadding="8dp"
+                android:padding="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+        <TextView
+            android:background="@color/colorLoginBack"
+            android:layout_width="match_parent"
+            android:layout_height="1px" />
+    </LinearLayout>
+</LinearLayout>

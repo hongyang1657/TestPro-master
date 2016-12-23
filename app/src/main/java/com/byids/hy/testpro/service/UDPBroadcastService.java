@@ -85,7 +85,11 @@ public class UDPBroadcastService extends Service{
         private boolean isSendUDPOn = true;
 
         public String getHostIp(){
-            return ip;
+            if (ip.equals("192.168.10.220")){                    //这里做判断是为了屏蔽拜爱展厅的主机（192.168.10.220）
+                return "192.168.10.167";
+            }else {
+                return ip;
+            }
         }
 
         public String getUdpCheck(){

@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal"
     android:id="@+id/linear_scene"
-    android:background="@mipmap/mohu"
+    android:background="@color/colorAlphaBlack"
     android:padding="8dp"
     android:weightSum="4"
     android:layout_width="match_parent"
@@ -14,21 +14,21 @@
         android:clickable="true"
         android:layout_weight="1"
         android:gravity="center"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content">
         <ImageView
             android:id="@+id/iv_xiuxian_out"
             android:src="@mipmap/theme2_jiating_xiuxian_ani_3x"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content" />
         <ImageView
             android:id="@+id/iv_xiuxian_in"
             android:src="@mipmap/theme2_jiating_xiuxian_ani_in_3x"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content" />
         <TextView
             android:id="@+id/tv_xiuxian"
-            android:text="休 闲"
+            android:text="未定义"
             android:textSize="12sp"
             android:textColor="@color/colorText"
             android:paddingTop="6dp"
@@ -46,26 +46,26 @@
         android:clickable="true"
         android:layout_weight="1"
         android:gravity="center"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content">
         <ImageView
             android:id="@+id/iv_yule_1"
             android:src="@mipmap/theme2_jiating_yule_1_3x"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content" />
         <ImageView
             android:id="@+id/iv_yule_2"
             android:src="@mipmap/theme2_jiating_yule_2_3x"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content" />
         <ImageView
             android:id="@+id/iv_yule_3"
             android:src="@mipmap/theme2_jiating_yule_3_3x"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content" />
         <TextView
             android:id="@+id/tv_yule"
-            android:text="娱 乐"
+            android:text="未定义"
             android:textSize="12sp"
             android:textColor="@color/colorText"
             android:paddingTop="6dp"
@@ -84,21 +84,21 @@
         android:clickable="true"
         android:layout_weight="1"
         android:gravity="center"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content">
         <ImageView
             android:id="@+id/iv_juhui_1"
             android:src="@mipmap/theme2_jiating_juhui_ani_3x"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content" />
         <ImageView
             android:id="@+id/iv_juhui_2"
             android:src="@mipmap/theme2_jiating_juhui_ani_in_3x"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content" />
         <TextView
             android:id="@+id/tv_juhui"
-            android:text="聚 会"
+            android:text="未定义"
             android:textColor="@color/colorText"
             android:textSize="12sp"
             android:paddingTop="6dp"
@@ -116,24 +116,24 @@
         android:clickable="true"
         android:layout_weight="1"
         android:gravity="center"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content">
         <ImageView
             android:id="@+id/iv_likai"
+            android:paddingLeft="4dp"
+            android:paddingRight="4dp"
             android:src="@mipmap/theme2_jiating_likai_ani_3x"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content" />
         <TextView
             android:id="@+id/tv_likai"
-            android:text="离 开"
+            android:text="未定义"
             android:textColor="@color/colorText"
             android:textSize="12sp"
             android:paddingTop="6dp"
-            android:layout_alignRight="@id/iv_likai"
-            android:layout_alignLeft="@id/iv_likai"
             android:layout_below="@id/iv_likai"
             android:gravity="center"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content" />
     </RelativeLayout>
 

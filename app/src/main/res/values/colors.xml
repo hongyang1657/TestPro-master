@@ -7,7 +7,7 @@
     <color name="colorBlack">#000000</color>
     <color name="colorGray">#FF4081</color>
     <color name="colorText">#a3a3a3</color>
-    <color name="colorTextActive">#FEAA53</color>
+    <color name="colorTextActive">#FDB02B</color>
     <color name="colorBule">#00a6ac</color>
     <color name="colorGreen">#65c294</color>
     <color name="colorDeepGreen">#005344</color>
@@ -15,6 +15,9 @@
     <color name="colorYellow">#ffc20e</color>
     <color name="colorLoginBack">#f2f2f2</color>
     <color name="colorAlphaBlack1">#cc000000</color>
-    <color name="colorAlphaBlack">#90000000</color>
+    <color name="colorAlphaBlack">#99000000</color>
     <color name="colorAlpha">#00000000</color>
+    <color name="colorCutOffLine">#c7c7c7</color>
+    <color name="colorCutOffLine2">#dbdbdb</color>
+    <color name="colorCustomYellow">#feaa53</color>
 </resources>

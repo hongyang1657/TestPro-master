@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/linear_air_details"
     android:orientation="vertical"
-    android:background="@mipmap/mohu"
+    android:background="@color/colorAlphaBlack"
     android:padding="8dp"
     android:visibility="gone"
     android:layout_width="match_parent"

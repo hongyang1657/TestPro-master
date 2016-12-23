@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal"
     android:id="@+id/ll_television"
-    android:background="@mipmap/mohu"
+    android:background="@color/colorAlphaBlack"
     android:gravity="center_horizontal"
     android:padding="8dp"
     android:weightSum="10"

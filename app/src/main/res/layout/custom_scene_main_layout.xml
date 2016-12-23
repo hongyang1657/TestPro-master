@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:weightSum="25"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:weightSum="18"
+        android:orientation="horizontal"
+        android:layout_weight="2"
+        android:background="@color/colorTextActive"
+        android:gravity="center_vertical"
+        android:layout_width="match_parent"
+        android:layout_height="0dp">
+
+        <ImageView
+            android:id="@+id/iv_custom_back"
+            android:layout_weight="3"
+            android:clickable="true"
+            android:onClick="customClick"
+            android:src="@mipmap/custom_return_3x"
+            android:layout_gravity="center"
+            android:paddingLeft="-20dp"
+            android:layout_width="0dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/tv_custom_title"
+            android:layout_weight="12"
+            android:text="自定义"
+            android:textSize="18sp"
+            android:textColor="@color/colorWhite"
+            android:gravity="center"
+            android:layout_width="0dp"
+            android:layout_height="match_parent" />
+
+        <TextView
+            android:id="@+id/tv_custom_save"
+            android:layout_weight="3"
+            android:text="保存"
+            android:padding="10dp"
+            android:textColor="@color/colorWhite"
+            android:clickable="true"
+            android:visibility="gone"
+            android:onClick="customClick"
+            android:gravity="center"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_weight="23"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="0dp">
+
+        <LinearLayout
+            android:id="@+id/ll_custom1"
+            android:clickable="true"
+            android:orientation="horizontal"
+            android:padding="2dp"
+            android:gravity="center_vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/iv_custom_icon1"
+                android:src="@mipmap/read_dark_3x"
+                android:layout_margin="10dp"
+                android:layout_width="28dp"
+                android:layout_height="28dp" />
+            <TextView
+                android:id="@+id/iv_custom_modification1"
+                android:text="未定义"
+                android:layout_weight="0.95"
+                android:textColor="@color/colorText"
+                android:paddingLeft="10dp"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content" />
+            <ImageView
+                android:src="@mipmap/custom_trangle_3x"
+                android:padding="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+        <TextView
+            android:background="@color/colorLoginBack"
+            android:layout_width="match_parent"
+            android:layout_height="1px" />
+        <LinearLayout
+            android:id="@+id/ll_custom2"
+            android:clickable="true"
+            android:orientation="horizontal"
+            android:padding="2dp"
+            android:gravity="center_vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/iv_custom_icon2"
+                android:src="@mipmap/game_dark_3x"
+                android:layout_margin="10dp"
+                android:layout_width="28dp"
+                android:layout_height="28dp" />
+            <TextView
+                android:id="@+id/iv_custom_modification2"
+                android:text="未定义"
+                android:layout_weight="1"
+                android:textColor="@color/colorText"
+                android:paddingLeft="10dp"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content" />
+            <ImageView
+                android:src="@mipmap/custom_trangle_3x"
+                android:padding="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+        <TextView
+            android:background="@color/colorLoginBack"
+            android:layout_width="match_parent"
+            android:layout_height="1px" />
+        <LinearLayout
+            android:id="@+id/ll_custom3"
+            android:clickable="true"
+            android:orientation="horizontal"
+            android:padding="2dp"
+            android:gravity="center_vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/iv_custom_icon3"
+                android:src="@mipmap/music_dark_3x"
+                android:layout_margin="10dp"
+                android:layout_width="28dp"
+                android:layout_height="28dp" />
+            <TextView
+                android:id="@+id/iv_custom_modification3"
+                android:text="未定义"
+                android:layout_weight="1"
+                android:textColor="@color/colorText"
+                android:paddingLeft="10dp"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content" />
+            <ImageView
+                android:src="@mipmap/custom_trangle_3x"
+                android:padding="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+        <TextView
+            android:background="@color/colorLoginBack"
+            android:layout_width="match_parent"
+            android:layout_height="1px" />
+        <LinearLayout
+            android:id="@+id/ll_custom4"
+            android:clickable="true"
+            android:orientation="horizontal"
+            android:padding="2dp"
+            android:gravity="center_vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/iv_custom_icon4"
+                android:src="@mipmap/clean_up_dark_3x"
+                android:layout_margin="10dp"
+                android:layout_width="28dp"
+                android:layout_height="28dp" />
+            <TextView
+                android:id="@+id/iv_custom_modification4"
+                android:text="未定义"
+                android:layout_weight="1"
+                android:textColor="@color/colorText"
+                android:paddingLeft="10dp"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content" />
+            <ImageView
+                android:src="@mipmap/custom_trangle_3x"
+                android:padding="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+        <TextView
+            android:background="@color/colorLoginBack"
+            android:layout_width="match_parent"
+            android:layout_height="1px" />
+    </LinearLayout>
+</LinearLayout>

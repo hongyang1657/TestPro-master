@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:weightSum="25"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:weightSum="18"
+        android:orientation="horizontal"
+        android:layout_weight="2"
+        android:background="@color/colorTextActive"
+        android:gravity="center_vertical"
+        android:layout_width="match_parent"
+        android:layout_height="0dp">
+
+        <ImageView
+            android:id="@+id/iv_custom_icon_back"
+            android:layout_weight="3"
+            android:clickable="true"
+            android:onClick="customClick"
+            android:src="@mipmap/custom_return_3x"
+            android:layout_gravity="center"
+            android:layout_width="0dp"
+            android:paddingLeft="-20dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/tv_custom_icon_title"
+            android:layout_weight="12"
+            android:text="选取图标"
+            android:textSize="18sp"
+            android:textColor="@color/colorWhite"
+            android:gravity="center"
+            android:layout_width="0dp"
+            android:layout_height="match_parent" />
+
+        <TextView
+            android:id="@+id/tv_custom_selecter_icon_save"
+            android:layout_weight="3"
+            android:text="保存"
+            android:padding="10dp"
+            android:textColor="@color/colorWhite"
+            android:clickable="true"
+            android:onClick="customClick"
+            android:gravity="center"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+    <ScrollView
+        android:layout_weight="23"
+        android:layout_width="match_parent"
+        android:layout_height="0dp">
+
+        <com.byids.hy.testpro.View.CustomIconGridView
+            android:id="@+id/gv_select_icon"
+            android:numColumns="4"
+            android:stretchMode="columnWidth"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+        </com.byids.hy.testpro.View.CustomIconGridView>
+    </ScrollView>
+</LinearLayout>
