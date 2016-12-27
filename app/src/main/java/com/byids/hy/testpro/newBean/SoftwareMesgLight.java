@@ -1,10 +1,12 @@
 package com.byids.hy.testpro.newBean;
 
+import java.io.Serializable;
+
 /**
  * Created by gqgz2 on 2016/10/26.
  */
 
-public class SoftwareMesgLight {
+public class SoftwareMesgLight implements Serializable {
     private String display_name;
 
     public String getDisplay_name() {

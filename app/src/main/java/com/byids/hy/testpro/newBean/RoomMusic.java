@@ -1,10 +1,12 @@
 package com.byids.hy.testpro.newBean;
 
+import java.io.Serializable;
+
 /**
  * Created by gqgz2 on 2016/10/26.
  */
 
-public class RoomMusic {
+public class RoomMusic implements Serializable {
     private int active;
     private String area;
 

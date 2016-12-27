@@ -85,7 +85,7 @@
             <ImageView
                 android:id="@+id/id_iv"
                 android:layout_below="@id/linear_menu"
-                android:src="@mipmap/bg_img_3"
+                android:src="@mipmap/bg_img_2"
                 android:scaleType="centerCrop"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
@@ -176,135 +176,116 @@
                     android:paddingLeft="10dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
-                <!--<TextView
-                    android:id="@+id/tv_local_temp"
-                    android:text="27°"
-                    android:textSize="32sp"
-                    android:textColor="@color/colorWhite"
-                    android:layout_alignParentBottom="true"
-                    android:layout_alignParentRight="true"
-                    android:padding="10dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />-->
+
             </RelativeLayout>
 
-            <TextView
-                android:id="@+id/tv_panel_name"
-                android:background="@color/colorAlphaBlack"
-                android:text="面 板"
-                android:textColor="@color/colorText"
-                android:clickable="true"
-                android:padding="10dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-            <include layout="@layout/panel_layout"/>
-
             <LinearLayout
-                android:id="@+id/ll_scene_name"
-                android:orientation="horizontal"
+                android:orientation="vertical"
                 android:background="@color/colorAlphaBlack"
-                android:clickable="true"
-                android:gravity="center_vertical"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
-
                 <TextView
-                    android:id="@+id/tv_scene_name"
-                    android:text="场 景"
+                    android:id="@+id/tv_panel_name"
+                    android:text="面 板"
                     android:textColor="@color/colorText"
                     android:clickable="true"
                     android:padding="10dp"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
+                <include layout="@layout/panel_layout"/>
+
+                <LinearLayout
+                    android:id="@+id/ll_scene_name"
+                    android:orientation="horizontal"
+                    android:clickable="true"
+                    android:gravity="center_vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:id="@+id/tv_scene_name"
+                        android:text="场 景"
+                        android:textColor="@color/colorText"
+                        android:clickable="true"
+                        android:padding="10dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+
+                    <TextView
+                        android:id="@+id/tv_scene_custom"
+                        android:text="自定义"
+                        android:background="@drawable/custom_button_back"
+                        android:paddingTop="2dp"
+                        android:paddingBottom="2dp"
+                        android:paddingRight="8dp"
+                        android:paddingLeft="8dp"
+                        android:layout_gravity="center"
+                        android:gravity="center"
+                        android:textColor="@color/colorText"
+                        android:clickable="true"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+                </LinearLayout>
+
+                <include layout="@layout/scene_layout" />
 
                 <TextView
-                    android:id="@+id/tv_scene_custom"
-                    android:text="自定义"
-                    android:background="@drawable/custom_button_back"
-                    android:paddingTop="2dp"
-                    android:paddingBottom="2dp"
-                    android:paddingRight="8dp"
-                    android:paddingLeft="8dp"
-                    android:layout_gravity="center"
-                    android:gravity="center"
+                    android:id="@+id/tv_light"
+                    android:text="灯 光"
                     android:textColor="@color/colorText"
                     android:clickable="true"
-                    android:layout_width="wrap_content"
+                    android:padding="10dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
+                <include layout="@layout/light_layout"/>
+
+                <TextView
+                    android:id="@+id/tv_curtain"
+                    android:text="窗 帘"
+                    android:textColor="@color/colorText"
+                    android:clickable="true"
+                    android:padding="10dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+                <include layout="@layout/curtain_layout"/>
+
+                <TextView
+                    android:id="@+id/tv_television"
+                    android:text="电 视"
+                    android:textColor="@color/colorText"
+                    android:clickable="true"
+                    android:padding="10dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+                <include layout="@layout/television_layout"/>
+
+                <TextView
+                    android:id="@+id/tv_air_condition"
+                    android:text="空 调"
+                    android:textColor="@color/colorText"
+                    android:clickable="true"
+                    android:padding="10dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+                <include layout="@layout/air_condition_layout"/>
+                <include layout="@layout/air_condition_details_layout" />
+                <TextView
+                    android:id="@+id/tv_main_blank"
+                    android:visibility="gone"
+                    android:text="卷 帘"
+                    android:textColor="#00000000"
+                    android:clickable="true"
+                    android:padding="10dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+                <!--<ImageView
+                    android:id="@+id/iv_bottom"
+                    android:background="@mipmap/mohu"
+                    android:layout_width="match_parent"
+                    android:layout_height="500dp" />-->
             </LinearLayout>
 
-            <include layout="@layout/scene_layout" />
-
-            <TextView
-                android:id="@+id/tv_light"
-                android:text="灯 光"
-                android:textColor="@color/colorText"
-                android:background="@color/colorAlphaBlack"
-                android:clickable="true"
-                android:padding="10dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-            <include layout="@layout/light_layout"/>
-
-            <TextView
-                android:id="@+id/tv_curtain"
-                android:text="窗 帘"
-                android:textColor="@color/colorText"
-                android:background="@color/colorAlphaBlack"
-                android:clickable="true"
-                android:padding="10dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-            <include layout="@layout/curtain_layout"/>
-
-            <!--<TextView
-                android:id="@+id/tv_roller_curtain"
-                android:text="卷 帘"
-                android:textColor="@color/colorText"
-                android:background="@mipmap/mohu"
-                android:clickable="true"
-                android:padding="10dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-            <include layout="@layout/roller_curtain_layout"/>-->
-            <TextView
-                android:id="@+id/tv_television"
-                android:text="电 视"
-                android:textColor="@color/colorText"
-                android:background="@color/colorAlphaBlack"
-                android:clickable="true"
-                android:padding="10dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-            <include layout="@layout/television_layout"/>
-
-            <TextView
-                android:id="@+id/tv_air_condition"
-                android:text="空 调"
-                android:textColor="@color/colorText"
-                android:background="@color/colorAlphaBlack"
-                android:clickable="true"
-                android:padding="10dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-            <include layout="@layout/air_condition_layout"/>
-            <include layout="@layout/air_condition_details_layout" />
-            <TextView
-                android:id="@+id/tv_main_blank"
-                android:visibility="gone"
-                android:text="卷 帘"
-                android:textColor="#00000000"
-                android:background="@color/colorAlphaBlack"
-                android:clickable="true"
-                android:padding="10dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-            <!--<ImageView
-                android:id="@+id/iv_bottom"
-                android:background="@mipmap/mohu"
-                android:layout_width="match_parent"
-                android:layout_height="500dp" />-->
 
         </LinearLayout>
     </com.byids.hy.testpro.View.MyPullUpScrollView>

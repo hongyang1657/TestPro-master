@@ -80,14 +80,22 @@ public class CustomSceneSecondActivity extends Activity {
     TextView tvCustomBianji4;
     @BindView(R.id.tv_custom_bianji5)
     TextView tvCustomBianji5;
+    @BindView(R.id.iv_compile_done_1)
+    ImageView ivCompileDone1;
+    @BindView(R.id.iv_compile_done_2)
+    ImageView ivCompileDone2;
+    @BindView(R.id.iv_compile_done_3)
+    ImageView ivCompileDone3;
+    @BindView(R.id.iv_compile_done_4)
+    ImageView ivCompileDone4;
 
-    private int[] iconResListSelect = {R.mipmap.scene_custom_img_select_3x_1,R.mipmap.scene_custom_img_select_3x_2,R.mipmap.scene_custom_img_select_3x_3,
-            R.mipmap.scene_custom_img_select_3x_4,R.mipmap.scene_custom_img_select_3x_5,R.mipmap.scene_custom_img_select_3x_6,R.mipmap.scene_custom_img_select_3x_7,
-            R.mipmap.scene_custom_img_select_3x_8,R.mipmap.scene_custom_img_select_3x_9,R.mipmap.scene_custom_img_select_3x_10,R.mipmap.scene_custom_img_select_3x_11,
-            R.mipmap.scene_custom_img_select_3x_12,R.mipmap.scene_custom_img_select_3x_13,R.mipmap.scene_custom_img_select_3x_14,R.mipmap.scene_custom_img_select_3x_15,
-            R.mipmap.scene_custom_img_select_3x_16,R.mipmap.scene_custom_img_select_3x_17,R.mipmap.scene_custom_img_select_3x_18,R.mipmap.scene_custom_img_select_3x_19,
-            R.mipmap.scene_custom_img_select_3x_20,R.mipmap.scene_custom_img_select_3x_21,R.mipmap.scene_custom_img_select_3x_22,R.mipmap.scene_custom_img_select_3x_23,
-            R.mipmap.scene_custom_img_select_3x_24,R.mipmap.scene_custom_img_select_3x_25,R.mipmap.scene_custom_img_select_3x_26,R.mipmap.scene_custom_img_select_3x_27,};
+    private int[] iconResListSelect = {R.mipmap.scene_custom_img_select_3x_1, R.mipmap.scene_custom_img_select_3x_2, R.mipmap.scene_custom_img_select_3x_3,
+            R.mipmap.scene_custom_img_select_3x_4, R.mipmap.scene_custom_img_select_3x_5, R.mipmap.scene_custom_img_select_3x_6, R.mipmap.scene_custom_img_select_3x_7,
+            R.mipmap.scene_custom_img_select_3x_8, R.mipmap.scene_custom_img_select_3x_9, R.mipmap.scene_custom_img_select_3x_10, R.mipmap.scene_custom_img_select_3x_11,
+            R.mipmap.scene_custom_img_select_3x_12, R.mipmap.scene_custom_img_select_3x_13, R.mipmap.scene_custom_img_select_3x_14, R.mipmap.scene_custom_img_select_3x_15,
+            R.mipmap.scene_custom_img_select_3x_16, R.mipmap.scene_custom_img_select_3x_17, R.mipmap.scene_custom_img_select_3x_18, R.mipmap.scene_custom_img_select_3x_19,
+            R.mipmap.scene_custom_img_select_3x_20, R.mipmap.scene_custom_img_select_3x_21, R.mipmap.scene_custom_img_select_3x_22, R.mipmap.scene_custom_img_select_3x_23,
+            R.mipmap.scene_custom_img_select_3x_24, R.mipmap.scene_custom_img_select_3x_25, R.mipmap.scene_custom_img_select_3x_26, R.mipmap.scene_custom_img_select_3x_27,};
     private static final int REQUEST_CODE_LIGHT = 1;
     private static final int REQUEST_CODE_ICON = 2;
 
@@ -155,7 +163,7 @@ public class CustomSceneSecondActivity extends Activity {
         tvList.add(tvCustomBianji3);
         tvList.add(tvCustomBianji4);
         tvList.add(tvCustomBianji5);
-        for (int i=0;i<tvList.size();i++){
+        for (int i = 0; i < tvList.size(); i++) {
             tvList.get(i).setTypeface(typeFace);
         }
     }
@@ -174,11 +182,11 @@ public class CustomSceneSecondActivity extends Activity {
                 break;
             case R.id.ll_custom_second_icon:
                 Intent intentToIcon = new Intent(this, CustomSceneSelectIconActivity.class);
-                startActivityForResult(intentToIcon,REQUEST_CODE_ICON);
+                startActivityForResult(intentToIcon, REQUEST_CODE_ICON);
                 break;
             case R.id.ll_custom_second_light:
-                Intent intentToLight = new Intent(this,CustomSceneLightActivity.class);
-                startActivityForResult(intentToLight,REQUEST_CODE_LIGHT);
+                Intent intentToLight = new Intent(this, CustomSceneLightActivity.class);
+                startActivityForResult(intentToLight, REQUEST_CODE_LIGHT);
                 break;
             case R.id.ll_custom_second_music:
                 break;
@@ -204,8 +212,8 @@ public class CustomSceneSecondActivity extends Activity {
         dialogCustomName.setContentView(viewDialog);
         dialogCustomName.setCanceledOnTouchOutside(false);//点击外部，弹框不消失
         WindowManager.LayoutParams params = dialogCustomName.getWindow().getAttributes();
-        params.width = (int) (width*0.7);
-        params.height = (int) (height*0.3);   //设置dialog的宽高
+        params.width = (int) (width * 0.7);
+        params.height = (int) (height * 0.3);   //设置dialog的宽高
         Window mWindow = dialogCustomName.getWindow();
         mWindow.setGravity(Gravity.CENTER);
         mWindow.setAttributes(params);
@@ -214,16 +222,18 @@ public class CustomSceneSecondActivity extends Activity {
     View.OnClickListener dialogListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            switch (v.getId()){
+            switch (v.getId()) {
                 case R.id.tv_custom_name_cancel:
                     Toast.makeText(CustomSceneSecondActivity.this, "取消", Toast.LENGTH_SHORT).show();
                     dialogCustomName.hide();
                     break;
                 case R.id.tv_custom_name_enter:
                     saveName = etCustomName.getText().toString().trim();
-                    ivCustomName.setText(saveName);
+                    //ivCustomName.setText(saveName);
                     tvCustomTitleSecond.setText(saveName);
-                    Toast.makeText(CustomSceneSecondActivity.this, "确定,保存的名字是："+saveName, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(CustomSceneSecondActivity.this, "确定,保存的名字是：" + saveName, Toast.LENGTH_SHORT).show();
+                    ivCompileDone1.setVisibility(View.VISIBLE);
+                    tvCustomBianji1.setVisibility(View.GONE);
                     dialogCustomName.hide();
                     break;
             }
@@ -233,12 +243,16 @@ public class CustomSceneSecondActivity extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        switch (requestCode){
+        switch (requestCode) {
             case REQUEST_CODE_LIGHT:
                 Toast.makeText(this, "从light回来", Toast.LENGTH_SHORT).show();
+                ivCompileDone3.setVisibility(View.VISIBLE);
+                tvCustomBianji3.setVisibility(View.GONE);
                 break;
             case REQUEST_CODE_ICON:
                 Toast.makeText(this, "从icon回来", Toast.LENGTH_SHORT).show();
+                ivCompileDone2.setVisibility(View.VISIBLE);
+                tvCustomBianji2.setVisibility(View.GONE);
                 break;
             default:
                 break;

@@ -1,10 +1,12 @@
 package com.byids.hy.testpro.newBean;
 
+import java.io.Serializable;
+
 /**
  * Created by gqgz2 on 2016/10/26.
  */
 
-public class HardwareMesgLight {
+public class HardwareMesgLight implements Serializable {
     private String subnet_id;
     private String device_id;
     private String type;

@@ -29,15 +29,14 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.byids.hy.testpro.Bean.HomeAttr;
-import com.byids.hy.testpro.Bean.RoomAttr;
-import com.byids.hy.testpro.Bean.Rooms;
 import com.byids.hy.testpro.R;
 import com.byids.hy.testpro.View.LoginHScrollView;
 import com.byids.hy.testpro.newBean.AllJsonData;
+import com.byids.hy.testpro.newBean.Rooms;
 import com.byids.hy.testpro.service.UDPBroadcastService;
 import com.byids.hy.testpro.utils.LongLogCatUtil;
 import com.byids.hy.testpro.utils.NetworkStateUtil;
+import com.byids.hy.testpro.utils.NewJsonParseUtils;
 import com.byids.hy.testpro.utils.RunningTimeDialog;
 
 import org.json.JSONException;
@@ -100,10 +99,10 @@ public class NewLoginActivity extends BaseActivity{
 
     private String userName;
     private String password;
-    HomeAttr homeAttrBean;
+    //HomeAttr homeAttrBean;
     Rooms rs;
     List<Rooms> roomsList = new ArrayList<Rooms>();
-    RoomAttr ra;
+    //RoomAttr ra;
     private RunningTimeDialog runningTimeDialog = new RunningTimeDialog();
 
     private Intent intentLogin;
@@ -138,10 +137,16 @@ public class NewLoginActivity extends BaseActivity{
                 case 3:      //获取用户信息
                     allJson = (String) msg.obj;
                     LongLogCatUtil.logE("hongyang","外网登陆获取："+allJson);
+                    NewJsonParseUtils newJsonParseUtils = new NewJsonParseUtils(allJson);
+                    allJsonData = newJsonParseUtils.newJsonParse();
                     runningTimeDialog.progressDialog.dismiss();     //转圈圈消失
                     //跳转
                     Log.i("putExtra_hy", "secondLoginLAN:"+userName+"---"+password+"---"+ip+"---"+token);
+                    Bundle bundle = new Bundle();
+                    bundle.putSerializable("allJsonData",allJsonData);
+                    intentLogin.putExtras(bundle);
                     intentLogin.putExtra("isFirstLogin",true);
+                    intentLogin.putExtra("isByWANLogin",true);
                     intentLogin.putExtra("uname",userName);
                     intentLogin.putExtra("pwd",password);
                     intentLogin.putExtra("host_ip",ip);
@@ -159,9 +164,11 @@ public class NewLoginActivity extends BaseActivity{
     private ServiceConnection connection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            udpBinder = (UDPBroadcastService.UDPBinder) service;
-            ip = udpBinder.getHostIp();
-            Log.i(TAG, "onServiceConnected: -----获取后台接受的主机ip------"+ip);
+            if (!isMobileState){
+                udpBinder = (UDPBroadcastService.UDPBinder) service;
+                ip = udpBinder.getHostIp();
+                Log.i(TAG, "onServiceConnected: -----获取后台接受的主机ip------"+ip);
+            }
         }
 
         @Override
@@ -177,16 +184,23 @@ public class NewLoginActivity extends BaseActivity{
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);//去掉信息栏
         setContentView(R.layout.login_1_layout);
+        //获取网络状态
+        isConnect = NetworkStateUtil.isNetworkAvailable(this);
+        isMobileState = NetworkStateUtil.isNetworkMobileState(this);
         //绑定service，实现通信
-        Intent bindIntent = new Intent(this, UDPBroadcastService.class);
-        bindService(bindIntent, connection, BIND_AUTO_CREATE); // 绑定服务
+        if (!isMobileState){
+            Intent bindIntent = new Intent(this, UDPBroadcastService.class);
+            bindService(bindIntent, connection, BIND_AUTO_CREATE); // 绑定服务
+        }
         initView();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        unbindService(connection);
+        if (!isMobileState){
+            unbindService(connection);
+        }
         setContentView(R.layout.view_null);
     }
 
@@ -413,9 +427,6 @@ public class NewLoginActivity extends BaseActivity{
                 }
                 break;
             case R.id.bt_login:   //登陆
-                //获取网络状态
-                isConnect = NetworkStateUtil.isNetworkAvailable(this);
-                isMobileState = NetworkStateUtil.isNetworkMobileState(this);
                 if (isConnect){  //网络可用
                     //加载动画
                     new Thread(){
@@ -506,8 +517,8 @@ public class NewLoginActivity extends BaseActivity{
 
     //套包返回的json数据
     private void loginPost(){
-        //final String url = "http://115.29.97.189:20000/api/user/login";
-        final String url = "http://192.168.10.230:20000/api/user/login";
+        final String url = "http://115.29.97.189:20000/api/user/login";
+        //final String url = "http://192.168.10.230:20000/api/user/login";
         new Thread(){
             @Override
             public void run() {
@@ -554,8 +565,8 @@ public class NewLoginActivity extends BaseActivity{
     //向服务器post token
     private void postToken(final String token){
         final String token1 = "00000000000000000000000000000000"; //暂时用
-        //final String url = "http://115.29.97.189:20000/api/homeserver/profile";
-        final String url = "http://192.168.10.230:20000/api/homeserver/profile";
+        final String url = "http://115.29.97.189:20000/api/homeserver/profile";
+        //final String url = "http://192.168.10.230:20000/api/homeserver/profile";
         new Thread(){
             @Override
             public void run() {

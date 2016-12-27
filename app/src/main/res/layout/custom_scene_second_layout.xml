@@ -82,6 +82,13 @@
                 android:padding="10dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
+            <ImageView
+                android:id="@+id/iv_compile_done_1"
+                android:visibility="gone"
+                android:src="@mipmap/custom_complete_3x"
+                android:padding="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
         </LinearLayout>
         <TextView
             android:background="@color/colorLoginBack"
@@ -113,6 +120,13 @@
                 android:padding="10dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
+            <ImageView
+                android:id="@+id/iv_compile_done_2"
+                android:visibility="gone"
+                android:src="@mipmap/custom_complete_3x"
+                android:padding="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
         </LinearLayout>
         <TextView
             android:background="@color/colorLoginBack"
@@ -141,6 +155,13 @@
                 android:textColor="@color/colorText"
                 android:drawableRight="@mipmap/custom_trangle_3x"
                 android:drawablePadding="8dp"
+                android:padding="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            <ImageView
+                android:id="@+id/iv_compile_done_3"
+                android:visibility="gone"
+                android:src="@mipmap/custom_complete_3x"
                 android:padding="10dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
@@ -201,6 +222,13 @@
                 android:textColor="@color/colorText"
                 android:drawableRight="@mipmap/custom_trangle_3x"
                 android:drawablePadding="8dp"
+                android:padding="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            <ImageView
+                android:id="@+id/iv_compile_done_4"
+                android:visibility="gone"
+                android:src="@mipmap/custom_complete_3x"
                 android:padding="10dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />

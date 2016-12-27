@@ -1,13 +1,13 @@
 package com.byids.hy.testpro.newBean;
 
-import org.json.JSONObject;
+import java.io.Serializable;
 
 /**
  *
  * Created by gqgz2 on 2016/10/25.
  */
 
-public class HomeProfile {
+public class HomeProfile implements Serializable {
     private Music music;
     private Camera camera;
     private Door door;

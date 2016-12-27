@@ -1,14 +1,15 @@
 package com.byids.hy.testpro.newBean;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
  * Created by gqgz2 on 2016/10/26.
  */
 
-public class Light {
+public class Light implements Serializable {
     private int active;
-    private String protocol;
+    //private String protocol;
     private List<LightAttr> array;
 
     public int getActive() {
@@ -19,13 +20,13 @@ public class Light {
         this.active = active;
     }
 
-    public String getProtocol() {
+    /*public String getProtocol() {
         return protocol;
-    }
+    }*/
 
-    public void setProtocol(String protocol) {
+    /*public void setProtocol(String protocol) {
         this.protocol = protocol;
-    }
+    }*/
 
     public List<LightAttr> getArray() {
         return array;

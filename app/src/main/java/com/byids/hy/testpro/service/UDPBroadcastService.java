@@ -56,10 +56,10 @@ public class UDPBroadcastService extends Service{
                     }
                     udpCheck = udpSocket.getUdpCheck();
                     ip = udpSocket.getIp();
-                    if (udpCheck=="ip"||udpCheck.equals("ip")){
-                        Log.i(TAG, "run: --------ip------------ip---------------ip-------------ip-----------ip-------收到的主机ip："+ip);
-                    }else if (udpCheck.equals("")||udpCheck==null){
-                        Log.i(TAG, "找不到ip了，可能是关闭了网络，停止发送udp");
+                    if (udpCheck.equals("ip")){
+                        Log.i(TAG, "udp 收到的主机ip："+ip);
+                    }else{
+                        Log.i(TAG, "udp 找不到ip了，可能是关闭了网络，停止发送udp");
                         isSendingUDP = false;
                     }
                     try {
@@ -86,14 +86,18 @@ public class UDPBroadcastService extends Service{
 
         public String getHostIp(){
             if (ip.equals("192.168.10.220")){                    //这里做判断是为了屏蔽拜爱展厅的主机（192.168.10.220）
-                return "192.168.10.167";
+                return "";
             }else {
                 return ip;
             }
         }
 
         public String getUdpCheck(){
-            return udpCheck;
+            if (ip.equals("192.168.10.220")){                    //这里做判断是为了屏蔽拜爱展厅的主机（192.168.10.220）
+                return "";
+            }else {
+                return udpCheck;
+            }
         }
 
         public void startSendUDP(){

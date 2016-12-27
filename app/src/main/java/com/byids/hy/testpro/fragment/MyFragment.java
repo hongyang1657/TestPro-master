@@ -35,7 +35,6 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.byids.hy.testpro.Bean.RoomAttr;
 import com.byids.hy.testpro.MyEventBus;
 import com.byids.hy.testpro.MyEventBus2;
 import com.byids.hy.testpro.PullDownMenuListener;
@@ -129,7 +128,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
     private int roomIndex;     //房间标示
     private String roomName;   //房间名
     private String roomDBName;    //房间拼音名
-    private RoomAttr roomAttr;   //房间拥有的各个产品信息
+    //private RoomAttr roomAttr;   //房间拥有的各个产品信息
     //private RoomDevMesg roomAttr;
     private String token;
     private String uname;
@@ -325,7 +324,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         this.roomName = roomName;
         this.roomDBName = roomDBName;
         this.backList = backList;
-        this.roomAttr = roomAttr;
+        //this.roomAttr = roomAttr;
         this.token = token;
         this.uname = uname;
         this.pwd = pwd;
@@ -336,7 +335,6 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_layout,null);
-
         EventBus.getDefault().register(this);
         initView();
 
@@ -2214,7 +2212,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         changeColorToActive4(R.mipmap.theme2_jiating_likai_active_ani_3x,R.color.colorTextActive);
     }
     private void clickLightSwitch(){
-        EventBus.getDefault().post(new MyEventBus(""));
+        EventBus.getDefault().post(new MyEventBus("7"));
 
     }
 

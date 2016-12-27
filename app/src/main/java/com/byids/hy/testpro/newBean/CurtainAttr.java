@@ -1,12 +1,12 @@
 package com.byids.hy.testpro.newBean;
 
-import java.util.List;
+import java.io.Serializable;
 
 /**
  * Created by gqgz2 on 2016/10/26.
  */
 
-public class CurtainAttr {
+public class CurtainAttr implements Serializable {
     private int active;
     private String protocol;
     private int number;

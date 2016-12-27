@@ -4,12 +4,12 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * Created by gqgz2 on 2016/10/25.
+ * Created by gqgz2 on 2016/12/24.
  */
 
-public class Rooms implements Serializable {
+public class Panel implements Serializable {
     private int active;
-    private List<RoomsAttr> array;
+    private List<PanelAttr> array;
 
     public int getActive() {
         return active;
@@ -19,11 +19,11 @@ public class Rooms implements Serializable {
         this.active = active;
     }
 
-    public List<RoomsAttr> getArray() {
+    public List<PanelAttr> getArray() {
         return array;
     }
 
-    public void setArray(List<RoomsAttr> array) {
+    public void setArray(List<PanelAttr> array) {
         this.array = array;
     }
 }

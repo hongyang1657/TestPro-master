@@ -1,12 +1,15 @@
 package com.byids.hy.testpro.newBean;
 
+import java.io.Serializable;
+
 /**
  * Created by gqgz2 on 2016/10/26.
  */
 
-public class RoomDevMesg {
+public class RoomDevMesg implements Serializable {
     private Light light;
     private Curtain curtain;
+    private Panel panel;
     private RoomMusic music;
 
     public Light getLight() {
@@ -31,5 +34,13 @@ public class RoomDevMesg {
 
     public void setMusic(RoomMusic music) {
         this.music = music;
+    }
+
+    public Panel getPanel() {
+        return panel;
+    }
+
+    public void setPanel(Panel panel) {
+        this.panel = panel;
     }
 }

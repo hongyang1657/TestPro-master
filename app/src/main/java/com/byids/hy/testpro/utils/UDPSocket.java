@@ -143,7 +143,11 @@ public class UDPSocket {
     //获取主机ip地址
     public String getIp() {
         Log.i("udp_search_ip", "getIp: -----------------------主机ip："+ip);
-        return ip;
+        if (udpCheck.equals("ip")){
+            return ip;
+        }else {
+            return "";
+        }
     }
 
     //判断是否找到主机

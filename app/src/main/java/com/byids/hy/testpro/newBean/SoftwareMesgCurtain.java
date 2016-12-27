@@ -1,10 +1,12 @@
 package com.byids.hy.testpro.newBean;
 
+import java.io.Serializable;
+
 /**
  * Created by gqgz2 on 2016/10/26.
  */
 
-public class SoftwareMesgCurtain {
+public class SoftwareMesgCurtain implements Serializable {
     private String tag;
     private String type;
     private String displayer_name;

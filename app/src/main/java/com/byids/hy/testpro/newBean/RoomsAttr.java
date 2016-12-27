@@ -1,11 +1,13 @@
 package com.byids.hy.testpro.newBean;
 
+import java.io.Serializable;
+
 /**
  * Created by gqgz2 on 2016/10/26.
  * 房间数组
  */
 
-public class RoomsAttr {
+public class RoomsAttr implements Serializable {
     private int active;
     private String protocol;
     private String room_db_name;

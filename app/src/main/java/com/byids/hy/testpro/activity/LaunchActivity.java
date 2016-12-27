@@ -17,12 +17,14 @@ import android.widget.Toast;
 import com.byids.hy.testpro.R;
 import com.byids.hy.testpro.TCPLongSocketCallback;
 import com.byids.hy.testpro.TcpLongSocket;
+import com.byids.hy.testpro.newBean.AllJsonData;
 import com.byids.hy.testpro.service.UDPBroadcastService;
 import com.byids.hy.testpro.utils.AES;
 import com.byids.hy.testpro.utils.CommandJsonUtils;
 import com.byids.hy.testpro.utils.Encrypt;
 import com.byids.hy.testpro.utils.LongLogCatUtil;
 import com.byids.hy.testpro.utils.NetworkStateUtil;
+import com.byids.hy.testpro.utils.NewJsonParseUtils;
 import com.byids.hy.testpro.utils.UDPSocket;
 import com.byids.hy.testpro.utils.VibratorUtil;
 
@@ -74,6 +76,7 @@ public class LaunchActivity extends BaseActivity{
     private boolean isConnect;
     private boolean isMobileState;
     private String phoneIP;
+    private AllJsonData allJsonData;
 
     //外网登陆
     private Handler handler = new Handler(){
@@ -103,11 +106,19 @@ public class LaunchActivity extends BaseActivity{
                     LongLogCatUtil.logE("result","launchActivity解密后的房间信息："+strRoomInf);     //多行打印logcat
                     //解析数据后跳转（测试，直接加载假数据跳转，以后删除）
 
-                        if ("Verify error".equals(judgeVerify(strRoomInf))){
-                            Toast.makeText(LaunchActivity.this, "内网验证没通过,尝试通过外网登录", Toast.LENGTH_SHORT).show();
-                            Log.i("result", "handleMessage: 内网验证没通过,尝试通过外网登录");
-                            secondLoginWAN();
-                        }
+
+                    if (strRoomInf!=null && "Verify error".equals(judgeVerify(strRoomInf))){
+                        Toast.makeText(LaunchActivity.this, "内网验证没通过,尝试通过外网登录", Toast.LENGTH_SHORT).show();
+                        Log.i("result", "handleMessage: 内网验证没通过,尝试通过外网登录");
+                        secondLoginWAN();      //内网找不到主机，外网登陆
+                    }else if (strRoomInf!=null && judgeRoomJson(strRoomInf)!=null){
+                        //解析房间信息
+                        String roomJson = strRoomInf.substring(0,strRoomInf.length()-16);
+                        LongLogCatUtil.logE("result","房间json："+roomJson);
+                        NewJsonParseUtils newJsonParseUtils = new NewJsonParseUtils(roomJson);
+                        allJsonData = newJsonParseUtils.newJsonParse();
+                        Log.e(TAG, "handleMessage: allJsonData对象等于："+allJsonData);
+
                         if (strRoomInf.length()>200){           //获取房间信息
                             tcplongSocket.close();
                             Intent intentByLAN = new Intent(LaunchActivity.this,MyMainActivity.class);
@@ -117,10 +128,18 @@ public class LaunchActivity extends BaseActivity{
                             intentByLAN.putExtra("host_ip",ip);
                             intentByLAN.putExtra("isFirstLogin",false);
                             intentByLAN.putExtra("token",saveToken);
+                            Bundle bundle = new Bundle();
+                            bundle.putSerializable("allJsonData",allJsonData);
+                            intentByLAN.putExtras(bundle);
                             startActivity(intentByLAN);
                             finish();
                         }
-
+                    }else if (strRoomInf==null){
+                        Toast.makeText(LaunchActivity.this, "内网验证没通过,尝试通过外网登录", Toast.LENGTH_SHORT).show();
+                        Log.i("result", "handleMessage: launchActivity内网验证没通过,尝试通过外网登录");
+                        secondLoginWAN();
+                        break;
+                    }
 
                     break;
                 case 2:
@@ -131,15 +150,22 @@ public class LaunchActivity extends BaseActivity{
                     break;
                 case 3:      //外网登陆获取用户信息后跳转
                     VibratorUtil.Vibrate(LaunchActivity.this, 100);
-                    //allJson = (String) msg.obj;
+                    allJson = (String) msg.obj;
+                    NewJsonParseUtils newJsonParseUtils = new NewJsonParseUtils(allJson);    //Gson解析房间数据
+                    allJsonData = newJsonParseUtils.newJsonParse();
+
                     //解析数据后跳转
                     Intent intentByWAN = new Intent(LaunchActivity.this,MyMainActivity.class);
                     Log.i("putExtra_hy", "secondLoginLAN:"+userName+"---"+password+"---"+ip+"---"+token);
                     intentByWAN.putExtra("uname",userName);
                     intentByWAN.putExtra("pwd",password);
                     intentByWAN.putExtra("token",token);
-                    intentByWAN.putExtra("host_ip",ip);
-                    intentByWAN.putExtra("isFirstLogin",true);
+                    Bundle bundle = new Bundle();
+                    bundle.putSerializable("allJsonData",allJsonData);
+                    intentByWAN.putExtras(bundle);
+                    intentByWAN.putExtra("isByWANLogin",true);
+                    intentByWAN.putExtra("isFirstLogin",false);
+                    intentByWAN.putExtra("needWANConnect",true);       //是否需要外网来尝试连接
                     startActivity(intentByWAN);
                     finish();
                     break;
@@ -216,10 +242,25 @@ public class LaunchActivity extends BaseActivity{
         return strVerify;
     }
 
+    //判断是否房间信息
+    private String judgeRoomJson(String strRec){
+        String strRoomJson = null;
+        String strJson = strRec.substring(0,strRec.length()-16);
+        Log.i("strRoomJson", "strRoomJson: "+strJson);
+        try {
+            JSONObject jsonObject = new JSONObject(strJson);
+            strRoomJson = jsonObject.getString("CommandUser");
+            Log.i(TAG, "judgeVerify:jsonObjectStr: "+strRoomJson);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return strRoomJson;
+    }
+
     private void init(){
         sp1 = getSharedPreferences("user_inform",MODE_PRIVATE);
         if (!isMobileState){      //在连接wifi的情况下，开启后台udp广播
-            startTcpService();     //开启service 绑定service
+            startUdpService();     //开启service 绑定service
         }
         //Log.i("hy_service", "init: "+udpBinder.getHostIp());
         //Log.i("hy_service", "init: "+udpBinder.getUdpCheck());
@@ -230,8 +271,10 @@ public class LaunchActivity extends BaseActivity{
             public void run() {
                 //获取主机ip
 
-                ip = udpBinder.getHostIp();
-                udpCheck = udpBinder.getUdpCheck();
+                if (udpBinder!=null){
+                    ip = udpBinder.getHostIp();
+                    udpCheck = udpBinder.getUdpCheck();
+                }
                 Log.i(TAG, "run: 启动页获取udp接受到的主机ip："+ip+"-----接受到的主机check："+udpCheck);
 
                 userName = sp1.getString("userName","");
@@ -266,7 +309,7 @@ public class LaunchActivity extends BaseActivity{
     }
 
     //开启service，后台发送udp广播
-    private void startTcpService(){
+    private void startUdpService(){
         Intent intentService = new Intent(this, UDPBroadcastService.class);
         startService(intentService);         //启动服务
 
@@ -382,8 +425,8 @@ public class LaunchActivity extends BaseActivity{
     //-------------------------------外网http请求-----------------------------------
     //post登录，返回token
     private void loginPost(){
-        final String url = "http://192.168.10.230:20000/api/user/login";
-        //final String url = "http://115.29.97.189:20000/api/user/login";
+        //final String url = "http://192.168.10.230:20000/api/user/login";
+        final String url = "http://115.29.97.189:20000/api/user/login";
         new Thread(){
             @Override
             public void run() {
@@ -428,8 +471,8 @@ public class LaunchActivity extends BaseActivity{
     //向服务器post token，获取房间信息
     private void postToken(final String token){
         final String token1 = "00000000000000000000000000000000"; //暂时用
-        final String url = "http://192.168.10.230:20000/api/homeserver/profile";
-        //final String url = "http://115.29.97.189:20000/api/homeserver/profile";
+        //final String url = "http://192.168.10.230:20000/api/homeserver/profile";
+        final String url = "http://115.29.97.189:20000/api/homeserver/profile";
         new Thread(){
             @Override
             public void run() {
