@@ -77,6 +77,7 @@
                     android:background="@drawable/custom_light_button_selecter_left"
                     android:gravity="center"
                     android:button="@null"
+                    android:onClick="allLightClick"
                     android:layout_margin="1dp"
                     android:padding="4dp"
                     android:layout_weight="1"
@@ -85,6 +86,7 @@
                 <RadioButton
                     android:id="@+id/rb_control_light_channel_all_1"
                     android:text="微弱"
+                    android:onClick="allLightClick"
                     android:textColor="@drawable/custom_light_textcolor_selecter"
                     android:gravity="center"
                     android:button="@null"
@@ -99,12 +101,12 @@
 
                 <RadioButton
                     android:id="@+id/rb_control_light_channel_all_2"
+                    android:onClick="allLightClick"
                     android:text="舒适"
                     android:textColor="@drawable/custom_light_textcolor_selecter"
                     android:background="@drawable/custom_light_button_selecter_mid"
                     android:gravity="center"
                     android:button="@null"
-                    android:checked="true"
                     android:layout_weight="1"
                     android:layout_marginTop="1dp"
                     android:layout_marginBottom="1dp"
@@ -113,6 +115,7 @@
                     android:layout_height="wrap_content" />
                 <RadioButton
                     android:id="@+id/rb_control_light_channel_all_3"
+                    android:onClick="allLightClick"
                     android:text="明亮"
                     android:textColor="@drawable/custom_light_textcolor_selecter"
                     android:background="@drawable/custom_light_button_selecter_right"

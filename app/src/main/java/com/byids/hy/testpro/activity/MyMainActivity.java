@@ -5,11 +5,13 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.app.Dialog;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -45,8 +47,9 @@ import com.byids.hy.testpro.View.MyCustomViewPager;
 import com.byids.hy.testpro.adapter.ControlLightBaseAdapter;
 import com.byids.hy.testpro.adapter.MyFragmentAdapter;
 import com.byids.hy.testpro.adapter.RoomNameBaseAdapter;
+import com.byids.hy.testpro.customSceneBean.AllCustomScene;
 import com.byids.hy.testpro.fragment.MyFragment;
-import com.byids.hy.testpro.newBean.AllJsonData;
+import com.byids.hy.testpro.newBean.CommandData;
 import com.byids.hy.testpro.service.TcpConnectService;
 import com.byids.hy.testpro.service.UDPBroadcastService;
 import com.byids.hy.testpro.utils.AES;
@@ -63,6 +66,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -72,6 +76,8 @@ import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+
+import static java.lang.Integer.parseInt;
 
 /**
  * 主界面：
@@ -123,8 +129,8 @@ public class MyMainActivity extends FragmentActivity {
 
 
     //房间名数组kk
-    private String[] roomNameList = new String[]{"客厅","主卧","次卧","厨房","餐厅","卫浴"};
-    private String[] roomDBNameList = new String[]{"keting","woshi","ciwo","chufang","canting","weiyu"};
+    private String[] roomNameList;
+    private String[] roomDBNameList;
     //private HomeAttr homeAttr = new HomeAttr();
 
 
@@ -140,7 +146,8 @@ public class MyMainActivity extends FragmentActivity {
     private String hid = "56e276f3736fb0872c69d876";        //换成主机发过来的token
     private String host_ip;     //主机地址
     private String token;     //外网登录服务器时给的token，只有当第二次登录时才会失效
-    private AllJsonData allJsonData = null;        //房间json数据总类
+    private CommandData commandData = null;        //房间json数据总类
+    private String protocol = "byids-A";
 
     //----------------TCP socket内网通信---------------------
     public static final int DEFAULT_PORT = 57816;
@@ -156,6 +163,7 @@ public class MyMainActivity extends FragmentActivity {
 
     //断线重连部分
     private AppConnection appConnection;
+    private AppConnectionWAN appConnectionWAN;
 
 
     private Handler handler = new Handler(){
@@ -183,6 +191,12 @@ public class MyMainActivity extends FragmentActivity {
                         EventBus.getDefault().post(new MyEventBus2("22"));
                     }
                     //appConnection.start();       //开启后台断线重连线程
+                    break;
+                case 3:
+                    Toast.makeText(MyMainActivity.this, "主机未连接，请连上主机后重试", Toast.LENGTH_LONG).show();
+                    break;
+                case 4:
+                    Toast.makeText(MyMainActivity.this, "Token无效", Toast.LENGTH_LONG).show();
                     break;
                 default:
                     break;
@@ -227,7 +241,7 @@ public class MyMainActivity extends FragmentActivity {
                     Log.i("reconnection_hy", "run: 内网连接中断......udp收到的check为："+udpBinder.getUdpCheck()+"-----"+udpBinder.getHostIp());
                     Message message = new Message();
                     message.what = 2;
-                    handler.sendMessageDelayed(message,3000);
+                    handler.sendMessageDelayed(message,300);
                     flag++;
 
                     Log.i("reconnection_hy", "run: 有没有网:"+NetworkStateUtil.isNetworkAvailable(MyMainActivity.this));
@@ -239,7 +253,56 @@ public class MyMainActivity extends FragmentActivity {
                         tcplongSocket.startConnect(host_ip, DEFAULT_PORT);
                         Message message1 = new Message();
                         message1.what = 2;
-                        handler.sendMessageDelayed(message1,3000);
+                        handler.sendMessageDelayed(message1,300);
+                        try {
+                            sleep(3000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+                try {
+                    sleep(5000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    //外网断线重连
+    class AppConnectionWAN extends Thread{
+        @Override
+        public void run() {
+            super.run();
+            int flag = 0;
+            try {
+                sleep(10000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            while (isOnMainActivity && tcpLongSocketWAN!=null /*&& !strVerify.equals("Verify error")*/){
+                if (tcpLongSocketWAN.getConnectStatus()){      //已经保持内网连接
+                    Log.i("reconnection_hy", "run:已经保持外网连接 ,心跳"+tcpLongSocketWAN);
+                    Log.i("reconnection_hy", "run: 有没有网:"+NetworkStateUtil.isNetworkAvailable(MyMainActivity.this));
+                    flag = 0;
+                }else if (!tcpLongSocketWAN.getConnectStatus()){
+                    Log.i("reconnection_hy", "run: 外网连接中断......udp收到的check为："+udpBinder.getUdpCheck()+"-----"+udpBinder.getHostIp());
+                    Message message = new Message();
+                    message.what = 1;
+                    handler.sendMessageDelayed(message,300);
+                    flag++;
+
+                    Log.i("reconnection_hy", "run: 有没有网:"+NetworkStateUtil.isNetworkAvailable(MyMainActivity.this));
+                    if (NetworkStateUtil.isNetworkAvailable(MyMainActivity.this) && flag>1 ){      //断线超过5秒，则断线重连
+                        //内网中断后，在连接上网络的情况下，断线重连
+                        tcpLongSocketWAN.close();
+                        //tcplongSocket.startConnect(host_ip,DEFAULT_PORT);
+                        tcpLongSocketWAN = new TcpLongSocket(new ConnectTcpWAN());
+                        tcpLongSocketWAN.startConnect(ip_WAN,DEFAULT_PORT_WAN);
+                        Message message1 = new Message();
+                        message1.what = 1;
+                        handler.sendMessageDelayed(message1,300);
                         try {
                             sleep(3000);
                         } catch (InterruptedException e) {
@@ -261,6 +324,7 @@ public class MyMainActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);//去掉信息栏
+        this.setVolumeControlStream(AudioManager.STREAM_MUSIC); //让音量键固定为媒体音量控制
         setContentView(R.layout.my_main_layout);
         //注册EventBus
         EventBus.getDefault().register(this);
@@ -273,7 +337,6 @@ public class MyMainActivity extends FragmentActivity {
     @Override
     protected void onResume() {
         super.onResume();
-
     }
 
     @Override
@@ -283,7 +346,6 @@ public class MyMainActivity extends FragmentActivity {
         //connectTcp = false;    //关闭线程
         Log.i(TAG, "onDestroy: ----------------主界面退出--------------onDestroy---------------------------");
         if (dialogExit!=null){
-            //dialogExit.dismiss();
             dialogExit.hide();
             dialogExit = null;
         }
@@ -296,35 +358,6 @@ public class MyMainActivity extends FragmentActivity {
         unbindService(connection);
     }
 
-    //接收登录页面传递过来的数据
-    /*private void reciveIntent() {
-        uname = getIntent().getStringExtra("uname");
-        pwd = getIntent().getStringExtra("pwd");
-        hid = getIntent().getStringExtra("hid");
-        ip = getIntent().getStringExtra("ip");
-        if (ip == null) {
-            Toast.makeText(MyMainActivity.this, "找不到主机", Toast.LENGTH_LONG).show();
-        } else {
-            Toast.makeText(MyMainActivity.this, "找到主机", Toast.LENGTH_LONG).show();
-            tcplongSocket = new TcpLongSocket(new ConnectTcp());
-            tcplongSocket.startConnect(ip, DEFAULT_PORT);
-
-            *//*new Thread() {
-                @Override
-                public void run() {
-                    super.run();
-                    while (connectTcp) {
-                        try {
-                            sleep(10000);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                        tcplongSocket.writeDate(Encrypt.encrypt("0"));
-                    }
-                }
-            }.start();*//*
-        }
-    }*/
 
     //------------------------------新版的逻辑判断 外网连接或内网连接---------------------------------
     private void reciveIntent(){
@@ -337,7 +370,7 @@ public class MyMainActivity extends FragmentActivity {
         isFirstLogin = getIntent().getBooleanExtra("isFirstLogin",false);       //是否第一次登陆
         isByWANLogin = getIntent().getBooleanExtra("isByWANLogin",false);      //是否通过外网登陆
         needWANConnect = getIntent().getBooleanExtra("needWANConnect",false);   //是否需要外网连接
-        allJsonData = (AllJsonData) getIntent().getSerializableExtra("allJsonData");
+        commandData = (CommandData) getIntent().getSerializableExtra("commandData");
         Log.i(TAG, "run: 是否第一次登陆："+isFirstLogin+"     是否外网登陆的："+isByWANLogin);
         initFragment();     //初始化fragment数据
         if (isByWANLogin){
@@ -355,9 +388,9 @@ public class MyMainActivity extends FragmentActivity {
             public void run() {
                 super.run();
                 Log.i(TAG, "run: 是否通过外网登陆的："+isByWANLogin);
-                if (host_ip==null||host_ip.equals("")||needWANConnect){
+                if (host_ip==null||host_ip.equals("")||needWANConnect||isByWANLogin){
                     Log.i("hongyang", "reciveIntent: 内网不通，尝试连接外网");
-                    Log.i("hy_result", "run: 外网连接用的token:"+token);
+                    Log.i("byid_hy_intent", "run: 外网连接用的token:"+token);
                     //外网Tcp连接
                     tcpLongSocketWAN = new TcpLongSocket(new ConnectTcpWAN());
                     tcpLongSocketWAN.startConnect(ip_WAN,DEFAULT_PORT_WAN);
@@ -369,7 +402,7 @@ public class MyMainActivity extends FragmentActivity {
                     tcplongSocket.startConnect(host_ip, DEFAULT_PORT);
                     Message message = new Message();
                     message.what = 2;
-                    handler.sendMessageDelayed(message,3000);
+                    handler.sendMessageDelayed(message,300);
                 }
             }
         }.start();
@@ -378,22 +411,25 @@ public class MyMainActivity extends FragmentActivity {
 
     //初始化各个房间fragment的数据
     private void initFragment(){
-        /*if (null!=allJsonData){
-            Log.i(TAG, "reciveIntent: alljson:"+allJsonData.getCommandUser().getHid());
-            allJsonData.getCommandData().getProfile().getRooms().getArray().size();
-            int roomsIndex = allJsonData.getCommandData().getProfile().getRooms().getArray().size();
-            Log.i(TAG, "initFragment: roomsIndex房间个数:"+roomsIndex);
+        if (null!=commandData){
+            protocol = commandData.getProtocol();
+            //Log.e(TAG, "reciveIntent: alljson:"+allJsonData.getCommandUser().getHid());
+            int roomsIndex = commandData.getProfile().getRooms().getArray().size();
+            roomNameList = new String[roomsIndex];
+            roomDBNameList = new String[roomsIndex];
             for (int i=0;i<roomsIndex;i++){
-                roomNameList[i] =
-            }*/
+                roomNameList[i] = commandData.getProfile().getRooms().getArray().get(i).getRoom_zh_name();
+                roomDBNameList[i] = commandData.getProfile().getRooms().getArray().get(i).getRoom_db_name();
+            }
 
             //activity给fragment传递数据
-            for (int i = 0; i < roomNameList.length; i++) {
-                myFragment1 = new MyFragment(i, roomNameList[i], roomDBNameList[i], ivBackList, token, uname, pwd);         //房间id,房间名数组，房间拼音名数组，背景图片数组，活跃的控件数组,hid,uname,pwd
+            AllCustomScene allCustomScene = new AllCustomScene();
+            for (int i = 0; i < roomsIndex; i++) {
+                myFragment1 = new MyFragment(i,commandData, roomNameList[i], roomDBNameList[i], ivBackList, token, uname, pwd, protocol,allCustomScene);         //房间id,房间名数组，房间拼音名数组，背景图片数组，活跃的控件数组,hid,uname,pwd
                 pullMenu(myFragment1);
                 viewList.add(myFragment1);
             }
-        //}
+        }
     }
 
     //SharedPreferences本地储存用户信息
@@ -428,7 +464,13 @@ public class MyMainActivity extends FragmentActivity {
 
             if (buffer.length>32 && buffer.length<200){
                 //LongLogCatUtil.logE("result",testDecryptByte(buffer));
-                judgeVerify(testDecryptByte(buffer));
+                String verifyStr = judgeVerify(testDecryptByte(buffer));
+                if ("Verify error".equals(verifyStr)){
+                    tcplongSocket.close();    //验证失败，关闭内网连接
+                    //外网Tcp连接
+                    tcpLongSocketWAN = new TcpLongSocket(new ConnectTcpWAN());
+                    tcpLongSocketWAN.startConnect(ip_WAN,DEFAULT_PORT_WAN);
+                }
             }else {
                 Log.e(TAG, "receive: 收到的数据不是加密数据或数据损坏");
             }
@@ -441,7 +483,7 @@ public class MyMainActivity extends FragmentActivity {
             EventBus.getDefault().post(new MyEventBus2("22"));
         }
 
-        private void judgeVerify(String strRec){
+        private String judgeVerify(String strRec){
             String strJson = strRec.substring(0,strRec.length()-16);
             Log.i("judgeVerify", "judgeVerify: "+strJson);
             LongLogCatUtil.logE("MyMainActivity","MyMainActivity接收到的主机回复消息："+strJson);
@@ -452,6 +494,7 @@ public class MyMainActivity extends FragmentActivity {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
+            return strVerify;
         }
     }
 
@@ -516,7 +559,7 @@ public class MyMainActivity extends FragmentActivity {
             System.arraycopy(data3,0,data,0,data3.length);
             System.arraycopy(postLenth,0,data,data3.length,postLenth.length);
 
-            Log.i(TAG, "connected: -----token-------"+token);
+            Log.i("byid_hy_intent", "connected: -----token-------"+token);
             /*String tokenStr = null;
             try {
                 JSONObject obj = new JSONObject(token);
@@ -529,7 +572,7 @@ public class MyMainActivity extends FragmentActivity {
             //byte[] tokenBytes = hexStr2Bytes(token);
 
             //token转byte数组,一个一转，一共32组
-            byte[] tokenBytes = token.getBytes();
+            byte[] tokenBytes = token.trim().getBytes();
             //Log.i(TAG, "onClick: --------"+byteStringLog(tokenBytes));
 
             byte[] toConnectTcpLong = new byte[data.length+tokenBytes.length];
@@ -545,7 +588,7 @@ public class MyMainActivity extends FragmentActivity {
         @Override
         public void receive(byte[] buffer) {
 
-            Log.i(TAG, "receive: buffer.length:"+buffer.length);
+            Log.i("byid_hy_intent", "receive: buffer.length:"+buffer.length);
             Log.i(TAG, "receive: 收到的buffer："+byteStringLog(buffer));
             //取最后一位，0：验证token成功；1：验证失败
             if (buffer.length>0){
@@ -555,7 +598,7 @@ public class MyMainActivity extends FragmentActivity {
                         Log.i(TAG, "receive: ---验证token成功---");
                         Message message = new Message();
                         message.what = 1;
-                        handler.sendMessageDelayed(message,3000);       //连接内网成功
+                        handler.sendMessageDelayed(message,300);       //连接内网成功
                         isConnectWAN = true;
                         new Thread(){
                             @Override
@@ -577,8 +620,15 @@ public class MyMainActivity extends FragmentActivity {
                             }
                         }.start();
                         break;
-                    case 1:
-                        Log.i(TAG, "receive: ---验证token失败---");
+                    case -112:
+                        Message msg =  new Message();
+                        msg.what = 3;
+                        handler.sendMessage(msg);       //主机未连接
+                        break;
+                    case -55:
+                        Message msg1 =  new Message();
+                        msg1.what = 4;
+                        handler.sendMessage(msg1);
                         break;
                     default:
                         break;
@@ -621,6 +671,8 @@ public class MyMainActivity extends FragmentActivity {
     private void initView() {
         appConnection = new AppConnection();
         appConnection.start();
+        appConnectionWAN = new AppConnectionWAN();
+        appConnectionWAN.start();
 
         Intent bindIntent = new Intent(this, UDPBroadcastService.class);
         bindService(bindIntent, connection, BIND_AUTO_CREATE); // 绑定服务
@@ -729,9 +781,15 @@ public class MyMainActivity extends FragmentActivity {
         tvSettingIP.setTypeface(typeFace);
         tvSettingExit.setTypeface(typeFace);
         //获取ip地址
-        NetworkStateUtil networkStateUtil = new NetworkStateUtil();
-        String phoneIP = networkStateUtil.getPhoneIp();
-        tvSettingIP.setText(phoneIP);
+        /*NetworkStateUtil networkStateUtil = new NetworkStateUtil();
+        String phoneIP = networkStateUtil.getPhoneIp();*/
+        //设置连上的主机ip
+        Log.e(TAG, "initSettingDialog: host_iphost_iphost_iphost_iphost_iphost_iphost_ip："+host_ip);
+        if (host_ip==null||host_ip.equals("")){
+            tvSettingIP.setText("外网");
+        }else{
+            tvSettingIP.setText(host_ip);
+        }
 
         dialogSetting.setContentView(viewSetting);
         dialogSetting.setCanceledOnTouchOutside(true);//点击外部，弹框消失
@@ -828,7 +886,7 @@ public class MyMainActivity extends FragmentActivity {
             R.mipmap.light_control_3x_3,R.mipmap.light_control_3x_4,R.mipmap.light_control_3x_5,R.mipmap.light_control_3x_6,
             R.mipmap.light_control_3x_7,R.mipmap.light_control_3x_8,R.mipmap.light_control_3x_9,R.mipmap.light_control_3x_10,
             R.mipmap.light_control_3x_11};
-    private String[] lightLoopNameList = {"中心主灯","沙发顶灯","辅灯","测试灯"};
+    private String[] lightLoopNameList = {"测试1","测试2","测试3","测试4"};
     private View viewLight;
     private TextView tvLightTitle;
     private TextView tvLightAll;
@@ -847,22 +905,51 @@ public class MyMainActivity extends FragmentActivity {
         tvLightAll = (TextView) viewLight.findViewById(R.id.tv_light_all);
         lvLightControl = (ListView) viewLight.findViewById(R.id.lv_light_control);
         rgLightAll = (RadioGroup) viewLight.findViewById(R.id.rg_control_light_channel_all);
+        rbLightAllClose = (RadioButton) viewLight.findViewById(R.id.rb_control_light_channel_all_close);
+        rbLightAll1 = (RadioButton) viewLight.findViewById(R.id.rb_control_light_channel_all_1);
+        rbLightAll2 = (RadioButton) viewLight.findViewById(R.id.rb_control_light_channel_all_2);
+        rbLightAll3 = (RadioButton) viewLight.findViewById(R.id.rb_control_light_channel_all_3);
 
         tvLightTitle.setTypeface(typeFace);
         tvLightAll.setTypeface(typeFace);
-        controlLightBaseAdapter = new ControlLightBaseAdapter(this,lightLoopIconList,lightLoopNameList);
+        rbLightAllClose.setTypeface(typeFace);
+        rbLightAll1.setTypeface(typeFace);
+        rbLightAll2.setTypeface(typeFace);
+        rbLightAll3.setTypeface(typeFace);
+        /*rgLightAll.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                switch (checkedId){
+                    case R.id.rb_control_light_channel_all_close:
+                        controlLightBaseAdapter.changeLightLoopValue(0);
+                        break;
+                    case R.id.rb_control_light_channel_all_1:
+                        controlLightBaseAdapter.changeLightLoopValue(1);
+                        break;
+                    case R.id.rb_control_light_channel_all_2:
+                        controlLightBaseAdapter.changeLightLoopValue(2);
+                        break;
+                    case R.id.rb_control_light_channel_all_3:
+                        controlLightBaseAdapter.changeLightLoopValue(3);
+                        break;
+                }
+            }
+        });*/
+        controlLightBaseAdapter = new ControlLightBaseAdapter(this,lightLoopIconList,lightLoopNameList,roomDBNameList[roomIndex],token,uname,pwd,protocol);
         lvLightControl.setAdapter(controlLightBaseAdapter);
 
         dialogLight.setContentView(viewLight);
         dialogLight.setCanceledOnTouchOutside(true);//点击外部，弹框消失
-        dialogLight.setOnDismissListener(new DialogInterface.OnDismissListener() {
+        dialogLight.setOnDismissListener(new DialogInterface.OnDismissListener() {      //dialog消失事件监听
             @Override
             public void onDismiss(DialogInterface dialog) {   //dialog消失时触发监听
                 ObjectAnimator.ofFloat(rlMain, "scaleX", 0.92f, 1f).setDuration(500).start();
                 ObjectAnimator.ofFloat(rlMain, "scaleY", 0.92f, 1f).setDuration(500).start();
-                //ObjectAnimator.ofFloat(viewSecurity,"translationY",0,400).setDuration(500).start();
-                //ObjectAnimator.ofFloat(ivBlackFront, "alpha", 0.7f, 0f).setDuration(500).start();
-
+                //消失后按钮全部设为不选中
+                rbLightAllClose.setChecked(false);
+                rbLightAll1.setChecked(false);
+                rbLightAll2.setChecked(false);
+                rbLightAll3.setChecked(false);
             }
         });
         WindowManager.LayoutParams params = dialogLight.getWindow().getAttributes();
@@ -871,6 +958,47 @@ public class MyMainActivity extends FragmentActivity {
         Window mWindow = dialogLight.getWindow();
         mWindow.setGravity(Gravity.BOTTOM);
         mWindow.setAttributes(params);
+    }
+
+    //全部回路灯光亮度调节点击事件
+    public void allLightClick(View v){
+        switch (v.getId()){
+            case R.id.rb_control_light_channel_all_close:
+                controlLightBaseAdapter.changeLightLoopValue(0);
+                controlLight(protocol,"light","0","0","all");
+                break;
+            case R.id.rb_control_light_channel_all_1:
+                controlLightBaseAdapter.changeLightLoopValue(1);
+                controlLight(protocol,"light","30","0","all");
+                break;
+            case R.id.rb_control_light_channel_all_2:
+                controlLightBaseAdapter.changeLightLoopValue(2);
+                controlLight(protocol,"light","60","0","all");
+                break;
+            case R.id.rb_control_light_channel_all_3:
+                controlLightBaseAdapter.changeLightLoopValue(3);
+                controlLight(protocol,"light","100","0","all");
+                break;
+        }
+    }
+
+    private void controlLight(String controlProtocol, String machineName, String value, String isServerAUTO, String controlSence) {
+        JSONObject CommandData = new JSONObject();
+        JSONObject controlData = new JSONObject();
+        try {
+            CommandData.put("controlProtocol", controlProtocol);
+            CommandData.put("machineName", machineName);
+            CommandData.put("controlData", controlData);
+            controlData.put("lightValue", value);
+            controlData.put("isServerAUTO", isServerAUTO);
+            CommandData.put("controlSence", controlSence);
+            CommandData.put("houseDBName", roomDBNameList[roomIndex]);
+            String lightJson = CommandJsonUtils.getCommandJson(0, CommandData, token, uname, pwd, String.valueOf(System.currentTimeMillis()));
+            EventBus.getDefault().post(new MyEventBus(lightJson));
+            Log.e("result", "onClick: ------lightjson------" + lightJson);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     //退出程序提示框dialog
@@ -1011,10 +1139,12 @@ public class MyMainActivity extends FragmentActivity {
             case R.id.tv_security_off:
                 Toast.makeText(MyMainActivity.this, "撤防", Toast.LENGTH_SHORT).show();
                 setScaleAnimation(tvSecurityOff);
+                controlSecurity(protocol,"security",0,"all_close");
                 break;
             case R.id.tv_security_on:
                 Toast.makeText(MyMainActivity.this, "布防", Toast.LENGTH_SHORT).show();
                 setScaleAnimation(tvSecurityOn);
+                controlSecurity(protocol,"security",255,"all_normal");
                 break;
             case R.id.tv_not_exit:
                 Toast.makeText(MyMainActivity.this, "不退出", Toast.LENGTH_SHORT).show();
@@ -1033,6 +1163,10 @@ public class MyMainActivity extends FragmentActivity {
                 spUser.edit().clear().commit();    //清除sharedPreference用户数据
                 SharedPreferences spToken = getSharedPreferences("user_token",MODE_PRIVATE);
                 spToken.edit().clear().commit();      //清除token
+                SharedPreferences spCustom = getSharedPreferences("customSceneJson",MODE_PRIVATE);
+                spCustom.edit().clear().commit();      //清除自定义场景信息
+                SharedPreferences spJudgeFirst = getSharedPreferences("judgeFirstSave",MODE_PRIVATE);
+                spJudgeFirst.edit().clear().commit();      //清除自定义场景信息
                 isConnectWAN = false;
                 if (tcpLongSocketWAN!=null){
                     tcpLongSocketWAN.close();    //关闭外网的连接
@@ -1042,7 +1176,8 @@ public class MyMainActivity extends FragmentActivity {
                 }
 
                 isOnMainActivity = false;     //退出该activity
-                appConnection.interrupt();
+                appConnection.interrupt();     //中断线程
+                appConnectionWAN.interrupt();
                 Intent intent = new Intent(MyMainActivity.this,NewLoginActivity.class);
                 startActivity(intent);
                 this.finish();
@@ -1170,7 +1305,7 @@ public class MyMainActivity extends FragmentActivity {
         //Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
         Log.i(TAG, "onEventMainThread: 接收到的json" + msg);
         //发送tcp Socket
-        if (msg!=SWITCH_ROOM_DIALOG && msg!=SETTING_DIALOG && msg!=DOOR_LOCK_DIALOG && msg!=SECURITY_DIALOG && msg!=LIGHT_DIALOG ) {
+        if (msg.length()>4) {
             if (tcplongSocket!=null){
                 tcplongSocket.writeDate(Encrypt.encrypt(msg));     //内网发送控制命令
             }
@@ -1179,56 +1314,58 @@ public class MyMainActivity extends FragmentActivity {
                 Log.i("hy_result", "onEventMainThread: -------------"+msg);
                 tcpLongSocketWAN.writeDate(jointWANControlCommend(Encrypt.encrypt(msg).length,Encrypt.encrypt(msg)));  //外网发送控制命令,前面拼接#byids + 4 + 控制命令的长度 + 控制命令
             }
-        }
+        }else {
+            switch (msg) {
+                case SWITCH_ROOM_DIALOG:     //选择房间dialog
+                    dialogSwitchRoom.show();
+                    break;
+                case SETTING_DIALOG:     //弹出设置dialog
+                    initExitDialog();    //确认是否退出的三级页面
+                    //ObjectAnimator.ofFloat(ivBlackFront, "alpha", 0f, 0.7f).setDuration(500).start();
+                    ObjectAnimator.ofFloat(rlMain, "scaleX", 1f, 0.92f).setDuration(500).start();
+                    ObjectAnimator obj = new ObjectAnimator().ofFloat(rlMain, "scaleY", 1f, 0.92f).setDuration(500);
+                    obj.addListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            super.onAnimationEnd(animation);
+                            ObjectAnimator.ofFloat(viewSetting,"translationY",(float) (height*0.6),0).setDuration(500).start();
+                            dialogSetting.show();
+                        }
+                    });
+                    obj.start();
+                    break;
+                case DOOR_LOCK_DIALOG:       //弹出门锁dialog
+                    //ObjectAnimator.ofFloat(ivBlackFront, "alpha", 0f, 0.7f).setDuration(500).start();
+                    ObjectAnimator.ofFloat(rlMain, "scaleX", 1f, 0.92f).setDuration(500).start();
+                    ObjectAnimator obj1 = new ObjectAnimator().ofFloat(rlMain, "scaleY", 1f, 0.92f).setDuration(500);
+                    obj1.addListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            super.onAnimationEnd(animation);
+                            ObjectAnimator.ofFloat(viewLock,"translationY",(float) (height*0.6),0).setDuration(500).start();
+                            dialogLock.show();
+                        }
+                    });
+                    obj1.start();
+                    break;
+                case SECURITY_DIALOG:      //弹出安防dialog
+                    //ObjectAnimator.ofFloat(ivBlackFront, "alpha", 0f, 0.7f).setDuration(500).start();
+                    ObjectAnimator.ofFloat(rlMain, "scaleX", 1f, 0.92f).setDuration(500).start();
+                    ObjectAnimator obj2 = new ObjectAnimator().ofFloat(rlMain, "scaleY", 1f, 0.92f).setDuration(500);
+                    obj2.addListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            super.onAnimationEnd(animation);
+                            ObjectAnimator.ofFloat(viewSecurity,"translationY",(float) (height*0.6),0).setDuration(500).start();
+                            dialogSecurity.show();
+                        }
+                    });
+                    obj2.start();
+                    break;
 
-        switch (event.getmMsg()) {
-            case SWITCH_ROOM_DIALOG:     //选择房间dialog
-                dialogSwitchRoom.show();
-                break;
-            case SETTING_DIALOG:     //弹出设置dialog
-                initExitDialog();    //确认是否退出的三级页面
-                //ObjectAnimator.ofFloat(ivBlackFront, "alpha", 0f, 0.7f).setDuration(500).start();
-                ObjectAnimator.ofFloat(rlMain, "scaleX", 1f, 0.92f).setDuration(500).start();
-                ObjectAnimator obj = new ObjectAnimator().ofFloat(rlMain, "scaleY", 1f, 0.92f).setDuration(500);
-                obj.addListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        super.onAnimationEnd(animation);
-                        ObjectAnimator.ofFloat(viewSetting,"translationY",(float) (height*0.6),0).setDuration(500).start();
-                        dialogSetting.show();
-                    }
-                });
-                obj.start();
-                break;
-            case DOOR_LOCK_DIALOG:       //弹出门锁dialog
-                //ObjectAnimator.ofFloat(ivBlackFront, "alpha", 0f, 0.7f).setDuration(500).start();
-                ObjectAnimator.ofFloat(rlMain, "scaleX", 1f, 0.92f).setDuration(500).start();
-                ObjectAnimator obj1 = new ObjectAnimator().ofFloat(rlMain, "scaleY", 1f, 0.92f).setDuration(500);
-                obj1.addListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        super.onAnimationEnd(animation);
-                        ObjectAnimator.ofFloat(viewLock,"translationY",(float) (height*0.6),0).setDuration(500).start();
-                        dialogLock.show();
-                    }
-                });
-                obj1.start();
-                break;
-            case SECURITY_DIALOG:      //弹出安防dialog
-                //ObjectAnimator.ofFloat(ivBlackFront, "alpha", 0f, 0.7f).setDuration(500).start();
-                ObjectAnimator.ofFloat(rlMain, "scaleX", 1f, 0.92f).setDuration(500).start();
-                ObjectAnimator obj2 = new ObjectAnimator().ofFloat(rlMain, "scaleY", 1f, 0.92f).setDuration(500);
-                obj2.addListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        super.onAnimationEnd(animation);
-                        ObjectAnimator.ofFloat(viewSecurity,"translationY",(float) (height*0.6),0).setDuration(500).start();
-                        dialogSecurity.show();
-                    }
-                });
-                obj2.start();
-                break;
-            case LIGHT_DIALOG:
+            }
+            if (msg.substring(0,1).equals("7")){         //灯光控制不同回路dialog
+                final String index = msg.substring(1,2);
                 ObjectAnimator.ofFloat(rlMain, "scaleX", 1f, 0.92f).setDuration(500).start();
                 ObjectAnimator obj3 = new ObjectAnimator().ofFloat(rlMain, "scaleY", 1f, 0.92f).setDuration(500);
                 obj3.addListener(new AnimatorListenerAdapter() {
@@ -1236,12 +1373,35 @@ public class MyMainActivity extends FragmentActivity {
                     public void onAnimationEnd(Animator animation) {
                         super.onAnimationEnd(animation);
                         dialogLight.show();
+                        controlLightBaseAdapter.changeLightLoopValue(10);     //设置按钮的选中
+                        setDiffRoomsLight(index);       //设置不同房间灯光回路
                         ObjectAnimator.ofFloat(viewLight,"translationY",(float) (height*0.8),0).setDuration(500).start();
                     }
                 });
                 obj3.start();
-                break;
+            }
         }
+
+    }
+
+    private String[] lightLoopNameLists;
+    private String[] lightDisplayType;
+    private int[] lightLoopIconLists;
+    private int roomIndex = 0; //房间下标
+    private void setDiffRoomsLight(String index){
+        roomIndex = parseInt(index);      //房间下标
+        int lightLoop = commandData.getProfile().getRooms().getArray().get(roomIndex).getRoom_dev_mesg().getLight().getArray().size();
+        lightLoopNameLists = new String[lightLoop];
+        lightDisplayType = new String[lightLoop];
+        lightLoopIconLists = new int[lightLoop];
+        for (int i=0;i<lightLoop;i++){
+            lightLoopNameLists[i] = commandData.getProfile().getRooms().getArray().get(roomIndex).getRoom_dev_mesg().getLight().getArray().get(i).getSoftware_mesg().getDisplay_name();
+            lightDisplayType[i] = commandData.getProfile().getRooms().getArray().get(roomIndex).getRoom_dev_mesg().getLight().getArray().get(i).getSoftware_mesg().getDisplay_type();
+            Log.e(TAG, "setDiffRoomsLight: 回路：" +lightLoopNameLists[i]+"--------图片编号："+lightDisplayType[i]);
+            lightLoopIconLists[i] = lightLoopIconList[Integer.parseInt(lightDisplayType[i])-1];
+        }
+
+        controlLightBaseAdapter.setDiffRoomLight(lightLoopIconLists,lightLoopNameLists,roomDBNameList[roomIndex]);
     }
 
 
@@ -1267,7 +1427,6 @@ public class MyMainActivity extends FragmentActivity {
                     break;
                 case R.id.rl_media:
                     Toast.makeText(MyMainActivity.this, "媒体", Toast.LENGTH_SHORT).show();
-                    Log.i("getConnect_hy", "onClick: "+tcplongSocket.getConnectStatus());
                     break;
             }
         }
@@ -1381,6 +1540,44 @@ public class MyMainActivity extends FragmentActivity {
         ObjectAnimator.ofFloat(view,"scaleY",1f,0.8f,1f).setDuration(600).start();
     }
 
+    private void controlSecurity(String controlProtocol, String machineName, int value, String controlSence) {
+        JSONObject CommandData = new JSONObject();
+        JSONObject controlData = new JSONObject();
+        try {
+            CommandData.put("controlProtocol", controlProtocol);
+            CommandData.put("machineName", machineName);
+            CommandData.put("controlData", controlData);
+            controlData.put("status", value);
+            CommandData.put("controlSence", controlSence);
+            CommandData.put("houseDBName", "house");
+            String securityJson = CommandJsonUtils.getCommandJson(0, CommandData, token, uname, pwd, String.valueOf(System.currentTimeMillis()));
+            //EventBus.getDefault().post(new MyEventBus(securityJson));
+            if (tcplongSocket!=null){
+                tcplongSocket.writeDate(Encrypt.encrypt(securityJson));     //内网发送控制命令
+            }
+            if (tcpLongSocketWAN!=null){
+                //拼接外网控制命令
+                tcpLongSocketWAN.writeDate(jointWANControlCommend(Encrypt.encrypt(securityJson).length,Encrypt.encrypt(securityJson)));  //外网发送控制命令,前面拼接#byids + 4 + 控制命令的长度 + 控制命令
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    //音量控制命令
+    private void controlVolume(double MusicVolume) {         //MusicVolume:0.000 ~ 1.000
+        JSONObject CommandData = new JSONObject();
+        try {
+            CommandData.put("MusicVolume", MusicVolume);
+            String volumeJson = CommandJsonUtils.getCommandJson(9, CommandData, token, uname, pwd, String.valueOf(System.currentTimeMillis()));
+            EventBus.getDefault().post(new MyEventBus(volumeJson));
+            Log.i(TAG, "onClick: ------volumeJson------" + volumeJson);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+
     private ArrayList<MyOnTouchListener> onTouchListeners = new ArrayList<MyOnTouchListener>(10);
 
     @Override
@@ -1403,11 +1600,24 @@ public class MyMainActivity extends FragmentActivity {
         public boolean onTouch(MotionEvent ev);
     }
 
+
+
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
+        AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        double maxVolume = am.getStreamMaxVolume( AudioManager.STREAM_MUSIC );     //获取媒体音量最大值
+        double currentVolume = am.getStreamVolume( AudioManager.STREAM_MUSIC );    //获取媒体当前音量
+        DecimalFormat df = new DecimalFormat("######0.000");       //double值取小数点后3位
+
         if (keyCode==event.KEYCODE_BACK){
             exit();
             return false;
+        }if (keyCode==KeyEvent.KEYCODE_VOLUME_UP){    //音量加
+            Log.e(TAG, "onKeyDown:当前音量："+currentVolume+"------最大音量"+maxVolume +"调节为"+df.format(currentVolume/maxVolume));
+            controlVolume(Double.parseDouble(df.format(currentVolume/maxVolume)));        //发送音量控制命令
+        }if (keyCode==KeyEvent.KEYCODE_VOLUME_DOWN){   //音量减
+            Log.e(TAG, "onKeyDown:当前音量："+currentVolume+"------最大音量"+maxVolume +"调节为"+df.format(currentVolume/maxVolume));
+            controlVolume(Double.parseDouble(df.format(currentVolume/maxVolume)));
         }
         return super.onKeyDown(keyCode, event);
     }

@@ -1,18 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
-    android:weightSum="25"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <LinearLayout
+        android:id="@+id/ll_custom_light_title"
         android:weightSum="18"
         android:orientation="horizontal"
-        android:layout_weight="2"
         android:background="@color/colorTextActive"
         android:gravity="center_vertical"
         android:layout_width="match_parent"
-        android:layout_height="0dp">
+        android:layout_height="wrap_content">
 
         <ImageView
             android:id="@+id/iv_custom_light_back"
@@ -49,7 +48,104 @@
             android:layout_height="wrap_content" />
     </LinearLayout>
 
-    <ScrollView
+    <RelativeLayout
+        android:padding="4dp"
+        android:gravity="center_vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/tv_custom_light_channel_all"
+            android:text="全部"
+            android:textSize="18sp"
+            android:gravity="center_vertical"
+            android:textColor="@color/colorText"
+            android:paddingTop="10dp"
+            android:paddingBottom="6dp"
+            android:paddingLeft="20dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <Switch
+            android:id="@+id/sw_custom_light_channel_all"
+            android:paddingTop="10dp"
+            android:paddingBottom="6dp"
+            android:paddingRight="20dp"
+            android:layout_toRightOf="@id/tv_custom_light_channel_all"
+            android:layout_alignParentRight="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </RelativeLayout>
+    <RadioGroup
+        android:id="@+id/rg_custom_light_channel_all"
+        android:orientation="horizontal"
+        android:weightSum="3"
+        android:background="@drawable/custom_light_rg_shape"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <RadioButton
+            android:id="@+id/rb_custom_light_channel_all_1"
+            android:text="微弱"
+            android:textColor="@drawable/custom_light_textcolor_selecter"
+            android:gravity="center"
+            android:button="@null"
+            android:background="@drawable/custom_light_button_selecter_left"
+            android:layout_weight="1"
+            android:layout_margin="1dp"
+            android:padding="4dp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content" />
+
+        <RadioButton
+            android:id="@+id/rb_custom_light_channel_all_2"
+            android:text="舒适"
+            android:textColor="@drawable/custom_light_textcolor_selecter"
+            android:background="@drawable/custom_light_button_selecter_mid"
+            android:gravity="center"
+            android:button="@null"
+            android:layout_weight="1"
+            android:layout_marginTop="1dp"
+            android:layout_marginBottom="1dp"
+            android:padding="4dp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content" />
+        <RadioButton
+            android:id="@+id/rb_custom_light_channel_all_3"
+            android:text="明亮"
+            android:textColor="@drawable/custom_light_textcolor_selecter"
+            android:background="@drawable/custom_light_button_selecter_right"
+            android:gravity="center"
+            android:button="@null"
+            android:layout_margin="1dp"
+            android:padding="4dp"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content" />
+    </RadioGroup>
+    <TextView
+        android:background="@color/colorCutOffLine"
+        android:layout_width="match_parent"
+        android:layout_height="1px" />
+    <TextView
+        android:background="@color/colorLoginBack"
+        android:layout_width="match_parent"
+        android:layout_height="14px" />
+
+    <ListView
+        android:id="@+id/lv_custom_light"
+        android:scrollbars="none"
+        android:divider="@color/colorCutOffLine2"
+        android:dividerHeight="1px"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    </ListView>
+    <!--<ScrollView
         android:layout_weight="23"
         android:layout_width="match_parent"
         android:layout_height="0dp">
@@ -181,7 +277,6 @@
                 android:layout_marginTop="4dp"
                 android:layout_marginBottom="4dp"
                 android:gravity="center"
-                android:visibility="gone"
                 android:layout_width="match_parent"
                 android:layout_height="0dp">
 
@@ -263,7 +358,6 @@
                 android:layout_marginTop="4dp"
                 android:layout_marginBottom="4dp"
                 android:gravity="center"
-                android:visibility="gone"
                 android:layout_width="match_parent"
                 android:layout_height="0dp">
 
@@ -349,7 +443,6 @@
                 android:layout_marginTop="4dp"
                 android:layout_marginBottom="4dp"
                 android:gravity="center"
-                android:visibility="gone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
@@ -431,7 +524,6 @@
                 android:layout_marginTop="4dp"
                 android:layout_marginBottom="4dp"
                 android:gravity="center"
-                android:visibility="gone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
@@ -513,7 +605,6 @@
                 android:layout_marginTop="4dp"
                 android:layout_marginBottom="4dp"
                 android:gravity="center"
-                android:visibility="gone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
@@ -563,5 +654,5 @@
                 android:layout_width="match_parent"
                 android:layout_height="1px" />
         </LinearLayout>
-    </ScrollView>
+    </ScrollView>-->
 </LinearLayout>

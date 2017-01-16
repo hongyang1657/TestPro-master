@@ -133,23 +133,24 @@ public class EzCameraActivity extends BaseActivity{
                 case 1:        //初始化摄像头
                     int cameraIndexs = msg.arg1;
                     roomsName = (String[]) msg.obj;
+                    Log.i(TAG, "handleMessage: "+cameraIndexs);
                     tvSwitchRoom.setText(roomsName[cameraIndexs]);      //默认选择第一个房间
                     playCamera(cameraIndex);
+
                     loadingAnimation();
 
                     //选择查看当天的视频录像片段
                     Log.i("hongyang", "handleMessage:-------kaishishijian "+mStartTime.getTime().toString()+"jieshushijian"+mEndTime.getTime().toString()+"ezopensdk"+ezOpenSDK);
                     try {
                         EzDeviceFileList = ezOpenSDK.searchRecordFileFromDevice(cameraId,mStartTime,mEndTime);
-                        Collections.reverse(EzDeviceFileList);     //倒置视频列表顺序
-                        if (EzDeviceFileList!=null){
+                        if (null!=EzDeviceFileList){
+                            Collections.reverse(EzDeviceFileList);     //倒置视频列表顺序
                             //此摄像头有本地录像
                             Log.i("hongyang", "handleMessage: ---------------------------此摄像头的录像个数:"+EzDeviceFileList.size()+"-------====id:===="+cameraId);
                             Log.i("hongyang", "handleMessage:@@@@@ 第一个录像的开始时间："+EzDeviceFileList.get(0).getStartTime().getTime().toString()+"@@@@结束时间："+EzDeviceFileList.get(0).getStopTime().getTime().toString());
                             dateList = new String[EzDeviceFileList.size()];
                             dateList = getDeviceFileInfo(EzDeviceFileList);       //获取各个录像片段的信息（开始时间，结束时间，录像片段个数等）
-                            //Collections.reverse(Arrays.asList(dateList));
-                        }else if (EzDeviceFileList==null){
+                        }else{
                             //此摄像头没有本地录像
                             Log.i("hongyang", "handleMessage:------此摄像头没有录像信息，可能没有内存卡------- ");
                             dateList = new String[]{"无历史录像"};

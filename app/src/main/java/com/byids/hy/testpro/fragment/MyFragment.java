@@ -8,6 +8,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -37,6 +38,7 @@ import android.widget.Toast;
 
 import com.byids.hy.testpro.MyEventBus;
 import com.byids.hy.testpro.MyEventBus2;
+import com.byids.hy.testpro.MyEventBusCustom;
 import com.byids.hy.testpro.PullDownMenuListener;
 import com.byids.hy.testpro.PullUpMenuListener;
 import com.byids.hy.testpro.R;
@@ -46,7 +48,16 @@ import com.byids.hy.testpro.View.MyCustomScrollView;
 import com.byids.hy.testpro.View.MyPullUpScrollView;
 import com.byids.hy.testpro.activity.MyMainActivity;
 import com.byids.hy.testpro.activity.custom_scene_activity.CustomSceneMainActivity;
+import com.byids.hy.testpro.customSceneBean.AllCustomScene;
+import com.byids.hy.testpro.customSceneBean.DetailCustomScene;
+import com.byids.hy.testpro.customSceneBean.LightDetail;
+import com.byids.hy.testpro.customSceneBean.RoomCustomScene;
+import com.byids.hy.testpro.newBean.CommandData;
+import com.byids.hy.testpro.newBean.RoomDevMesg;
 import com.byids.hy.testpro.utils.CommandJsonUtils;
+import com.byids.hy.testpro.utils.LongLogCatUtil;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.videogo.openapi.EZOpenSDK;
 
 import org.greenrobot.eventbus.EventBus;
@@ -58,6 +69,9 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+import static android.content.Context.MODE_PRIVATE;
+import static com.byids.hy.testpro.R.id.relative_light_switch;
 
 /**
  * 382,770     android23以上能使用
@@ -128,11 +142,13 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
     private int roomIndex;     //房间标示
     private String roomName;   //房间名
     private String roomDBName;    //房间拼音名
+    private CommandData commandData;    //所有的房间信息
     //private RoomAttr roomAttr;   //房间拥有的各个产品信息
     //private RoomDevMesg roomAttr;
     private String token;
     private String uname;
     private String pwd;
+    private String protocol;
 
     private GestureDetector detector;
     //private MyMainActivity.MyOntouchListener listener;
@@ -190,24 +206,20 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
     //场景
     private TextView tvScene;
     private RelativeLayout rlXiuxian;
-    private ImageView ivXiuxianOut;      //内部图片和文字
-    private ImageView ivXiuxianIn;
-    private TextView tvXiuxian;
+    private ImageView ivScene1;
+    private TextView tvScene1;
 
     private RelativeLayout rlYule;
-    private ImageView ivYule1;
-    private ImageView ivYule2;
-    private ImageView ivYule3;
-    private TextView tvYule;
+    private ImageView ivScene2;
+    private TextView tvScene2;
 
     private RelativeLayout rlJuhui;
-    private ImageView ivJuhui1;
-    private ImageView ivJuhui2;
-    private TextView tvJuhui;
+    private ImageView ivScene3;
+    private TextView tvScene3;
 
     private RelativeLayout rlLikai;
-    private ImageView ivLikai;
-    private TextView tvLikai;
+    private ImageView ivScene4;
+    private TextView tvScene4;
 
 
 
@@ -265,6 +277,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
 
     private List<TextView> tvList = new ArrayList<TextView>();  //textview控件组，用于改变字体
     private Typeface typeFace;
+    private RoomDevMesg roomDevMesg;
 
     //控制部分 下
     private LinearLayout linearAirDetails;
@@ -315,19 +328,40 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
     private static final String IS_SERVER_AUTO = "0";
     private static final String CONTROL_SENCE_ALL = "all";
 
+    private int[] iconResList = {R.mipmap.scene_custom_img_3x_1, R.mipmap.scene_custom_img_3x_2, R.mipmap.scene_custom_img_3x_3,
+            R.mipmap.scene_custom_img_3x_4, R.mipmap.scene_custom_img_3x_5, R.mipmap.scene_custom_img_3x_6, R.mipmap.scene_custom_img_3x_7,
+            R.mipmap.scene_custom_img_3x_8, R.mipmap.scene_custom_img_3x_9, R.mipmap.scene_custom_img_3x_10, R.mipmap.scene_custom_img_3x_11,
+            R.mipmap.scene_custom_img_3x_12, R.mipmap.scene_custom_img_3x_13, R.mipmap.scene_custom_img_3x_14, R.mipmap.scene_custom_img_3x_15,
+            R.mipmap.scene_custom_img_3x_16, R.mipmap.scene_custom_img_3x_17, R.mipmap.scene_custom_img_3x_18, R.mipmap.scene_custom_img_3x_19,
+            R.mipmap.scene_custom_img_3x_20, R.mipmap.scene_custom_img_3x_21, R.mipmap.scene_custom_img_3x_22, R.mipmap.scene_custom_img_3x_23,
+            R.mipmap.scene_custom_img_3x_24, R.mipmap.scene_custom_img_3x_25, R.mipmap.scene_custom_img_3x_26, R.mipmap.scene_custom_img_3x_27};
+    private int[] iconResListSelect = {R.mipmap.scene_custom_img_select_3x_1,R.mipmap.scene_custom_img_select_3x_2,R.mipmap.scene_custom_img_select_3x_3,
+            R.mipmap.scene_custom_img_select_3x_4,R.mipmap.scene_custom_img_select_3x_5,R.mipmap.scene_custom_img_select_3x_6,R.mipmap.scene_custom_img_select_3x_7,
+            R.mipmap.scene_custom_img_select_3x_8,R.mipmap.scene_custom_img_select_3x_9,R.mipmap.scene_custom_img_select_3x_10,R.mipmap.scene_custom_img_select_3x_11,
+            R.mipmap.scene_custom_img_select_3x_12,R.mipmap.scene_custom_img_select_3x_13,R.mipmap.scene_custom_img_select_3x_14,R.mipmap.scene_custom_img_select_3x_15,
+            R.mipmap.scene_custom_img_select_3x_16,R.mipmap.scene_custom_img_select_3x_17,R.mipmap.scene_custom_img_select_3x_18,R.mipmap.scene_custom_img_select_3x_19,
+            R.mipmap.scene_custom_img_select_3x_20,R.mipmap.scene_custom_img_select_3x_21,R.mipmap.scene_custom_img_select_3x_22,R.mipmap.scene_custom_img_select_3x_23,
+            R.mipmap.scene_custom_img_select_3x_24,R.mipmap.scene_custom_img_select_3x_25,R.mipmap.scene_custom_img_select_3x_26,R.mipmap.scene_custom_img_select_3x_27,};
+    private AllCustomScene allCustomScene;
+    //用来发送控制命令的数据
+    private AllCustomScene allCustomSceneBean;
+    private RoomCustomScene roomCustomSceneBean;
+
 
     public MyFragment(){}
 
     private int[] backList;  //背景图片组
-    public MyFragment(int roomIndex, String roomName, String roomDBName, int[] backList, String token, String uname, String pwd) {
+    public MyFragment(int roomIndex, CommandData commandData, String roomName, String roomDBName, int[] backList, String token, String uname, String pwd,String protocol,AllCustomScene allCustomScene) {
         this.roomIndex = roomIndex;
         this.roomName = roomName;
         this.roomDBName = roomDBName;
         this.backList = backList;
-        //this.roomAttr = roomAttr;
+        this.commandData = commandData;
         this.token = token;
         this.uname = uname;
         this.pwd = pwd;
+        this.protocol = protocol;
+        this.allCustomScene = allCustomScene;
     }
 
 
@@ -557,6 +591,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         activity = getActivity();
         super.onActivityCreated(savedInstanceState);
+        Log.e("fragment_shunxu", "onActivityCreated ");
     }
 
 
@@ -565,27 +600,27 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         super.onResume();
         isFragmemtFront = true;
         //initBackGround();     //初始化背景图片
-
+        Log.e("fragment_shunxu", "onResume ");
     }
 
     @Override
     public void onPause() {
         super.onPause();
         isFragmemtFront = false;
-        //Log.i(TAG, "onDestroyView: fragment暂停");
+        Log.e("fragment_shunxu", "onPause ");
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         EventBus.getDefault().unregister(this);  //反注册EventBus
-        Log.i(TAG, "onDestroy: fragmentonDestroyfragmentonDestroyfragmentonDestroyfragmentonDestro");
+        Log.e("fragment_shunxu", "onDestroy");
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-
+        Log.e("fragment_shunxu", "onDestroyView");
     }
 
     private void initView(){
@@ -626,8 +661,20 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         initControler();    //初始化控制部分  下
 
         initPanelIcon();     //初始化面板图标
+        initSceneIcon();
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("judgeFirstSave",MODE_PRIVATE);
+        if (!sharedPreferences.getBoolean("isFirstSave",false)){
+            initCustomScene();
+        }
 
-
+        //初始化存在本地的自定义场景信息
+        SharedPreferences sp = getActivity().getSharedPreferences("customSceneJson",MODE_PRIVATE);
+        String json = sp.getString("json","");
+        LongLogCatUtil.logE("bean_hy",json);
+        GsonBuilder builder = new GsonBuilder();
+        Gson gson = builder.create();
+        allCustomSceneBean = gson.fromJson(json,AllCustomScene.class);
+        roomCustomSceneBean = allCustomSceneBean.getArray().get(roomIndex);
     }
 
     //初始化不同房间的面板图标
@@ -648,9 +695,40 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
             case "canting":
                 setDifferentRoomsPanelIcon(R.mipmap.dinner_dark_3x,R.mipmap.snack_dark_3x,R.mipmap.afternoon_tea_dark_3x,"正 餐","夜 宵","午 茶");
                 break;
-            case "weiyu":
+            case "weishengjian":
                 setDifferentRoomsPanelIcon(R.mipmap.wash_dark_3x,R.mipmap.toilet_dark_3x,R.mipmap.shower_dark_3x,"洗 漱","如 厕","淋 浴");
                 break;
+        }
+    }
+
+    //初始化场景图标
+    private void initSceneIcon(){
+        SharedPreferences sp = getActivity().getSharedPreferences("customSceneJson",MODE_PRIVATE);
+        String json = sp.getString("json","");
+        GsonBuilder builder = new GsonBuilder();
+        Gson gson = builder.create();
+        AllCustomScene allCustomScene = gson.fromJson(json,AllCustomScene.class);
+        if (allCustomScene!=null){
+            RoomCustomScene roomCustomScene = allCustomScene.getArray().get(roomIndex);
+            sceneIconIndex_1 = roomCustomScene.getArray().get(0).getSceneIconIndex();
+            sceneIconIndex_2 = roomCustomScene.getArray().get(1).getSceneIconIndex();
+            sceneIconIndex_3 = roomCustomScene.getArray().get(2).getSceneIconIndex();
+            sceneIconIndex_4 = roomCustomScene.getArray().get(3).getSceneIconIndex();
+            sceneName_1 = roomCustomScene.getArray().get(0).getSceneName();
+            sceneName_2 = roomCustomScene.getArray().get(1).getSceneName();
+            sceneName_3 = roomCustomScene.getArray().get(2).getSceneName();
+            sceneName_4 = roomCustomScene.getArray().get(3).getSceneName();
+
+            ivScene1.setImageResource(iconResList[sceneIconIndex_1]);
+            ivScene2.setImageResource(iconResList[sceneIconIndex_2]);
+            ivScene3.setImageResource(iconResList[sceneIconIndex_3]);
+            ivScene4.setImageResource(iconResList[sceneIconIndex_4]);
+            tvScene1.setText(sceneName_1);
+            tvScene2.setText(sceneName_2);
+            tvScene3.setText(sceneName_3);
+            tvScene4.setText(sceneName_4);
+        }else {
+
         }
     }
 
@@ -695,7 +773,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
          rlJuhui = (RelativeLayout) view.findViewById(R.id.rl_juhui);
          rlLikai = (RelativeLayout) view.findViewById(R.id.rl_likai);
         //灯光
-         rlLight = (RelativeLayout) view.findViewById(R.id.relative_light_switch);
+         rlLight = (RelativeLayout) view.findViewById(relative_light_switch);
         //窗帘
         rlBulian = (RelativeLayout) view.findViewById(R.id.rl_bulian);
         rlShalian = (RelativeLayout) view.findViewById(R.id.rl_shalian);
@@ -727,18 +805,14 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
 
         //---------------------------需要做动画的图片--------------------------
         //场景
-        ivXiuxianOut = (ImageView) view.findViewById(R.id.iv_xiuxian_out);
-        ivXiuxianIn = (ImageView) view.findViewById(R.id.iv_xiuxian_in);
-        tvXiuxian = (TextView) view.findViewById(R.id.tv_xiuxian);
-        ivYule1 = (ImageView) view.findViewById(R.id.iv_yule_1);
-        ivYule2 = (ImageView) view.findViewById(R.id.iv_yule_2);
-        ivYule3 = (ImageView) view.findViewById(R.id.iv_yule_3);
-        tvYule = (TextView) view.findViewById(R.id.tv_yule);
-        ivJuhui1 = (ImageView) view.findViewById(R.id.iv_juhui_1);
-        ivJuhui2 = (ImageView) view.findViewById(R.id.iv_juhui_2);
-        tvJuhui = (TextView) view.findViewById(R.id.tv_juhui);
-        ivLikai = (ImageView) view.findViewById(R.id.iv_likai);
-        tvLikai = (TextView) view.findViewById(R.id.tv_likai);
+        ivScene1 = (ImageView) view.findViewById(R.id.iv_scene_custom_1);
+        ivScene2 = (ImageView) view.findViewById(R.id.iv_scene_custom_2);
+        ivScene3 = (ImageView) view.findViewById(R.id.iv_scene_custom_3);
+        ivScene4 = (ImageView) view.findViewById(R.id.iv_scene_custom_4);
+        tvScene1 = (TextView) view.findViewById(R.id.tv_xiuxian);
+        tvScene2 = (TextView) view.findViewById(R.id.tv_yule);
+        tvScene3 = (TextView) view.findViewById(R.id.tv_juhui);
+        tvScene4 = (TextView) view.findViewById(R.id.tv_likai);
         //灯光
         hsLightValue = (LightValueScrollView) view.findViewById(R.id.hs_light_point);
         rlLightValue = (RelativeLayout) view.findViewById(R.id.relative_light_control);
@@ -819,10 +893,10 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         tvList.add(tvSecurity);
         tvList.add(tvRoomNameTop);
         tvList.add(tvRoomName);
-        tvList.add(tvXiuxian);
-        tvList.add(tvYule);
-        tvList.add(tvJuhui);
-        tvList.add(tvLikai);
+        tvList.add(tvScene1);
+        tvList.add(tvScene2);
+        tvList.add(tvScene3);
+        tvList.add(tvScene4);
         tvList.add(tvScene);
         tvList.add(tvCustomScene);
         tvList.add(tvLight);
@@ -834,11 +908,6 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         tvList.add(tvAll);
         tvList.add(tvStop);
         tvList.add(tvTelevision);
-        //tvList.add(tvJuanLian);
-        //tvList.add(tvJuanlian);
-        //tvList.add(tvJuanlianR);
-        //tvList.add(tvAllJuan);
-        //tvList.add(tvStopJuan);
         tvList.add(tvAirCondition);
         tvList.add(tvKongtiaoSwitch);
         tvList.add(tvKongtiaoTemp);
@@ -852,26 +921,33 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         tvList.add(tvPanel2);
         tvList.add(tvPanel3);
         tvList.add(tvPanel4);
-        //tvList.add(tvLocalTemp);
 
 
         //根据房间信息选择隐藏的控件
-        /*if (roomAttr.getLight().getActive()==0){
-            initRoomAttr(tvLight,llLight);
-        }if (roomAttr.getCurtain().getActive()==0){
-            initRoomAttr(tvChuanglian,llChuanglian);
-            initRoomAttr(tvJuanLian,llJuanlian);
+        //Log.e(TAG, "initControler: +"+commandData);
+        roomDevMesg = commandData.getProfile().getRooms().getArray().get(roomIndex).getRoom_dev_mesg();
+        /*if (null!=commandData){
+            SharedPreferences sp = getActivity().getSharedPreferences("roomDevMesg",MODE_PRIVATE);
+            sp.edit().
+        }else {
+            roomDevMesg =
         }*/
-
+        if (roomDevMesg.getLight()==null){
+            initRoomAttr(tvLight,llLight);
+        }if (roomDevMesg.getCurtain()==null){
+            initRoomAttr(tvChuanglian,llChuanglian);
+        }if (roomDevMesg.getPanel()==null){
+            initRoomAttr(tvPanelTitle,linearPanel);
+        }if (roomDBName.equals("canting")||roomDBName.equals("chufang")||roomDBName.equals("weishengjian")){
+            initRoomAttr(tvTelevision,llTelevision);
+        }
 
 
         rlXiuxian.setOnClickListener(controlListener);
         rlYule.setOnClickListener(controlListener);
         rlJuhui.setOnClickListener(controlListener);
         rlLikai.setOnClickListener(controlListener);
-
         rlLight.setOnClickListener(controlListener);
-
         rlBulian.setOnClickListener(controlListener);
         rlShalian.setOnClickListener(controlListener);
         rlAll.setOnClickListener(controlListener);
@@ -880,7 +956,6 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         rlJuanlianR.setOnClickListener(controlListener);
         rlAllJuan.setOnClickListener(controlListener);
         rlStopJuan.setOnClickListener(controlListener);*/
-
         rlKongtiao.setOnClickListener(controlListener);
         rlKongtiaoMoshi.setOnClickListener(controlListener);
         rlAirControl1.setOnClickListener(controlListener);
@@ -891,7 +966,6 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         ivTelevisionOn.setOnClickListener(controlListener);
         ivTelevisionOff.setOnClickListener(controlListener);
         tvCustomScene.setOnClickListener(controlListener);
-
 
         sbTemp.setOnSeekBarChangeListener(tempSeekBarListener);  //空调调温SeekBar
         //hsLightValue.setOnScrollChangeListener(hsChangeListener);       //android 23 以上才能用
@@ -1051,6 +1125,27 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         }
     }
 
+    //---------------------------------------接收自定义场景的消息------------------------------------------------
+    @Subscribe
+    public void onEventMainThread(MyEventBusCustom event) {
+
+        switch (event.getmMsg()){
+            case "1":
+                sendSceneControlData(roomIndex,0);      //发送场景的控制命令
+                break;
+            case "2":
+                sendSceneControlData(roomIndex,1);      //发送场景的控制命令
+                break;
+            case "3":
+                sendSceneControlData(roomIndex,2);      //发送场景的控制命令
+                break;
+            case "4":
+                sendSceneControlData(roomIndex,3);      //发送场景的控制命令
+                break;
+        }
+    }
+
+
     //--------------------------------------点击事件-------------------------------------------
     View.OnClickListener controlListener = new View.OnClickListener() {
         @Override
@@ -1059,18 +1154,22 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                 case R.id.rl_panel_1:
                     clickPanel(1);
                     setScaleAnimation(rlPanel1);
+                    changeSceneColor();         //点击改变场景图片颜色
                     break;
                 case R.id.rl_panel_2:
                     clickPanel(2);
                     setScaleAnimation(rlPanel2);
+                    changeSceneColor();         //点击改变场景图片颜色
                     break;
                 case R.id.rl_panel_3:
                     clickPanel(3);
                     setScaleAnimation(rlPanel3);
+                    changeSceneColor();         //点击改变场景图片颜色
                     break;
                 case R.id.rl_panel_4:
                     clickPanel(4);
                     setScaleAnimation(rlPanel4);
+                    changeSceneColor();         //点击改变场景图片颜色
                     break;
                 case R.id.tv_blank:      //点击弹出切换房间dialog
                     clickRoomName();
@@ -1078,27 +1177,31 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                 case R.id.iv_switch_room_icon:
                     clickRoomName();
                     break;
-                case R.id.rl_xiuxian:
+                case R.id.rl_xiuxian:                  //1自定义场景，点击事件
                     setScaleAnimation(rlXiuxian);
                     clickXiuxian();
                     setPanelIconColor(roomDBName);
+                    sendSceneControlData(roomIndex,0);      //发送场景的控制命令
                     break;
-                case R.id.rl_yule:
+                case R.id.rl_yule:                     //2自定义场景，点击事件
                     setScaleAnimation(rlYule);
                     clickYule();
                     setPanelIconColor(roomDBName);
+                    sendSceneControlData(roomIndex,1);      //发送场景的控制命令
                     break;
-                case R.id.rl_juhui:
+                case R.id.rl_juhui:                    //3自定义场景，点击事件
                     setScaleAnimation(rlJuhui);
                     clickJuhui();
                     setPanelIconColor(roomDBName);
+                    sendSceneControlData(roomIndex,2);      //发送场景的控制命令
                     break;
-                case R.id.rl_likai:
+                case R.id.rl_likai:                    //4自定义场景，点击事件
                     setScaleAnimation(rlLikai);
                     clickLikai();
                     setPanelIconColor(roomDBName);
+                    sendSceneControlData(roomIndex,3);      //发送场景的控制命令
                     break;
-                case R.id.relative_light_switch:
+                case relative_light_switch:    //打开灯光回路dialog
                     setScaleAnimation(rlLight);
                     clickLightSwitch();
                     break;
@@ -1173,13 +1276,120 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                     Toast.makeText(activity, "定时", Toast.LENGTH_SHORT).show();
                     break;
                 case R.id.tv_scene_custom:      //跳转场景自定义界面
+                    changeSceneColor();
                     Intent intent = new Intent(getContext(), CustomSceneMainActivity.class);
                     intent.putExtra("roomDBName",roomDBName);
-                    startActivity(intent);
+                    intent.putExtra("roomIndex",roomIndex);
+                    intent.putExtra("token",token);
+                    intent.putExtra("uname",uname);
+                    intent.putExtra("pwd",pwd);
+                    intent.putExtra("protocol",protocol);
+                    Bundle bundle = new Bundle();
+                    bundle.putSerializable("roomDevMesg",roomDevMesg);
+                    //传入默认的自定义场景数据
+                    intent.putExtras(bundle);
+                    startActivityForResult(intent,1);
+
                     break;
             }
         }
     };
+
+    //发送场景控制命令, 灯光，窗帘
+    private void sendSceneControlData(int roomIndex,int sceneIndex){
+        int[] loopLightValueList = new int[6];
+        int[] loopLightIndexList;
+        String[] loopLightNameList;
+        DetailCustomScene detailCustomScene = roomCustomSceneBean.getArray().get(sceneIndex);
+        boolean isOpenCurtain = detailCustomScene.isOpenCurtain();   //窗帘是否打开
+        int allLightValue;
+        if (detailCustomScene.getLightDetail()!=null){
+            allLightValue = detailCustomScene.getLightDetail().getAllLight();     //灯光的所有亮度:-1(表示回路亮度值不同，需要判断各个回路)；0：全关
+            Log.i("bean_hy", "sendSceneControlData: allLightValue:"+allLightValue);
+            if (detailCustomScene.getLightDetail().getArray()!=null){
+                Log.i("bean_hy", "sendSceneControlData: size:"+detailCustomScene.getLightDetail().getArray().size());
+                int loopSize = detailCustomScene.getLightDetail().getArray().size();
+                loopLightValueList = new int[loopSize];
+                loopLightIndexList = new int[loopSize];
+                loopLightNameList = new String[loopSize];
+                for (int i=0;i<loopSize;i++){
+                    loopLightValueList[i] = detailCustomScene.getLightDetail().getArray().get(i).getLoopLightValue();
+                    loopLightIndexList[i] = detailCustomScene.getLightDetail().getArray().get(i).getLoopLightIndex();
+                    loopLightNameList[i] = detailCustomScene.getLightDetail().getArray().get(i).getLoopLightName();
+                }
+            }else {
+                Log.i("bean_hy", "sendSceneControlData: size:回路亮度值为空");
+            }
+        }else {
+            allLightValue = -2;
+        }
+
+        //发送窗帘控制命令
+        if (isOpenCurtain){
+            controlCurtain(CONTROL_PROTOCOL_HDL,MACHINE_NAME_CURTAIN,-1,1,-1,"all_both_open");    //自定义场景开窗帘
+        }else {
+            controlCurtain(CONTROL_PROTOCOL_HDL,MACHINE_NAME_CURTAIN,-1,1,-1,"all_both_close");   //自定义场景关窗帘
+        }
+
+        //发送灯光控制命令
+        if (allLightValue==-1){      //发送灯光各回路控制命令
+            for (int i=0;i<loopLightValueList.length;i++){
+                if (loopLightValueList[i]==0){
+                    controlLight(protocol,"light","0","0",""+(i+1));
+                }else if (loopLightValueList[i]==1){
+                    controlLight(protocol,"light","30","0",""+(i+1));
+                }else if (loopLightValueList[i]==2){
+                    controlLight(protocol,"light","60","0",""+(i+1));
+                } else if (loopLightValueList[i]==3){
+                    controlLight(protocol,"light","100","0",""+(i+1));
+                }
+            }
+        }else if (allLightValue==0){
+            controlLight(protocol,"light","0","0","all");
+        }else if (allLightValue==1){
+            controlLight(protocol,"light","30","0","all");
+        }else if (allLightValue==2){
+            controlLight(protocol,"light","60","0","all");
+        }else if (allLightValue==3){
+            controlLight(protocol,"light","100","0","all");
+        }else if (allLightValue==-2){
+            //还未定义场景
+        }
+    }
+
+    //初始化的自定义场景数据
+    private RoomCustomScene initCustomScene(){
+
+        List<RoomCustomScene> array = new ArrayList<>();
+        List<DetailCustomScene> arrayList = new ArrayList<>();
+        LightDetail lightDetail = new LightDetail();
+        lightDetail.setAllLight(-2);
+        for (int i=0;i<4;i++){
+            DetailCustomScene detailCustomScene = new DetailCustomScene();
+            detailCustomScene.setOpenCurtain(false);
+            detailCustomScene.setSceneName(sceneNameList[i]);
+            detailCustomScene.setSceneIconIndex(sceneIconIndexList[i]);
+            detailCustomScene.setLightDetail(lightDetail);
+            arrayList.add(i,detailCustomScene);
+        }
+
+        RoomCustomScene roomCustomScene = new RoomCustomScene();
+        roomCustomScene.setRoomDBName(roomDBName);
+        roomCustomScene.setRoomIndex(roomIndex);
+        roomCustomScene.setArray(arrayList);
+        for (int i=0;i<commandData.getProfile().getRooms().getArray().size();i++){
+            array.add(i,roomCustomScene);
+        }
+        allCustomScene.setArray(array);
+
+        //生成json看看
+        Gson gson = new GsonBuilder().serializeNulls().create();
+        String json = gson.toJson(allCustomScene);
+        //存到SharedPreferences
+        SharedPreferences sp = getActivity().getSharedPreferences("customSceneJson",MODE_PRIVATE);
+        sp.edit().putString("json",json).commit();
+        return roomCustomScene;
+    }
 
     //设置不同房间面板点击后变色
     private void clickPanel(int index){
@@ -1199,7 +1409,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
             case "canting":
                 changePanelCanting(index);
                 break;
-            case "weiyu":
+            case "weishengjian":
                 changePanelWeiyu(index);
                 break;
         }
@@ -1510,7 +1720,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                 ivPanel4.setImageResource(R.mipmap.get_out_dark_3x);
                 tvPanel4.setTextColor(activity.getResources().getColor(R.color.colorText));
                 break;
-            case "weiyu":
+            case "weishengjian":
                 ivPanel1.setImageResource(R.mipmap.wash_dark_3x);
                 tvPanel1.setTextColor(activity.getResources().getColor(R.color.colorText));
                 ivPanel2.setImageResource(R.mipmap.toilet_dark_3x);
@@ -1682,49 +1892,49 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         @Override
         public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
             if (i<10){
-                tvKongtiaoTemp.setText("16°");
+                tvKongtiaoTemp.setText("  16°");
                 tvKongtiaoTemp.setTextColor(activity.getResources().getColor(R.color.colorPrimary));
             }else if (i>=10&&i<20){
-                tvKongtiaoTemp.setText("17°");
+                tvKongtiaoTemp.setText("  17°");
                 tvKongtiaoTemp.setTextColor(activity.getResources().getColor(R.color.colorPrimary));
             }else if (i>=20&&i<30){
-                tvKongtiaoTemp.setText("18°");
+                tvKongtiaoTemp.setText("  18°");
                 tvKongtiaoTemp.setTextColor(activity.getResources().getColor(R.color.colorBule));
             }else if (i>=30&&i<40){
-                tvKongtiaoTemp.setText("19°");
+                tvKongtiaoTemp.setText("  19°");
                 tvKongtiaoTemp.setTextColor(activity.getResources().getColor(R.color.colorBule));
             }else if (i>=40&&i<50){
-                tvKongtiaoTemp.setText("20°");
+                tvKongtiaoTemp.setText("  20°");
                 tvKongtiaoTemp.setTextColor(activity.getResources().getColor(R.color.colorBule));
             }else if (i>=50&&i<60){
-                tvKongtiaoTemp.setText("21°");
+                tvKongtiaoTemp.setText("  21°");
                 tvKongtiaoTemp.setTextColor(activity.getResources().getColor(R.color.colorGreen));
             }else if (i>=60&&i<70){
-                tvKongtiaoTemp.setText("22°");
+                tvKongtiaoTemp.setText("  22°");
                 tvKongtiaoTemp.setTextColor(activity.getResources().getColor(R.color.colorGreen));
             }else if (i>=70&&i<80){
-                tvKongtiaoTemp.setText("23°");
+                tvKongtiaoTemp.setText("  23°");
                 tvKongtiaoTemp.setTextColor(activity.getResources().getColor(R.color.colorGreen));
             }else if (i>=80&&i<90){
-                tvKongtiaoTemp.setText("24°");
+                tvKongtiaoTemp.setText("  24°");
                 tvKongtiaoTemp.setTextColor(activity.getResources().getColor(R.color.colorYellowGreen));
             }else if (i>=90&&i<100){
-                tvKongtiaoTemp.setText("25°");
+                tvKongtiaoTemp.setText("  25°");
                 tvKongtiaoTemp.setTextColor(activity.getResources().getColor(R.color.colorYellowGreen));
             }else if (i>=100&&i<110){
-                tvKongtiaoTemp.setText("26°");
+                tvKongtiaoTemp.setText("  26°");
                 tvKongtiaoTemp.setTextColor(activity.getResources().getColor(R.color.colorYellowGreen));
             }else if (i>=110&&i<120){
-                tvKongtiaoTemp.setText("27°");
+                tvKongtiaoTemp.setText("  27°");
                 tvKongtiaoTemp.setTextColor(activity.getResources().getColor(R.color.colorYellow));
             }else if (i>=120&&i<130){
-                tvKongtiaoTemp.setText("28°");
+                tvKongtiaoTemp.setText("  28°");
                 tvKongtiaoTemp.setTextColor(activity.getResources().getColor(R.color.colorYellow));
             }else if (i>=130&&i<140){
-                tvKongtiaoTemp.setText("29°");
+                tvKongtiaoTemp.setText("  29°");
                 tvKongtiaoTemp.setTextColor(activity.getResources().getColor(R.color.colorTextActive));
             }else if (i>=140){
-                tvKongtiaoTemp.setText("30°");
+                tvKongtiaoTemp.setText("  30°");
                 tvKongtiaoTemp.setTextColor(activity.getResources().getColor(R.color.colorTextActive));
             }
         }
@@ -1870,18 +2080,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
     * ----------------------------按钮的点击动画-------------------------------
     * */
     //场景  -----------休闲-----------
-    private void animationXiuxian(){
-        AnimatorSet set = new AnimatorSet();
-        ObjectAnimator objectAnimatorOut = new ObjectAnimator().ofFloat(ivXiuxianOut,"rotation",0,-10,0);
-        ivXiuxianOut.setPivotX(0f);
-        ivXiuxianOut.setPivotY(100f);
 
-        ObjectAnimator objectAnimatorIn = new ObjectAnimator().ofFloat(ivXiuxianIn,"rotation",0,-10,0);
-        ivXiuxianIn.setPivotX(0f);
-        ivXiuxianIn.setPivotY(100f);
-        set.playTogether(objectAnimatorIn,objectAnimatorOut);
-        set.setDuration(1500).start();
-    }
     //场景 ------------娱乐-------------
     private void animationYule(){
         AnimatorSet set = new AnimatorSet();
@@ -2091,7 +2290,6 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
     };
 
 
-
     //滑动到隐藏头 初始化
     private void scrollToBottomInit(){
         isInitPosition = true;
@@ -2161,59 +2359,65 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
      *    ---------------------------------点击图标变色---------------------------------
      */
     //---------------------------------------场景-----------------------------------------
-    private void changeColorToActive1(int imgId1,int imgId2,int colorId){
-        ivXiuxianOut.setImageResource(imgId1);
-        ivXiuxianIn.setImageResource(imgId2);
-        tvXiuxian.setTextColor(activity.getResources().getColor(colorId));
+    private void changeColorToActive1(int imgId1,int colorId){
+        ivScene1.setImageResource(imgId1);
+        tvScene1.setTextColor(activity.getResources().getColor(colorId));
     }
-    private void changeColorToActive2(int imgId1,int imgId2,int imgId3,int colorId){
-        ivYule1.setImageResource(imgId1);
-        ivYule2.setImageResource(imgId2);
-        ivYule3.setImageResource(imgId3);
-        tvYule.setTextColor(activity.getResources().getColor(colorId));
+    private void changeColorToActive2(int imgId1,int colorId){
+        ivScene2.setImageResource(imgId1);
+        tvScene2.setTextColor(activity.getResources().getColor(colorId));
     }
-    private void changeColorToActive3(int imgId1,int imgId2,int colorId){
-        ivJuhui1.setImageResource(imgId1);
-        ivJuhui2.setImageResource(imgId2);
-        tvJuhui.setTextColor(activity.getResources().getColor(colorId));
+    private void changeColorToActive3(int imgId1,int colorId){
+        ivScene3.setImageResource(imgId1);
+        tvScene3.setTextColor(activity.getResources().getColor(colorId));
     }
     private void changeColorToActive4(int imgId1,int colorId){
-        ivLikai.setImageResource(imgId1);
-        tvLikai.setTextColor(activity.getResources().getColor(colorId));
+        ivScene4.setImageResource(imgId1);
+        tvScene4.setTextColor(activity.getResources().getColor(colorId));
     }
 
 
     //点击事件
+    private int sceneIconIndex_1 = 0;
+    private int sceneIconIndex_2 = 1;
+    private int sceneIconIndex_3 = 2;
+    private int sceneIconIndex_4 = 3;    //自定义场景选择的图标
+
     private void clickRoomName(){
         EventBus.getDefault().post(new MyEventBus(SWITCH_ROOM_DIALOG));
     }
     private void clickXiuxian(){
-        changeColorToActive1(R.mipmap.theme2_jiating_xiuxian_active_ani_3x,R.mipmap.theme2_jiating_xiuxian_active_ani_in_3x,R.color.colorTextActive);
-        changeColorToActive2(R.mipmap.theme2_jiating_yule_1_3x,R.mipmap.theme2_jiating_yule_2_3x,R.mipmap.theme2_jiating_yule_3_3x,R.color.colorText);
-        changeColorToActive3(R.mipmap.theme2_jiating_juhui_ani_3x,R.mipmap. theme2_jiating_juhui_ani_in_3x,R.color.colorText);
-        changeColorToActive4(R.mipmap.theme2_jiating_likai_ani_3x,R.color.colorText);
+        changeColorToActive1(iconResListSelect[sceneIconIndex_1],R.color.colorTextActive);
+        changeColorToActive2(iconResList[sceneIconIndex_2],R.color.colorText);
+        changeColorToActive3(iconResList[sceneIconIndex_3],R.color.colorText);
+        changeColorToActive4(iconResList[sceneIconIndex_4],R.color.colorText);
     }
     private void clickYule(){
-        changeColorToActive1(R.mipmap.theme2_jiating_xiuxian_ani_3x,R.mipmap.theme2_jiating_xiuxian_ani_in_3x,R.color.colorText);
-        changeColorToActive2(R.mipmap.theme2_jiating_yule_active_1_3x,R.mipmap.theme2_jiating_yule_active_2_3x,R.mipmap.theme2_jiating_yule_active_3_3x,R.color.colorTextActive);
-        changeColorToActive3(R.mipmap.theme2_jiating_juhui_ani_3x,R.mipmap.theme2_jiating_juhui_ani_in_3x,R.color.colorText);
-        changeColorToActive4(R.mipmap.theme2_jiating_likai_ani_3x,R.color.colorText);
+        changeColorToActive1(iconResList[sceneIconIndex_1],R.color.colorText);
+        changeColorToActive2(iconResListSelect[sceneIconIndex_2],R.color.colorTextActive);
+        changeColorToActive3(iconResList[sceneIconIndex_3],R.color.colorText);
+        changeColorToActive4(iconResList[sceneIconIndex_4],R.color.colorText);
     }
     private void clickJuhui(){
-        changeColorToActive1(R.mipmap.theme2_jiating_xiuxian_ani_3x,R.mipmap.theme2_jiating_xiuxian_ani_in_3x,R.color.colorText);
-        changeColorToActive2(R.mipmap.theme2_jiating_yule_1_3x,R.mipmap.theme2_jiating_yule_2_3x,R.mipmap.theme2_jiating_yule_3_3x,R.color.colorText);
-        changeColorToActive3(R.mipmap.theme2_jiating_juhui_active_ani_3x,R.mipmap.theme2_jiating_juhui_active_ani_in_3x,R.color.colorTextActive);
-        changeColorToActive4(R.mipmap.theme2_jiating_likai_ani_3x,R.color.colorText);
+        changeColorToActive1(iconResList[sceneIconIndex_1],R.color.colorText);
+        changeColorToActive2(iconResList[sceneIconIndex_2],R.color.colorText);
+        changeColorToActive3(iconResListSelect[sceneIconIndex_3],R.color.colorTextActive);
+        changeColorToActive4(iconResList[sceneIconIndex_4],R.color.colorText);
     }
     private void clickLikai(){
-        changeColorToActive1(R.mipmap.theme2_jiating_xiuxian_ani_3x,R.mipmap.theme2_jiating_xiuxian_ani_in_3x,R.color.colorText);
-        changeColorToActive2(R.mipmap.theme2_jiating_yule_1_3x,R.mipmap.theme2_jiating_yule_2_3x,R.mipmap.theme2_jiating_yule_3_3x,R.color.colorText);
-        changeColorToActive3(R.mipmap.theme2_jiating_juhui_ani_3x,R.mipmap.theme2_jiating_juhui_ani_in_3x,R.color.colorText);
-        changeColorToActive4(R.mipmap.theme2_jiating_likai_active_ani_3x,R.color.colorTextActive);
+        changeColorToActive1(iconResList[sceneIconIndex_1],R.color.colorText);
+        changeColorToActive2(iconResList[sceneIconIndex_2],R.color.colorText);
+        changeColorToActive3(iconResList[sceneIconIndex_3],R.color.colorText);
+        changeColorToActive4(iconResListSelect[sceneIconIndex_4],R.color.colorTextActive);
+    }
+    private void changeSceneColor(){
+        changeColorToActive1(iconResList[sceneIconIndex_1],R.color.colorText);
+        changeColorToActive2(iconResList[sceneIconIndex_2],R.color.colorText);
+        changeColorToActive3(iconResList[sceneIconIndex_3],R.color.colorText);
+        changeColorToActive4(iconResList[sceneIconIndex_4],R.color.colorText);
     }
     private void clickLightSwitch(){
-        EventBus.getDefault().post(new MyEventBus("7"));
-
+        EventBus.getDefault().post(new MyEventBus("7"+roomIndex));
     }
 
     //----------------------------------窗帘-----------------------------------
@@ -2517,16 +2721,77 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
             CommandData.put("houseDBName", roomDBName);
             String curtainJson = CommandJsonUtils.getCommandJson(0, CommandData, token, uname, pwd, String.valueOf(System.currentTimeMillis()));
             EventBus.getDefault().post(new MyEventBus(curtainJson));
-            Log.i(TAG, "onClick: ------lightjson------" + curtainJson);
+            Log.i(TAG, "onClick: ------curtainJson------" + curtainJson);
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
 
+    private String sceneName_1 = "未定义";
+    private String sceneName_2 = "未定义";
+    private String sceneName_3 = "未定义";
+    private String sceneName_4 = "未定义";
+    private String[] sceneNameList = new String[]{"未定义","未定义","未定义","未定义"};
+    private int[] sceneIconIndexList = new int[]{0,1,2,3};
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Log.e(TAG, "onActivityResult:resultCode: "+resultCode);
+        if (resultCode==1){
+            /*sceneIconIndex_1 = data.getIntExtra("sceneIconIndex1",0);
+            sceneIconIndex_2 = data.getIntExtra("sceneIconIndex2",1);
+            sceneIconIndex_3 = data.getIntExtra("sceneIconIndex3",2);
+            sceneIconIndex_4 = data.getIntExtra("sceneIconIndex4",3);
+            sceneName_1 = data.getStringExtra("sceneName1");
+            sceneName_2 = data.getStringExtra("sceneName2");
+            sceneName_3 = data.getStringExtra("sceneName3");
+            sceneName_4 = data.getStringExtra("sceneName4");*/
+/*
+            boolean isOpenCurtain_1 = data.getBooleanExtra("isOpenCurtain1",false);
+            boolean isOpenCurtain_2 = data.getBooleanExtra("isOpenCurtain2",false);
+            boolean isOpenCurtain_3 = data.getBooleanExtra("isOpenCurtain3",false);
+            boolean isOpenCurtain_4 = data.getBooleanExtra("isOpenCurtain4",false);*/
+            //RoomCustomScene roomCustomScene = (RoomCustomScene) data.getSerializableExtra("roomCustomScene");
+
+            SharedPreferences sp = getActivity().getSharedPreferences("customSceneJson",MODE_PRIVATE);
+            String json = sp.getString("json","");
+            GsonBuilder builder = new GsonBuilder();
+            Gson gson = builder.create();
+            allCustomSceneBean = gson.fromJson(json,AllCustomScene.class);
+            roomCustomSceneBean = allCustomSceneBean.getArray().get(roomIndex);
+            sceneIconIndex_1 = roomCustomSceneBean.getArray().get(0).getSceneIconIndex();
+            sceneIconIndex_2 = roomCustomSceneBean.getArray().get(1).getSceneIconIndex();
+            sceneIconIndex_3 = roomCustomSceneBean.getArray().get(2).getSceneIconIndex();
+            sceneIconIndex_4 = roomCustomSceneBean.getArray().get(3).getSceneIconIndex();
+            sceneName_1 = roomCustomSceneBean.getArray().get(0).getSceneName();
+            sceneName_2 = roomCustomSceneBean.getArray().get(1).getSceneName();
+            sceneName_3 = roomCustomSceneBean.getArray().get(2).getSceneName();
+            sceneName_4 = roomCustomSceneBean.getArray().get(3).getSceneName();
+
+            ivScene1.setImageResource(iconResList[sceneIconIndex_1]);
+            ivScene2.setImageResource(iconResList[sceneIconIndex_2]);
+            ivScene3.setImageResource(iconResList[sceneIconIndex_3]);
+            ivScene4.setImageResource(iconResList[sceneIconIndex_4]);
+            tvScene1.setText(sceneName_1);
+            tvScene2.setText(sceneName_2);
+            tvScene3.setText(sceneName_3);
+            tvScene4.setText(sceneName_4);
+
+            sceneNameList[0] = sceneName_1;
+            sceneNameList[1] = sceneName_2;
+            sceneNameList[2] = sceneName_3;
+            sceneNameList[3] = sceneName_4;
+            sceneIconIndexList[0] = sceneIconIndex_1;
+            sceneIconIndexList[1] = sceneIconIndex_2;
+            sceneIconIndexList[2] = sceneIconIndex_3;
+            sceneIconIndexList[3] = sceneIconIndex_4;
+        }
+    }
 
     /*
-     *    ----------------------------------------------------手势------------------------------------------------------
-     */
+         *    ----------------------------------------------------手势------------------------------------------------------
+         */
     @Override
     public boolean onDown(MotionEvent motionEvent) {
 

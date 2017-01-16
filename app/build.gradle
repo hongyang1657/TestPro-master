@@ -8,7 +8,7 @@ android {
     defaultConfig {
         applicationId "com.byids.hy.testpro"
         minSdkVersion 15
-        targetSdkVersion 21
+        targetSdkVersion 22
         versionCode 1
         versionName "1.0"
     }
@@ -42,6 +42,6 @@ dependencies {
     compile 'com.google.code.gson:gson:2.7'
     compile'com.jakewharton:butterknife:8.2.1'
     apt 'com.jakewharton:butterknife-compiler:8.2.1'
-    compile 'com.android.support:design:25.0.0'
+    compile 'com.android.support:design:24.0.0'
 }
 

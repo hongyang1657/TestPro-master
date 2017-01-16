@@ -15,7 +15,7 @@
         android:gravity="center"
         android:layout_width="0dp"
         android:layout_height="wrap_content">
-        <ImageView
+        <!--<ImageView
             android:id="@+id/iv_xiuxian_out"
             android:src="@mipmap/theme2_jiating_xiuxian_ani_3x"
             android:layout_width="match_parent"
@@ -24,6 +24,11 @@
             android:id="@+id/iv_xiuxian_in"
             android:src="@mipmap/theme2_jiating_xiuxian_ani_in_3x"
             android:layout_width="match_parent"
+            android:layout_height="wrap_content" />-->
+        <ImageView
+            android:id="@+id/iv_scene_custom_1"
+            android:src="@mipmap/scene_custom_img_3x_1"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content" />
         <TextView
             android:id="@+id/tv_xiuxian"
@@ -31,9 +36,9 @@
             android:textSize="12sp"
             android:textColor="@color/colorText"
             android:paddingTop="6dp"
-            android:layout_alignRight="@id/iv_xiuxian_in"
-            android:layout_alignLeft="@id/iv_xiuxian_in"
-            android:layout_below="@id/iv_xiuxian_out"
+            android:layout_alignRight="@id/iv_scene_custom_1"
+            android:layout_alignLeft="@id/iv_scene_custom_1"
+            android:layout_below="@id/iv_scene_custom_1"
             android:gravity="center"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
@@ -47,7 +52,7 @@
         android:gravity="center"
         android:layout_width="0dp"
         android:layout_height="wrap_content">
-        <ImageView
+        <!--<ImageView
             android:id="@+id/iv_yule_1"
             android:src="@mipmap/theme2_jiating_yule_1_3x"
             android:layout_width="match_parent"
@@ -61,6 +66,11 @@
             android:id="@+id/iv_yule_3"
             android:src="@mipmap/theme2_jiating_yule_3_3x"
             android:layout_width="match_parent"
+            android:layout_height="wrap_content" />-->
+        <ImageView
+            android:id="@+id/iv_scene_custom_2"
+            android:src="@mipmap/scene_custom_img_3x_2"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content" />
         <TextView
             android:id="@+id/tv_yule"
@@ -68,9 +78,9 @@
             android:textSize="12sp"
             android:textColor="@color/colorText"
             android:paddingTop="6dp"
-            android:layout_alignRight="@id/iv_yule_3"
-            android:layout_alignLeft="@id/iv_yule_3"
-            android:layout_below="@id/iv_yule_1"
+            android:layout_alignRight="@id/iv_scene_custom_2"
+            android:layout_alignLeft="@id/iv_scene_custom_2"
+            android:layout_below="@id/iv_scene_custom_2"
             android:gravity="center"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
@@ -85,7 +95,7 @@
         android:gravity="center"
         android:layout_width="0dp"
         android:layout_height="wrap_content">
-        <ImageView
+        <!--<ImageView
             android:id="@+id/iv_juhui_1"
             android:src="@mipmap/theme2_jiating_juhui_ani_3x"
             android:layout_width="match_parent"
@@ -94,6 +104,11 @@
             android:id="@+id/iv_juhui_2"
             android:src="@mipmap/theme2_jiating_juhui_ani_in_3x"
             android:layout_width="match_parent"
+            android:layout_height="wrap_content" />-->
+        <ImageView
+            android:id="@+id/iv_scene_custom_3"
+            android:src="@mipmap/scene_custom_img_3x_3"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content" />
         <TextView
             android:id="@+id/tv_juhui"
@@ -101,9 +116,9 @@
             android:textColor="@color/colorText"
             android:textSize="12sp"
             android:paddingTop="6dp"
-            android:layout_alignRight="@id/iv_juhui_2"
-            android:layout_alignLeft="@id/iv_juhui_2"
-            android:layout_below="@id/iv_juhui_2"
+            android:layout_alignRight="@id/iv_scene_custom_3"
+            android:layout_alignLeft="@id/iv_scene_custom_3"
+            android:layout_below="@id/iv_scene_custom_3"
             android:gravity="center"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
@@ -117,11 +132,16 @@
         android:gravity="center"
         android:layout_width="0dp"
         android:layout_height="wrap_content">
-        <ImageView
+        <!--<ImageView
             android:id="@+id/iv_likai"
             android:paddingLeft="4dp"
             android:paddingRight="4dp"
             android:src="@mipmap/theme2_jiating_likai_ani_3x"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />-->
+        <ImageView
+            android:id="@+id/iv_scene_custom_4"
+            android:src="@mipmap/scene_custom_img_3x_4"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
         <TextView
@@ -130,7 +150,7 @@
             android:textColor="@color/colorText"
             android:textSize="12sp"
             android:paddingTop="6dp"
-            android:layout_below="@id/iv_likai"
+            android:layout_below="@id/iv_scene_custom_4"
             android:gravity="center"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />

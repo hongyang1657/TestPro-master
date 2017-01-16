@@ -68,13 +68,13 @@
 
             <ImageView
                 android:id="@+id/iv_custom_icon1"
-                android:src="@mipmap/read_dark_3x"
+                android:src="@mipmap/scene_custom_img_3x_1"
                 android:layout_margin="10dp"
                 android:layout_width="28dp"
                 android:layout_height="28dp" />
             <TextView
                 android:id="@+id/iv_custom_modification1"
-                android:text="未定义"
+                android:text="未定义1"
                 android:layout_weight="0.95"
                 android:textColor="@color/colorText"
                 android:paddingLeft="10dp"
@@ -101,13 +101,13 @@
 
             <ImageView
                 android:id="@+id/iv_custom_icon2"
-                android:src="@mipmap/game_dark_3x"
+                android:src="@mipmap/scene_custom_img_3x_2"
                 android:layout_margin="10dp"
                 android:layout_width="28dp"
                 android:layout_height="28dp" />
             <TextView
                 android:id="@+id/iv_custom_modification2"
-                android:text="未定义"
+                android:text="未定义1"
                 android:layout_weight="1"
                 android:textColor="@color/colorText"
                 android:paddingLeft="10dp"
@@ -134,13 +134,13 @@
 
             <ImageView
                 android:id="@+id/iv_custom_icon3"
-                android:src="@mipmap/music_dark_3x"
+                android:src="@mipmap/scene_custom_img_3x_3"
                 android:layout_margin="10dp"
                 android:layout_width="28dp"
                 android:layout_height="28dp" />
             <TextView
                 android:id="@+id/iv_custom_modification3"
-                android:text="未定义"
+                android:text="未定义1"
                 android:layout_weight="1"
                 android:textColor="@color/colorText"
                 android:paddingLeft="10dp"
@@ -167,13 +167,13 @@
 
             <ImageView
                 android:id="@+id/iv_custom_icon4"
-                android:src="@mipmap/clean_up_dark_3x"
+                android:src="@mipmap/scene_custom_img_3x_4"
                 android:layout_margin="10dp"
                 android:layout_width="28dp"
                 android:layout_height="28dp" />
             <TextView
                 android:id="@+id/iv_custom_modification4"
-                android:text="未定义"
+                android:text="未定义1"
                 android:layout_weight="1"
                 android:textColor="@color/colorText"
                 android:paddingLeft="10dp"

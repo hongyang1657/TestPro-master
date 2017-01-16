@@ -3,21 +3,31 @@ package com.byids.hy.testpro.activity.custom_scene_activity;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.byids.hy.testpro.R;
+import com.byids.hy.testpro.customSceneBean.AllCustomScene;
+import com.byids.hy.testpro.customSceneBean.DetailCustomScene;
+import com.byids.hy.testpro.customSceneBean.LightDetail;
+import com.byids.hy.testpro.customSceneBean.RoomCustomScene;
+import com.byids.hy.testpro.newBean.RoomDevMesg;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -99,7 +109,6 @@ public class CustomSceneSecondActivity extends Activity {
     private static final int REQUEST_CODE_LIGHT = 1;
     private static final int REQUEST_CODE_ICON = 2;
 
-
     private TextView tvCustomNameTitle;
     private TextView tvCustomNameCancel;
     private TextView tvCustomNameEnter;
@@ -108,6 +117,12 @@ public class CustomSceneSecondActivity extends Activity {
 
     private int sceneIndex;        //场景数字标识（1——4）
     private String roomDBName;       //房间名
+    private String token;
+    private String uname;
+    private String pwd;
+    private String protocol;
+    private int roomIndex;
+    private RoomDevMesg roomDevMesg;
     private Dialog dialogCustomName;
     private View viewDialog;
     private Typeface typeFace;
@@ -116,6 +131,11 @@ public class CustomSceneSecondActivity extends Activity {
     private int height;
     //场景的各个单品状态
     private String saveName;
+    private int iconNum = 0;  //保存的自定义icon的下标
+    private boolean isOpenCurtain = false;      //窗帘是否打开
+
+    private LightDetail lightDetail;
+    private DetailCustomScene detailCustomScene;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -140,10 +160,39 @@ public class CustomSceneSecondActivity extends Activity {
         WindowManager wm = this.getWindowManager();
         width = wm.getDefaultDisplay().getWidth();
         height = wm.getDefaultDisplay().getHeight();
+
         sceneIndex = getIntent().getIntExtra("index", 0);
         roomDBName = getIntent().getStringExtra("roomDBName");
-        Toast.makeText(this, "点击的是房间：" + roomDBName + "的第" + sceneIndex + "个自定义按钮", Toast.LENGTH_SHORT).show();
+        token = getIntent().getStringExtra("token");
+        uname = getIntent().getStringExtra("uname");
+        pwd = getIntent().getStringExtra("pwd");
+        protocol = getIntent().getStringExtra("protocol");
+        roomDevMesg = (RoomDevMesg) getIntent().getSerializableExtra("roomDevMesg");
+        roomIndex = getIntent().getIntExtra("roomIndex",0);
+        //detailCustomScene = (DetailCustomScene) getIntent().getSerializableExtra("detailCustomScene");
+        //本地自定义场景的信息
+        SharedPreferences sp = getSharedPreferences("customSceneJson",MODE_PRIVATE);
+        String json = sp.getString("json","");
+        GsonBuilder builder = new GsonBuilder();
+        Gson gson = builder.create();
+        AllCustomScene allCustomScene = gson.fromJson(json,AllCustomScene.class);
+        RoomCustomScene roomCustomScene = allCustomScene.getArray().get(roomIndex);
+        //生成json看看
+        Gson gson1 = new GsonBuilder().serializeNulls().create();
+        String json1 = gson1.toJson(allCustomScene);
+        detailCustomScene = roomCustomScene.getArray().get(sceneIndex-1);
 
+        tvCustomTitleSecond.setText(detailCustomScene.getSceneName());
+        saveName = detailCustomScene.getSceneName();
+        iconNum = detailCustomScene.getSceneIconIndex();
+        lightDetail = detailCustomScene.getLightDetail();
+        swCustomCurtain.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                isOpenCurtain = isChecked;
+            }
+        });
+        swCustomCurtain.setChecked(detailCustomScene.isOpenCurtain());
     }
 
     //设置字体
@@ -172,9 +221,46 @@ public class CustomSceneSecondActivity extends Activity {
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.iv_custom_back_second:
+                Intent intent1 = new Intent();
+                setResult(0,intent1);    //回复0，表示不改变自定义场景的信息
                 finish();
                 break;
             case R.id.tv_custom_save_second:
+                SharedPreferences sharedPreferences = getSharedPreferences("judgeFirstSave",MODE_PRIVATE);
+                sharedPreferences.edit().putBoolean("isFirstSave",true).commit();
+                //本地自定义场景的信息
+                List<DetailCustomScene> array = new ArrayList<>();
+                DetailCustomScene dcs = new DetailCustomScene();
+                Log.i("bean_hy", "onClick:bean_hy "+lightDetail);
+                dcs.setLightDetail(lightDetail);
+                dcs.setSceneIconIndex(iconNum);
+                dcs.setSceneName(saveName);
+                dcs.setOpenCurtain(isOpenCurtain);
+
+                SharedPreferences sp = getSharedPreferences("customSceneJson",MODE_PRIVATE);
+                String json = sp.getString("json","");
+                GsonBuilder builder = new GsonBuilder();
+                Gson gson = builder.create();
+                AllCustomScene allCustomScene = gson.fromJson(json,AllCustomScene.class);
+                RoomCustomScene roomCustomScene = allCustomScene.getArray().get(roomIndex);
+                array = roomCustomScene.getArray();
+                array.remove(sceneIndex-1);
+                array.add(sceneIndex-1,dcs);
+                roomCustomScene.setArray(array);
+                Gson gson1 = new GsonBuilder().serializeNulls().create();
+                String json1 = gson1.toJson(allCustomScene);
+                SharedPreferences sp1 = getSharedPreferences("customSceneJson",MODE_PRIVATE);
+                sp1.edit().putString("json",json1).commit();
+
+                Intent intent = new Intent();
+                intent.putExtra("iconNum",iconNum);
+                intent.putExtra("sceneName",saveName);
+                intent.putExtra("isOpenCurtain",isOpenCurtain);
+                Bundle bundle1 = new Bundle();
+                bundle1.putSerializable("lightDetail",lightDetail);
+                intent.putExtras(bundle1);
+                setResult(sceneIndex,intent);
+                finish();
                 break;
             case R.id.ll_custom_second_name:
                 initCustomNameDialog();
@@ -182,10 +268,20 @@ public class CustomSceneSecondActivity extends Activity {
                 break;
             case R.id.ll_custom_second_icon:
                 Intent intentToIcon = new Intent(this, CustomSceneSelectIconActivity.class);
+                intentToIcon.putExtra("iconNum",iconNum);
                 startActivityForResult(intentToIcon, REQUEST_CODE_ICON);
                 break;
             case R.id.ll_custom_second_light:
                 Intent intentToLight = new Intent(this, CustomSceneLightActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("roomDevMesg",roomDevMesg);
+                bundle.putSerializable("detailCustomScene",detailCustomScene);
+                intentToLight.putExtras(bundle);
+                intentToLight.putExtra("roomDBName",roomDBName);
+                intentToLight.putExtra("token",token);
+                intentToLight.putExtra("uname",uname);
+                intentToLight.putExtra("pwd",pwd);
+                intentToLight.putExtra("protocol",protocol);
                 startActivityForResult(intentToLight, REQUEST_CODE_LIGHT);
                 break;
             case R.id.ll_custom_second_music:
@@ -208,6 +304,7 @@ public class CustomSceneSecondActivity extends Activity {
         tvCustomNameEnter.setTypeface(typeFace);
         tvCustomNameCancel.setOnClickListener(dialogListener);
         tvCustomNameEnter.setOnClickListener(dialogListener);
+        etCustomName.setText(detailCustomScene.getSceneName());
 
         dialogCustomName.setContentView(viewDialog);
         dialogCustomName.setCanceledOnTouchOutside(false);//点击外部，弹框不消失
@@ -224,14 +321,11 @@ public class CustomSceneSecondActivity extends Activity {
         public void onClick(View v) {
             switch (v.getId()) {
                 case R.id.tv_custom_name_cancel:
-                    Toast.makeText(CustomSceneSecondActivity.this, "取消", Toast.LENGTH_SHORT).show();
                     dialogCustomName.hide();
                     break;
                 case R.id.tv_custom_name_enter:
                     saveName = etCustomName.getText().toString().trim();
-                    //ivCustomName.setText(saveName);
                     tvCustomTitleSecond.setText(saveName);
-                    Toast.makeText(CustomSceneSecondActivity.this, "确定,保存的名字是：" + saveName, Toast.LENGTH_SHORT).show();
                     ivCompileDone1.setVisibility(View.VISIBLE);
                     tvCustomBianji1.setVisibility(View.GONE);
                     dialogCustomName.hide();
@@ -245,17 +339,36 @@ public class CustomSceneSecondActivity extends Activity {
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
             case REQUEST_CODE_LIGHT:
-                Toast.makeText(this, "从light回来", Toast.LENGTH_SHORT).show();
-                ivCompileDone3.setVisibility(View.VISIBLE);
-                tvCustomBianji3.setVisibility(View.GONE);
+                if (data.getBooleanExtra("isSave",false)){
+                    ivCompileDone3.setVisibility(View.VISIBLE);
+                    tvCustomBianji3.setVisibility(View.GONE);
+                    lightDetail = (LightDetail) data.getSerializableExtra("lightDetail");
+
+                }else {
+                    //没保存
+                }
                 break;
             case REQUEST_CODE_ICON:
-                Toast.makeText(this, "从icon回来", Toast.LENGTH_SHORT).show();
-                ivCompileDone2.setVisibility(View.VISIBLE);
-                tvCustomBianji2.setVisibility(View.GONE);
+                if (data.getIntExtra("customIconNum",-1)!=-1){
+                    tvCustomBianji2.setVisibility(View.GONE);
+                    ivCompileDone2.setVisibility(View.VISIBLE);
+                    iconNum = data.getIntExtra("customIconNum",0);
+                }else {
+                    //没有保存
+                }
                 break;
             default:
                 break;
         }
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode==event.KEYCODE_BACK){
+            Intent intent1 = new Intent();
+            setResult(0,intent1);    //回复0，表示不改变自定义场景的信息
+            finish();
+        }
+        return super.onKeyDown(keyCode, event);
     }
 }

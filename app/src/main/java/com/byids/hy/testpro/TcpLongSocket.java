@@ -27,7 +27,7 @@ public class TcpLongSocket {
 	private ConnectThread connThread;//连接线程
 	private boolean threadBoo = true;
 	private TCPLongSocketCallback callBack;// 回调接口
-	private byte[] buffer = new byte[1024 * 100];// 缓冲区字节数组，信息不能大于此缓冲区
+	private byte[] buffer = new byte[1024*100];// 缓冲区字节数组，信息不能大于此缓冲区
 	private byte[] tmpBuffer;// 临时缓冲字节数组
 	private static List<byte[]> datas = new ArrayList<byte[]>();// 待发送数据队列
 	private TcpLongSocket tcplongSocket;
@@ -86,7 +86,7 @@ public class TcpLongSocket {
 	}
 
 	public void writeDate(byte[] data) {
-		Log.i("hy_result", "writeDate: "+byteStringLog(data));
+		//Log.i("hy_result", "writeDate: "+byteStringLog(data));
 		datas.add(data);      // 将发送数据添加到发送队列
 	}
 
@@ -206,31 +206,82 @@ public class TcpLongSocket {
 					try {
 						int flag = 1;
 						buffer = new byte[1024*100];
+						byte[] laTer = new byte[0];
 						while ((len = in.read(buffer)) > 0) {
-							//sleep(10);
 							Log.i(TAG, "run: ---------len------------"+len);
 							tmpBuffer = new byte[len];
 							System.arraycopy(buffer, 0, tmpBuffer, 0, len);
-							//String recData = new String(tmpBuffer);   //接受的数据
+							String recData = new String(tmpBuffer);   //接受的数据
+							Log.i("result", "-------这是第"+flag+"段加密数据------数据String长度--"+recData.length()+"-------数据:"+recData);
+							//Log.i("result", "run: ！！！！！tmpBuffer"+byteStringLog(tmpBuffer));
+							// 返回第一次出现的指定子字符串在此字符串中的索引。
+							int a = recData.indexOf("nihaonihaonihaon");
+							Log.e(TAG, "run: nihao在字符串中的位置："+a);
+							/*if (a!=-1){
+								int i = 0;
+								byte aa = 13;
+								byte bb = 10;
+								boolean findingTile = true;
+								int recIndex = 1;
 
-							Log.i("result", "-------这是第"+flag+"段加密数据--------"+new String(tmpBuffer));
-							if("Hello client".equals(new String(tmpBuffer))){
-								Log.i("result", "--------心跳-------");
-							}else {
-								Log.i(TAG, "run: -------------------"+new String(tmpBuffer));
-								//Log.i(TAG, "run: ！！！！！tmpBuffer"+byteStringLog(tmpBuffer));
-								allTmpBuffer = spliceBytes(allTmpBuffer,tmpBuffer);
-								if (len<1024*100){
-									buffer = new byte[]{};
-									Log.i(TAG, "run: @@@@@@@@@@@@@@len小于1024了@@@@@@@@@@@@@@@");
+								while (findingTile){
+									if (tmpBuffer[i]==aa&&tmpBuffer[i+1]==bb&&tmpBuffer[i+2]==aa&&tmpBuffer[i+3]==bb){
+										findingTile = false;
+										Log.e(TAG, "run: i="+i+"----------buff长度"+tmpBuffer.length );
+										if (i+4 != tmpBuffer.length){
+											Log.i(TAG, "run: ----------有问题的读取-----------");
+											//取前一段加密信息
+											byte[] front = new byte[i+4];
+											byte[] later = new byte[tmpBuffer.length-i-4];
+											System.arraycopy(tmpBuffer, 0, front, 0, i+4);  //取混杂加密数据中完整的前面部分
+											System.arraycopy(tmpBuffer,i+4,later,0,tmpBuffer.length-i-4);     //取剩余的部分
+											if (recIndex==1){
+												tmpBuffer = new byte[i+4];
+												tmpBuffer = front;
+												laTer = new byte[tmpBuffer.length-i-4];
+												laTer = later;
+											}else {
+												tmpBuffer = new byte[laTer.length+front.length];
+												System.arraycopy(laTer, 0, tmpBuffer, 0, laTer.length);
+												System.arraycopy(front, 0, tmpBuffer, laTer.length, front.length);
+											}
+											recIndex++;
+										}else {
+											Log.i(TAG, "run: ----------正常的读取-----------");
+											recIndex = 1;
+										}
+									}else {
+										Log.e(TAG, "run: 中间的信息");
+										byteStringLog(tmpBuffer);
+									}
+									i++;
 								}
-							}
-							flag++;
+							}*/
+
+							//if (a==-1){       //加密字段没有一次读取完全
+								if("Hello client".equals(recData)){
+									Log.i("result", "--------心跳-------");
+								}else {
+									//Log.i(TAG, "run: -------------------"+new String(tmpBuffer));
+									//Log.i(TAG, "run: ！！！！！tmpBuffer"+byteStringLog(tmpBuffer));
+									allTmpBuffer = spliceBytes(allTmpBuffer,tmpBuffer);
+									Log.e(TAG, "run: tmpBuffer。length："+tmpBuffer.length );
+									if (tmpBuffer.length<1024*100){
+										buffer = new byte[]{};
+										//Log.i(TAG, "run: @@@@@@@@@@@@@@len小于1024了@@@@@@@@@@@@@@@");
+									}
+								}
+								flag++;
+							/*}else {
+
+							}*/
+
+
 						}
 						//拼接tmpBuffer
 						if (allTmpBuffer==null){
 							Log.i(TAG, "run: --------接收到的allTmpBuffer为空---------");
-							//return;
+							return;
 						}else {
 							//Log.i(TAG, "run: 跳出循环？？？？？？？？？？？？拼接后的byte[]:"+byteStringLog(allTmpBuffer));
 						 	/*String strRoomInfo = testDecryptByte(allTmpBuffer);
@@ -240,8 +291,8 @@ public class TcpLongSocket {
 							}
 							allTmpBuffer = null;
 						}
-						sleep(500);
-						Log.i(TAG, "run: ----------循环读取数据--------");
+						sleep(1000);
+						//Log.i(TAG, "run: ----------循环读取数据----911680226----");
 					} catch (IOException e) {
 						e.printStackTrace();
 						try {

@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -18,6 +19,7 @@ public class BaseActivity extends Activity{
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        this.setVolumeControlStream(AudioManager.STREAM_MUSIC); //让音量键固定为媒体音量控制
         super.onCreate(savedInstanceState);
         //动态注册广播
         myBaseActivityBroadcast = new MyBaseActivityBroadcast();
@@ -44,4 +46,5 @@ public class BaseActivity extends Activity{
             }
         }
     }
+
 }

@@ -18,6 +18,7 @@ import com.byids.hy.testpro.R;
 import com.byids.hy.testpro.TCPLongSocketCallback;
 import com.byids.hy.testpro.TcpLongSocket;
 import com.byids.hy.testpro.newBean.AllJsonData;
+import com.byids.hy.testpro.newBean.CommandData;
 import com.byids.hy.testpro.service.UDPBroadcastService;
 import com.byids.hy.testpro.utils.AES;
 import com.byids.hy.testpro.utils.CommandJsonUtils;
@@ -78,48 +79,45 @@ public class LaunchActivity extends BaseActivity{
     private String phoneIP;
     private AllJsonData allJsonData;
 
+    private boolean stopRec = false;
+
     //外网登陆
     private Handler handler = new Handler(){
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             switch (msg.what){
-                /*case 1:
-                    //Log.i("result", "handleMessage:ggggggggggggggggggggggggggggggg "+msg.obj);
-                    //Log.i("result", "secondLogin: -----------------------------------"+userName+"------------"+password+"------------"+ip);
-                    Intent intent = new Intent(LaunchActivity.this, MyMainActivity.class);
-                    intent.putExtra("roomNameList",roomNameList);
-                    intent.putExtra("roomDBNameList",roomDBNameList);
-                    intent.putExtra("roomAttr",roomAttr);
-                    intent.putExtra("hid",hid);
-                    intent.putExtra("uname",userName);
-                    intent.putExtra("pwd",password);
-                    intent.putExtra("ip",ip);
-                    Bundle bundle = new Bundle();
-                    bundle.putSerializable("homeAttr",homeAttrBean);
-                    intent.putExtras(bundle);
-                    startActivity(intent);
-                    finish();        //结束此activity，下一个activity返回时，直接退出
-                    break;*/
                 case 1:            //内网登录获取房间信息后跳转
                     String strRoomInf = (String) msg.obj;
                     LongLogCatUtil.logE("result","launchActivity解密后的房间信息："+strRoomInf);     //多行打印logcat
                     //解析数据后跳转（测试，直接加载假数据跳转，以后删除）
-
+                    Log.e(TAG, "handleMessage: 11111111111111111111111111111111111111111111111111111" );
 
                     if (strRoomInf!=null && "Verify error".equals(judgeVerify(strRoomInf))){
                         Toast.makeText(LaunchActivity.this, "内网验证没通过,尝试通过外网登录", Toast.LENGTH_SHORT).show();
                         Log.i("result", "handleMessage: 内网验证没通过,尝试通过外网登录");
+                        Log.e(TAG, "handleMessage: 2222222222222222222222222222222222222222222222222" );
+                        tcplongSocket.close();
+                        stopRec = true;
                         secondLoginWAN();      //内网找不到主机，外网登陆
                     }else if (strRoomInf!=null && judgeRoomJson(strRoomInf)!=null){
                         //解析房间信息
                         String roomJson = strRoomInf.substring(0,strRoomInf.length()-16);
                         LongLogCatUtil.logE("result","房间json："+roomJson);
                         NewJsonParseUtils newJsonParseUtils = new NewJsonParseUtils(roomJson);
-                        allJsonData = newJsonParseUtils.newJsonParse();
+                        try {
+                            allJsonData = newJsonParseUtils.newJsonParseLAN();
+                        }catch (Exception e){
+                            Log.e(TAG, "handleMessage: Gson出错："+e.toString());
+                            tcplongSocket.close();
+                            stopRec = true;
+                            secondLoginWAN();      //内网找不到主机，外网登陆
+                        }
                         Log.e(TAG, "handleMessage: allJsonData对象等于："+allJsonData);
-
+                        Log.e(TAG, "handleMessage: 4444444444444444444444444444444444444444444444444" );
                         if (strRoomInf.length()>200){           //获取房间信息
+                            stopRec = true;
+                            Log.e(TAG, "handleMessage: 555555555555555555555555555555555555555555555" );
                             tcplongSocket.close();
                             Intent intentByLAN = new Intent(LaunchActivity.this,MyMainActivity.class);
                             Log.i("putExtra_hy", "secondLoginLANlaunch:"+userName+"---"+password+"---"+ip+"---"+saveToken);
@@ -129,14 +127,17 @@ public class LaunchActivity extends BaseActivity{
                             intentByLAN.putExtra("isFirstLogin",false);
                             intentByLAN.putExtra("token",saveToken);
                             Bundle bundle = new Bundle();
-                            bundle.putSerializable("allJsonData",allJsonData);
+                            bundle.putSerializable("commandData",allJsonData.getCommandData());
                             intentByLAN.putExtras(bundle);
                             startActivity(intentByLAN);
                             finish();
                         }
                     }else if (strRoomInf==null){
+                        tcplongSocket.close();
+                        stopRec = true;
                         Toast.makeText(LaunchActivity.this, "内网验证没通过,尝试通过外网登录", Toast.LENGTH_SHORT).show();
                         Log.i("result", "handleMessage: launchActivity内网验证没通过,尝试通过外网登录");
+                        Log.e(TAG, "handleMessage: 33333333333333333333333333333333333333333333333333333" );
                         secondLoginWAN();
                         break;
                     }
@@ -152,16 +153,18 @@ public class LaunchActivity extends BaseActivity{
                     VibratorUtil.Vibrate(LaunchActivity.this, 100);
                     allJson = (String) msg.obj;
                     NewJsonParseUtils newJsonParseUtils = new NewJsonParseUtils(allJson);    //Gson解析房间数据
-                    allJsonData = newJsonParseUtils.newJsonParse();
+                    CommandData commandData = newJsonParseUtils.newJsonParseWAN();
 
+                    Log.i("byid_hy_intent", "从LaunchActivity传入给MyMainActivity的值：userName："+
+                            userName+"---password："+password+"---ip："+ip+"---token："+token+"----commandData:"
+                            +commandData+"------isFirstLogin:"+false+"-----isByWANLogin:"+true+"------");
                     //解析数据后跳转
                     Intent intentByWAN = new Intent(LaunchActivity.this,MyMainActivity.class);
-                    Log.i("putExtra_hy", "secondLoginLAN:"+userName+"---"+password+"---"+ip+"---"+token);
                     intentByWAN.putExtra("uname",userName);
                     intentByWAN.putExtra("pwd",password);
                     intentByWAN.putExtra("token",token);
                     Bundle bundle = new Bundle();
-                    bundle.putSerializable("allJsonData",allJsonData);
+                    bundle.putSerializable("commandData",commandData);
                     intentByWAN.putExtras(bundle);
                     intentByWAN.putExtra("isByWANLogin",true);
                     intentByWAN.putExtra("isFirstLogin",false);
@@ -365,7 +368,7 @@ public class LaunchActivity extends BaseActivity{
             /*
             * ***********************从主机获取了房间信息**********************用Gson处理******跳转
             * */
-            if (buffer.length>12){
+            if (buffer.length>12 && !stopRec){
                 message = new Message();
                 message.what = 1;
                 message.obj = testDecryptByte(buffer);
@@ -470,15 +473,16 @@ public class LaunchActivity extends BaseActivity{
 
     //向服务器post token，获取房间信息
     private void postToken(final String token){
-        final String token1 = "00000000000000000000000000000000"; //暂时用
+        //final String token1 = "00000000000000000000000000000000"; //暂时用
         //final String url = "http://192.168.10.230:20000/api/homeserver/profile";
         final String url = "http://115.29.97.189:20000/api/homeserver/profile";
+        Log.e(TAG, "launchActivity_postToken: "+token);
         new Thread(){
             @Override
             public void run() {
                 super.run();
                 OkHttpClient client = new OkHttpClient();
-                okhttp3.Request request = new okhttp3.Request.Builder().url(url).addHeader("content-type", "application/json").addHeader("token",token1).build();
+                okhttp3.Request request = new okhttp3.Request.Builder().url(url).addHeader("content-type", "application/json").addHeader("token",token).build();
                 client.newCall(request).enqueue(new Callback() {
                     @Override
                     public void onFailure(Call call, IOException e) {

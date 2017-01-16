@@ -31,7 +31,7 @@ import android.widget.Toast;
 
 import com.byids.hy.testpro.R;
 import com.byids.hy.testpro.View.LoginHScrollView;
-import com.byids.hy.testpro.newBean.AllJsonData;
+import com.byids.hy.testpro.newBean.CommandData;
 import com.byids.hy.testpro.newBean.Rooms;
 import com.byids.hy.testpro.service.UDPBroadcastService;
 import com.byids.hy.testpro.utils.LongLogCatUtil;
@@ -116,7 +116,7 @@ public class NewLoginActivity extends BaseActivity{
     private String ip;    //接收到的ip地址
 
     private String allJson;     //解析出的json
-    private AllJsonData allJsonData;
+    private CommandData commandData;
     private boolean isConnect;       //网络是否可用
     private boolean isMobileState;      //是否为数据流量状态（外网）
     private String token;
@@ -128,7 +128,6 @@ public class NewLoginActivity extends BaseActivity{
             switch (msg.what){
                 case 1:
                     runningTimeDialog.runningTimeProgressDialog(NewLoginActivity.this);
-                    //runningTimeDialog.runningTimeProgressDialog1(NewLoginActivity.this);
                     break;
                 case 2:       //获取token
                     String token1 = (String) msg.obj;
@@ -138,12 +137,14 @@ public class NewLoginActivity extends BaseActivity{
                     allJson = (String) msg.obj;
                     LongLogCatUtil.logE("hongyang","外网登陆获取："+allJson);
                     NewJsonParseUtils newJsonParseUtils = new NewJsonParseUtils(allJson);
-                    allJsonData = newJsonParseUtils.newJsonParse();
+                    commandData = newJsonParseUtils.newJsonParseWAN();
                     runningTimeDialog.progressDialog.dismiss();     //转圈圈消失
                     //跳转
-                    Log.i("putExtra_hy", "secondLoginLAN:"+userName+"---"+password+"---"+ip+"---"+token);
+                    Log.i("byid_hy_intent", "从NewLoginActivity传入给MyMainActivity的值：userName："+
+                            userName+"---password："+password+"---ip："+ip+"---token："+token+"----commandData:"
+                            +commandData+"------isFirstLogin:"+true+"-----isByWANLogin:"+true+"------");
                     Bundle bundle = new Bundle();
-                    bundle.putSerializable("allJsonData",allJsonData);
+                    bundle.putSerializable("commandData",commandData);
                     intentLogin.putExtras(bundle);
                     intentLogin.putExtra("isFirstLogin",true);
                     intentLogin.putExtra("isByWANLogin",true);
@@ -152,6 +153,11 @@ public class NewLoginActivity extends BaseActivity{
                     intentLogin.putExtra("host_ip",ip);
                     startActivity(intentLogin);
                     finish();        //结束此activity，下一个activity返回时，直接退出
+                    break;
+                case 4:
+                    String errorMsg  = (String) msg.obj;
+                    Toast.makeText(NewLoginActivity.this, "服务器请求失败："+errorMsg, Toast.LENGTH_LONG).show();
+                    runningTimeDialog.progressDialog.dismiss();
                     break;
                 default:
                     break;
@@ -501,7 +507,6 @@ public class NewLoginActivity extends BaseActivity{
             return;
         }else {         //外网请求
             loginPost();    //新版
-            //postAndInitData();   //旧版，日后删除
         }
     }
 
@@ -510,10 +515,7 @@ public class NewLoginActivity extends BaseActivity{
         SharedPreferences sp = getSharedPreferences("user_inform",MODE_PRIVATE);        //文件名，文件类型
         sp.edit().putString("userName",userName).putString("password",password).commit();
     }
-    /*private void saveHomeJson(String homeJson){
-        SharedPreferences sp = getSharedPreferences("homeJson",MODE_PRIVATE);        //文件名，文件类型
-        sp.edit().putString("homeJson",homeJson).commit();
-    }*/
+
 
     //套包返回的json数据
     private void loginPost(){
@@ -532,7 +534,10 @@ public class NewLoginActivity extends BaseActivity{
                     @Override
                     public void onFailure(Call call, IOException e) {
                         Log.i(TAG, "onFailure: -----------请求失败------------："+e.toString());
-
+                        Message message = new Message();
+                        message.what = 4;
+                        message.obj = e.toString();
+                        handler.sendMessage(message);
                     }
 
                     @Override
@@ -564,15 +569,16 @@ public class NewLoginActivity extends BaseActivity{
 
     //向服务器post token
     private void postToken(final String token){
-        final String token1 = "00000000000000000000000000000000"; //暂时用
+        //final String token1 = "00000000000000000000000000000000"; //暂时用
         final String url = "http://115.29.97.189:20000/api/homeserver/profile";
         //final String url = "http://192.168.10.230:20000/api/homeserver/profile";
+        Log.e(TAG, "NewLoginActivity_postToken: "+token);
         new Thread(){
             @Override
             public void run() {
                 super.run();
                 OkHttpClient client = new OkHttpClient();
-                okhttp3.Request request = new okhttp3.Request.Builder().url(url).addHeader("content-type", "application/json").addHeader("token",token1).build();
+                okhttp3.Request request = new okhttp3.Request.Builder().url(url).addHeader("content-type", "application/json").addHeader("token",token).build();
                 client.newCall(request).enqueue(new Callback() {
                     @Override
                     public void onFailure(Call call, IOException e) {

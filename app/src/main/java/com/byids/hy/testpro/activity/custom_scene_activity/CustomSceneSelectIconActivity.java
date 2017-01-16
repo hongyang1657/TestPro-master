@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -57,6 +58,8 @@ public class CustomSceneSelectIconActivity extends Activity {
     @BindView(R.id.gv_select_icon)
     CustomIconGridView gvSelectIcon;
 
+    private int iconNum;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,8 +74,9 @@ public class CustomSceneSelectIconActivity extends Activity {
         typeFace = Typeface.createFromAsset(getAssets(), "fonts/xiyuanti.ttf");
         tvCustomIconTitle.setTypeface(typeFace);
         tvCustomSelecterIconSave.setTypeface(typeFace);
+        iconNum = getIntent().getIntExtra("iconNum",0);
 
-        adapter = new CustomIconBaseAdapter(this, iconResList,iconResListSelect);
+        adapter = new CustomIconBaseAdapter(this,iconResList,iconResListSelect);
         gvSelectIcon.setAdapter(adapter);
         gvSelectIcon.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -82,6 +86,7 @@ public class CustomSceneSelectIconActivity extends Activity {
             }
         });
 
+        adapter.changeIconColor(iconNum);
     }
 
     @OnClick({R.id.iv_custom_icon_back, R.id.tv_custom_selecter_icon_save})
@@ -89,7 +94,7 @@ public class CustomSceneSelectIconActivity extends Activity {
         switch (view.getId()) {
             case R.id.iv_custom_icon_back:
                 Intent intent = new Intent();
-                intent.putExtra("customIconNum",0);
+                intent.putExtra("customIconNum",-1);
                 setResult(1,intent);
                 finish();
                 break;
@@ -162,5 +167,16 @@ public class CustomSceneSelectIconActivity extends Activity {
         class Viewholder{
             ImageView ivIcon;
         }
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode==event.KEYCODE_BACK){
+            Intent intent = new Intent();
+            intent.putExtra("customIconNum",-1);
+            setResult(1,intent);
+            finish();
+        }
+        return super.onKeyDown(keyCode, event);
     }
 }

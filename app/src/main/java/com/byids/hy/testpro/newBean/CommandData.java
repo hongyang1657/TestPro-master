@@ -12,6 +12,7 @@ public class CommandData implements Serializable {
     private String address;
     private String telephone;
     private String Package;       //套餐标示
+    private String protocol;
     private HomeProfile profile;
 
     public String getOwer() {
@@ -62,5 +63,11 @@ public class CommandData implements Serializable {
         this.profile = profile;
     }
 
+    public String getProtocol() {
+        return protocol;
+    }
 
+    public void setProtocol(String protocol) {
+        this.protocol = protocol;
+    }
 }
