@@ -1,6 +1,5 @@
 package com.byids.hy.testpro.activity.custom_scene_activity;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
@@ -17,13 +16,13 @@ import android.widget.TextView;
 import com.byids.hy.testpro.MyEventBus;
 import com.byids.hy.testpro.MyEventBusCustom;
 import com.byids.hy.testpro.R;
+import com.byids.hy.testpro.activity.BaseActivity;
 import com.byids.hy.testpro.customSceneBean.AllCustomScene;
 import com.byids.hy.testpro.customSceneBean.DetailCustomScene;
 import com.byids.hy.testpro.customSceneBean.LightDetail;
 import com.byids.hy.testpro.customSceneBean.RoomCustomScene;
 import com.byids.hy.testpro.newBean.RoomDevMesg;
 import com.byids.hy.testpro.utils.CommandJsonUtils;
-import com.byids.hy.testpro.utils.LongLogCatUtil;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -42,7 +41,7 @@ import butterknife.OnClick;
  * Created by gqgz2 on 2016/12/14.
  */
 
-public class CustomSceneMainActivity extends Activity {
+public class CustomSceneMainActivity extends BaseActivity {
 
     private Typeface typeFace;
     private Intent intentToSecond;
@@ -155,7 +154,7 @@ public class CustomSceneMainActivity extends Activity {
         SharedPreferences sp = getSharedPreferences("customSceneJson",MODE_PRIVATE);
         String json = sp.getString("json","");
         //生成json看看
-        LongLogCatUtil.logE("bean_hy", "initView:json: "+json);
+        //LongLogCatUtil.logE("bean_hy", "initView:json: "+json);
         GsonBuilder builder = new GsonBuilder();
         Gson gson = builder.create();
         AllCustomScene allCustomScene = gson.fromJson(json,AllCustomScene.class);

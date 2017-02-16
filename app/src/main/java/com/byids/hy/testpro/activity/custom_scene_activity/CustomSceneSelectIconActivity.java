@@ -1,6 +1,5 @@
 package com.byids.hy.testpro.activity.custom_scene_activity;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
@@ -19,6 +18,7 @@ import android.widget.TextView;
 
 import com.byids.hy.testpro.R;
 import com.byids.hy.testpro.View.CustomIconGridView;
+import com.byids.hy.testpro.activity.BaseActivity;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -28,7 +28,7 @@ import butterknife.OnClick;
  * Created by gqgz2 on 2016/12/16.
  */
 
-public class CustomSceneSelectIconActivity extends Activity {
+public class CustomSceneSelectIconActivity extends BaseActivity {
 
     private CustomIconBaseAdapter adapter;
     private int iconPosition = 0;

@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:weightSum="25"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:weightSum="18"
+        android:orientation="horizontal"
+        android:layout_weight="2"
+        android:background="@color/colorTextActive"
+        android:gravity="center_vertical"
+        android:layout_width="match_parent"
+        android:layout_height="0dp">
+
+        <ImageView
+            android:id="@+id/iv_custom_ac_back"
+            android:layout_weight="3"
+            android:clickable="true"
+            android:onClick="customClick"
+            android:src="@mipmap/custom_return_3x"
+            android:layout_gravity="center"
+            android:paddingLeft="-20dp"
+            android:layout_width="0dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/tv_custom_ac_title"
+            android:layout_weight="12"
+            android:text="空调"
+            android:textSize="18sp"
+            android:textColor="@color/colorWhite"
+            android:gravity="center"
+            android:layout_width="0dp"
+            android:layout_height="match_parent" />
+
+        <TextView
+            android:id="@+id/tv_custom_ac_save"
+            android:layout_weight="3"
+            android:text="保存"
+            android:padding="10dp"
+            android:textColor="@color/colorWhite"
+            android:clickable="true"
+            android:onClick="customClick"
+            android:gravity="center"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_weight="23"
+        android:weightSum="2"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="0dp">
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:id="@+id/tv_custom_ac_kaiguan"
+                android:text="开关"
+                android:textSize="18sp"
+                android:gravity="center"
+                android:padding="10dp"
+                android:textColor="@color/colorText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            <Switch
+                android:id="@+id/sw_custom_ac"
+                android:padding="10dp"
+                android:textColor="@color/colorText"
+                android:drawablePadding="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+        <TextView
+            android:background="@color/colorCutOffLine2"
+            android:layout_width="match_parent"
+            android:layout_height="1px" />
+        <RadioGroup
+            android:id="@+id/rg_custom_ac"
+            android:orientation="horizontal"
+            android:weightSum="3"
+            android:background="@drawable/custom_light_rg_shape"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <RadioButton
+                android:id="@+id/rb_custom_ac_auto"
+                android:text="自动"
+                android:textColor="@drawable/custom_light_textcolor_selecter"
+                android:gravity="center"
+                android:button="@null"
+                android:background="@drawable/custom_light_button_selecter_left"
+                android:layout_weight="1"
+                android:layout_margin="1dp"
+                android:padding="4dp"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content" />
+
+            <RadioButton
+                android:id="@+id/rb_custom_ac_hot"
+                android:text="制热"
+                android:textColor="@drawable/custom_light_textcolor_selecter"
+                android:background="@drawable/custom_light_button_selecter_mid"
+                android:gravity="center"
+                android:button="@null"
+                android:layout_weight="1"
+                android:layout_marginTop="1dp"
+                android:layout_marginBottom="1dp"
+                android:padding="4dp"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content" />
+            <RadioButton
+                android:id="@+id/rb_custom_ac_cold"
+                android:text="制冷"
+                android:textColor="@drawable/custom_light_textcolor_selecter"
+                android:background="@drawable/custom_light_button_selecter_right"
+                android:gravity="center"
+                android:button="@null"
+                android:layout_margin="1dp"
+                android:padding="4dp"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content" />
+        </RadioGroup>
+        <TextView
+            android:background="@color/colorCutOffLine2"
+            android:layout_width="match_parent"
+            android:layout_height="1px" />
+        <LinearLayout
+            android:weightSum="3"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="0dp">
+
+            <TextView
+                android:id="@+id/tv_custom_ac_minus"
+                android:text="-"
+                android:textSize="30sp"
+                android:textColor="@color/colorCustomYellow"
+                android:gravity="center"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="match_parent" />
+            <RelativeLayout
+                android:id="@+id/rl_custom_ac_temp"
+                android:textColor="@color/colorWhite"
+                android:background="@drawable/custom_light_rg_shape"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="90dp" >
+
+                <TextView
+                    android:id="@+id/tv_custom_ac_temp"
+                    android:text="16"
+                    android:textSize="30sp"
+                    android:textColor="@color/colorWhite"
+                    android:layout_centerInParent="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+                <TextView
+                    android:id="@+id/tv_custom_ac_temp_du"
+                    android:layout_toRightOf="@id/tv_custom_ac_temp"
+                    android:layout_alignTop="@+id/tv_custom_ac_temp"
+                    android:text="°"
+                    android:textSize="30sp"
+                    android:textColor="@color/colorWhite"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </RelativeLayout>
+            <TextView
+                android:id="@+id/tv_custom_ac_plus"
+                android:text="+"
+                android:textSize="30sp"
+                android:textColor="@color/colorCustomYellow"
+                android:gravity="center"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="match_parent" />
+        </LinearLayout>
+        <TextView
+            android:background="@color/colorCutOffLine2"
+            android:layout_width="match_parent"
+            android:layout_height="1px" />
+    </LinearLayout>
+</LinearLayout>

@@ -1,6 +1,5 @@
 package com.byids.hy.testpro.View;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Rect;
 import android.util.AttributeSet;
@@ -205,7 +204,8 @@ public class MyPullUpScrollView extends ScrollView{
 
 
 
-    @SuppressLint("MissingSuperCall")
+    //---------------------------添加滑动到底部的弹簧效果------------------------------
+    /*@SuppressLint("MissingSuperCall")
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();          //
@@ -213,7 +213,7 @@ public class MyPullUpScrollView extends ScrollView{
             inner = getChildAt(0);
             contentView = getChildAt(0);         //
         }
-    }
+    }*/
 
     //
     @Override
@@ -233,7 +233,7 @@ public class MyPullUpScrollView extends ScrollView{
     //添加滑动阻尼   velocityY/3
     @Override
     public void fling(int velocityY) {
-        super.fling(velocityY/2);
+        super.fling(velocityY*4/5);
     }
 
     @Override

@@ -39,11 +39,13 @@ import android.widget.Toast;
 
 import com.byids.hy.testpro.MyEventBus;
 import com.byids.hy.testpro.MyEventBus2;
+import com.byids.hy.testpro.MyEventBusControlLight;
 import com.byids.hy.testpro.PullDownMenuListener;
 import com.byids.hy.testpro.R;
 import com.byids.hy.testpro.TCPLongSocketCallback;
 import com.byids.hy.testpro.TcpLongSocket;
 import com.byids.hy.testpro.View.MyCustomViewPager;
+import com.byids.hy.testpro.View.MyEventBusPullMenu;
 import com.byids.hy.testpro.adapter.ControlLightBaseAdapter;
 import com.byids.hy.testpro.adapter.MyFragmentAdapter;
 import com.byids.hy.testpro.adapter.RoomNameBaseAdapter;
@@ -54,10 +56,12 @@ import com.byids.hy.testpro.service.TcpConnectService;
 import com.byids.hy.testpro.service.UDPBroadcastService;
 import com.byids.hy.testpro.utils.AES;
 import com.byids.hy.testpro.utils.CommandJsonUtils;
+import com.byids.hy.testpro.utils.CustomCroutonUtil;
 import com.byids.hy.testpro.utils.Encrypt;
 import com.byids.hy.testpro.utils.LongLogCatUtil;
 import com.byids.hy.testpro.utils.NetworkStateUtil;
 import com.byids.hy.testpro.utils.VibratorUtil;
+import com.byids.hy.testpro.utils.crouton.Crouton;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -77,6 +81,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
+import static android.animation.ObjectAnimator.ofFloat;
 import static java.lang.Integer.parseInt;
 
 /**
@@ -111,6 +116,17 @@ public class MyMainActivity extends FragmentActivity {
     private RelativeLayout rlMedia;
     private RelativeLayout rlMain;  //主界面
     private ImageView ivBlackFront;    //黑色的遮罩
+    private ImageView ivMusic;
+    private ImageView ivSleepMoon;
+    private ImageView ivSleepStars;
+    private TextView tvMainBlank1;
+    private TextView tvButtonComeHome;
+    private TextView tvButtonGoOut;
+    private TextView tvHouseOwnerName;
+    private TextView tvHouseTimeLeft;
+    private TextView tvHouseTimeRight;
+    private TextView tvHouseTemp;
+
 
     //二级页面dialog
     private Dialog dialogSwitchRoom;
@@ -125,7 +141,9 @@ public class MyMainActivity extends FragmentActivity {
 
 
     //背景图片
-    private int[] ivBackList = { R.mipmap.back_13,R.mipmap.back_10, R.mipmap.back_5,R.mipmap.back_6,R.mipmap.back_2, R.mipmap.back_14, R.mipmap.back_8, R.mipmap.back_9,R.mipmap.back_12,  R.mipmap.back_1, R.mipmap.back_3, R.mipmap.back_4};
+    private int[] ivBackList = { R.mipmap.back_1,R.mipmap.back_2, R.mipmap.back_3,R.mipmap.back_4,
+            R.mipmap.back_5, R.mipmap.back_6, R.mipmap.back_7, R.mipmap.back_8,R.mipmap.back_9,
+            R.mipmap.back_10};
 
 
     //房间名数组kk
@@ -165,6 +183,8 @@ public class MyMainActivity extends FragmentActivity {
     private AppConnection appConnection;
     private AppConnectionWAN appConnectionWAN;
 
+    private CustomCroutonUtil customCroutonUtil;
+    private boolean isConnectBreak = false;
 
     private Handler handler = new Handler(){
         @Override
@@ -175,20 +195,32 @@ public class MyMainActivity extends FragmentActivity {
                     Log.i("hongyang", "run:外网连接状态 "+tcpLongSocketWAN.getConnectStatus());
                     if (tcpLongSocketWAN.getConnectStatus()){
                         EventBus.getDefault().post(new MyEventBus2("12"));     //外网连接
-                        Toast.makeText(MyMainActivity.this, "连接上外网...", Toast.LENGTH_SHORT).show();
+                        if (isConnectBreak){
+                            customCroutonUtil.makeTopToast("连接上外网",1000);
+                            isConnectBreak = false;
+                        }
                     }else {
                         EventBus.getDefault().post(new MyEventBus2("22"));
-                        Toast.makeText(MyMainActivity.this, "连接断开...", Toast.LENGTH_SHORT).show();
+                        if (!isConnectBreak){
+                            customCroutonUtil.makeTopToast("连接断开",1000);
+                            isConnectBreak = true;
+                        }
                     }
                     break;
                 case 2:         //内网
                     Log.i("hongyang", "run:内网连接状态 "+tcplongSocket.getConnectStatus());
                     if (tcplongSocket.getConnectStatus()){
-                        Toast.makeText(MyMainActivity.this, "连接上内网...", Toast.LENGTH_SHORT).show();
                         EventBus.getDefault().post(new MyEventBus2("11"));    //内网连接
+                        if (isConnectBreak){
+                            customCroutonUtil.makeTopToast("连接上内网",1000);
+                            isConnectBreak = false;
+                        }
                     }else {
-                        Toast.makeText(MyMainActivity.this, "连接断开...", Toast.LENGTH_SHORT).show();
                         EventBus.getDefault().post(new MyEventBus2("22"));
+                        if (!isConnectBreak){
+                            customCroutonUtil.makeTopToast("连接断开",1000);
+                            isConnectBreak = true;
+                        }
                     }
                     //appConnection.start();       //开启后台断线重连线程
                     break;
@@ -197,6 +229,26 @@ public class MyMainActivity extends FragmentActivity {
                     break;
                 case 4:
                     Toast.makeText(MyMainActivity.this, "Token无效", Toast.LENGTH_LONG).show();
+                    break;
+                default:
+                    break;
+            }
+        }
+    };
+
+    private Handler handlerUI = new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what){
+                case 1:
+                    /*ObjectAnimator.ofFloat(rlMusic,"alpha",0f,1f).setDuration(200).start();
+                    ObjectAnimator.ofFloat(rlMedia,"alpha",0f,1f).setDuration(200).start();*/
+                    rlMusic.setVisibility(View.VISIBLE);
+                    rlMedia.setVisibility(View.VISIBLE);
+                    break;
+                case 2:
+                    setButtonsAnimationAppear();          //设置主界面信息控件的出现动画
                     break;
                 default:
                     break;
@@ -335,14 +387,86 @@ public class MyMainActivity extends FragmentActivity {
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        Log.i("activity_cycle", "onStart: onStartonStart");
+    }
+    
+    @Override
     protected void onResume() {
         super.onResume();
+        Log.i("activity_cycle", "onResume: onResumeonResume"+appConnection.isAlive());
+        Crouton.cancelAllCroutons();
+        /*isOnMainActivity = true;
+        if (!appConnectionWAN.isAlive()){
+            Log.i(TAG, "onResume: -=-isInterrupted????????????????????????");
+            appConnectionWAN = new AppConnectionWAN();
+            appConnectionWAN.start();
+        }
+        if (!appConnection.isAlive()){
+            Log.i(TAG, "onResume: -=-isInterrupted????????????????????????");
+            appConnection = new AppConnection();
+            appConnection.start();
+
+        }
+        if (host_ip==null||host_ip.equals("")||needWANConnect||isByWANLogin){
+            //外网tcp连接
+            tcpLongSocketWAN = new TcpLongSocket(new ConnectTcpWAN());
+            tcpLongSocketWAN.startConnect(ip_WAN,DEFAULT_PORT_WAN);
+        }else {
+            //内网Tcp连接
+            connectTCP = new ConnectTcp();
+            tcplongSocket = new TcpLongSocket(connectTCP);
+            tcplongSocket.startConnect(host_ip, DEFAULT_PORT);
+            Message message = new Message();
+            message.what = 2;
+            handler.sendMessageDelayed(message,300);
+        }*/
     }
+    
+    /*@Override
+    protected void onPause() {
+        super.onPause();
+        Log.i("activity_cycle", "onPause: onPauseonPause");
+        //============================关闭连接socket，中断断线重连的线程==============================
+        appConnection.interrupt();     //中断线程
+        appConnectionWAN.interrupt();
+        isOnMainActivity = false;
+        new Thread(){
+            @Override
+            public void run() {
+                super.run();
+                try {
+                    sleep(11000);
+                    Log.i(TAG, "run:-------------1100000000000000------------ ");
+                    isConnectWAN = false;
+                    isConnectLAN = false;
+                    if (tcpLongSocketWAN!=null){
+                        tcpLongSocketWAN.close();    //关闭外网的连接
+                    }
+                    if (tcplongSocket!=null){
+                        tcplongSocket.close();      //关闭内网连接
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }.start();
+    }*/
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.i("activity_cycle", "onStop: onStoponStop");
+    }
+
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        Log.i("activity_cycle", "onDestroy: onDestroy");
         EventBus.getDefault().unregister(this);  //反注册EventBus
+        Crouton.cancelAllCroutons();
         //connectTcp = false;    //关闭线程
         Log.i(TAG, "onDestroy: ----------------主界面退出--------------onDestroy---------------------------");
         if (dialogExit!=null){
@@ -411,6 +535,7 @@ public class MyMainActivity extends FragmentActivity {
 
     //初始化各个房间fragment的数据
     private void initFragment(){
+
         if (null!=commandData){
             protocol = commandData.getProtocol();
             //Log.e(TAG, "reciveIntent: alljson:"+allJsonData.getCommandUser().getHid());
@@ -422,14 +547,39 @@ public class MyMainActivity extends FragmentActivity {
                 roomDBNameList[i] = commandData.getProfile().getRooms().getArray().get(i).getRoom_db_name();
             }
 
+            int[] randomNum = randomCommon(0,9,roomsIndex);
             //activity给fragment传递数据
             AllCustomScene allCustomScene = new AllCustomScene();
             for (int i = 0; i < roomsIndex; i++) {
-                myFragment1 = new MyFragment(i,commandData, roomNameList[i], roomDBNameList[i], ivBackList, token, uname, pwd, protocol,allCustomScene);         //房间id,房间名数组，房间拼音名数组，背景图片数组，活跃的控件数组,hid,uname,pwd
+                myFragment1 = new MyFragment(i,commandData, roomNameList[i], roomDBNameList[i], ivBackList, token, uname, pwd, protocol,allCustomScene,randomNum[i]);         //房间id,房间名数组，房间拼音名数组，背景图片数组，活跃的控件数组,hid,uname,pwd
                 pullMenu(myFragment1);
                 viewList.add(myFragment1);
             }
         }
+    }
+
+    //取随机数
+    public static int[] randomCommon(int min, int max, int n){
+        if (n > (max - min + 1) || max < min) {
+            return null;
+        }
+        int[] result = new int[n];
+        int count = 0;
+        while(count < n) {
+            int num = (int) (Math.random() * (max - min)) + min;
+            boolean flag = true;
+            for (int j = 0; j < n; j++) {
+                if(num == result[j]){
+                    flag = false;
+                    break;
+                }
+            }
+            if(flag){
+                result[count] = num;
+                count++;
+            }
+        }
+        return result;
     }
 
     //SharedPreferences本地储存用户信息
@@ -440,6 +590,8 @@ public class MyMainActivity extends FragmentActivity {
     }
 
     //----------------------内网通信的Tcp Socket连接--------------------------
+    private boolean isConnectLAN = false;
+    private JSONObject objHeart;  //心跳数据
     private class ConnectTcp implements TCPLongSocketCallback {
 
         @Override
@@ -457,6 +609,28 @@ public class MyMainActivity extends FragmentActivity {
             String checkJson = CommandJsonUtils.getCommandJson(1, checkCommandData, token, uname, pwd, String.valueOf(System.currentTimeMillis()));
             Log.i("result", "check" + checkJson);
             tcplongSocket.writeDate(Encrypt.encrypt(checkJson));
+            //============================发内网心跳数据=========================
+            isConnectLAN = true;
+            try {
+                objHeart = new JSONObject("{\"hehe\":\"Hello Server\"}");
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            new Thread(){
+                @Override
+                public void run() {
+                    super.run();
+                    while (isConnectLAN){
+                        tcplongSocket.writeDate(Encrypt.encrypt(CommandJsonUtils.getCommandJson(100, objHeart, token, uname, pwd, String.valueOf(System.currentTimeMillis()))));
+                        try {
+                            sleep(3000);    //隔三秒发送心跳
+                            Log.i("xintiao", "run: ------------我的内网心跳---------------");
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }.start();
         }
 
         @Override
@@ -466,13 +640,14 @@ public class MyMainActivity extends FragmentActivity {
                 //LongLogCatUtil.logE("result",testDecryptByte(buffer));
                 String verifyStr = judgeVerify(testDecryptByte(buffer));
                 if ("Verify error".equals(verifyStr)){
-                    tcplongSocket.close();    //验证失败，关闭内网连接
+                        tcplongSocket.close();    //验证失败，关闭内网连接
                     //外网Tcp连接
                     tcpLongSocketWAN = new TcpLongSocket(new ConnectTcpWAN());
                     tcpLongSocketWAN.startConnect(ip_WAN,DEFAULT_PORT_WAN);
                 }
             }else {
                 Log.e(TAG, "receive: 收到的数据不是加密数据或数据损坏");
+
             }
 
         }
@@ -480,6 +655,7 @@ public class MyMainActivity extends FragmentActivity {
         @Override
         public void disconnect() {
             tcplongSocket.close();
+            isConnectLAN =  false;
             EventBus.getDefault().post(new MyEventBus2("22"));
         }
 
@@ -669,6 +845,8 @@ public class MyMainActivity extends FragmentActivity {
 
 
     private void initView() {
+        customCroutonUtil = new CustomCroutonUtil(MyMainActivity.this);
+
         appConnection = new AppConnection();
         appConnection.start();
         appConnectionWAN = new AppConnectionWAN();
@@ -700,6 +878,26 @@ public class MyMainActivity extends FragmentActivity {
         rlMain = (RelativeLayout) findViewById(R.id.rl_main);
         rlMusic = (RelativeLayout) findViewById(R.id.rl_music);
         rlMedia = (RelativeLayout) findViewById(R.id.rl_media);
+        ivMusic = (ImageView) findViewById(R.id.iv_music_icon);
+        ivSleepMoon = (ImageView) findViewById(R.id.iv_sleep_moon);
+        ivSleepStars = (ImageView) findViewById(R.id.iv_sleep_stars);
+        tvMainBlank1 = (TextView) findViewById(R.id.tv_main_blank_1);
+        tvButtonComeHome = (TextView) findViewById(R.id.tv_button_come_home);
+        tvButtonGoOut = (TextView) findViewById(R.id.tv_button_go_out);
+        tvHouseOwnerName = (TextView) findViewById(R.id.tv_house_owner_name);
+        tvHouseTimeLeft = (TextView) findViewById(R.id.tv_house_time_left);
+        tvHouseTimeRight = (TextView) findViewById(R.id.tv_house_time_right);
+        tvHouseTemp = (TextView) findViewById(R.id.tv_house_temp);
+
+        tvButtonComeHome.setTypeface(typeFace);
+        tvButtonGoOut.setTypeface(typeFace);
+        tvHouseOwnerName.setTypeface(typeFace);
+        tvHouseTimeLeft.setTypeface(typeFace);
+        tvHouseTimeRight.setTypeface(typeFace);
+        tvHouseTemp.setTypeface(typeFace);
+
+        tvButtonComeHome.setOnClickListener(mediaListener);
+        tvButtonGoOut.setOnClickListener(mediaListener);
         rlMusic.setOnClickListener(mediaListener);
         rlMedia.setOnClickListener(mediaListener);
         int h = (int) ((int) height * 0.03);
@@ -771,18 +969,30 @@ public class MyMainActivity extends FragmentActivity {
     private TextView tvSettingTitle;
     private TextView tvSettingIP;
     private TextView tvSettingExit;
+    private TextView tvSettingClock;
+    private TextView tvSettingHelp;
+    private RelativeLayout rlSheZhi;
     private void initSettingDialog() {
         dialogSetting = new Dialog(this, R.style.CustomDialog);
         viewSetting = LayoutInflater.from(this).inflate(R.layout.secondary_dialog, null);
         tvSettingTitle = (TextView) viewSetting.findViewById(R.id.tv_setting_title);
         tvSettingIP = (TextView) viewSetting.findViewById(R.id.tv_setting_ip);
         tvSettingExit = (TextView) viewSetting.findViewById(R.id.tv_setting_exit);
+        tvSettingClock = (TextView) viewSetting.findViewById(R.id.tv_setting_clock);
+        tvSettingHelp = (TextView) viewSetting.findViewById(R.id.tv_setting_help);
+        rlSheZhi = (RelativeLayout) viewSetting.findViewById(R.id.ll_shezhi_title);
         tvSettingTitle.setTypeface(typeFace);
         tvSettingIP.setTypeface(typeFace);
         tvSettingExit.setTypeface(typeFace);
-        //获取ip地址
-        /*NetworkStateUtil networkStateUtil = new NetworkStateUtil();
-        String phoneIP = networkStateUtil.getPhoneIp();*/
+        tvSettingClock.setTypeface(typeFace);
+        tvSettingHelp.setTypeface(typeFace);
+        rlSheZhi.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialogSetting.dismiss();
+            }
+        });
+
         //设置连上的主机ip
         Log.e(TAG, "initSettingDialog: host_iphost_iphost_iphost_iphost_iphost_iphost_ip："+host_ip);
         if (host_ip==null||host_ip.equals("")){
@@ -796,8 +1006,8 @@ public class MyMainActivity extends FragmentActivity {
         dialogSetting.setOnDismissListener(new DialogInterface.OnDismissListener() {
             @Override
             public void onDismiss(DialogInterface dialog) {   //dialog消失时触发监听
-                ObjectAnimator.ofFloat(rlMain, "scaleX", 0.92f, 1f).setDuration(500).start();
-                ObjectAnimator.ofFloat(rlMain, "scaleY", 0.92f, 1f).setDuration(500).start();
+                ofFloat(rlMain, "scaleX", 0.92f, 1f).setDuration(500).start();
+                ofFloat(rlMain, "scaleY", 0.92f, 1f).setDuration(500).start();
                 //ObjectAnimator.ofFloat(viewSetting,"translationY",0,400).setDuration(500).start();
                 //ObjectAnimator.ofFloat(ivBlackFront, "alpha", 0.7f, 0f).setDuration(500).start();
 
@@ -805,7 +1015,7 @@ public class MyMainActivity extends FragmentActivity {
         });
         WindowManager.LayoutParams params = dialogSetting.getWindow().getAttributes();
         params.width = width;
-        params.height = (int) (height*0.6);   //设置dialog的宽高
+        params.height = height;   //设置dialog的宽高
         Window mWindow = dialogSetting.getWindow();
         mWindow.setGravity(Gravity.BOTTOM);
         mWindow.setAttributes(params);
@@ -813,6 +1023,7 @@ public class MyMainActivity extends FragmentActivity {
 
     //初始化--------------门锁------------------二级界面
     private View viewLock;
+    private RelativeLayout rlDialogTitle;
     private TextView tvLockTitle;
     private TextView tvLockOff;
     private TextView tvLockOn;
@@ -822,17 +1033,24 @@ public class MyMainActivity extends FragmentActivity {
         tvLockTitle = (TextView) viewLock.findViewById(R.id.tv_setting_title);
         tvLockOff = (TextView) viewLock.findViewById(R.id.tv_close_door);
         tvLockOn = (TextView) viewLock.findViewById(R.id.tv_open_door);
+        rlDialogTitle = (RelativeLayout) viewLock.findViewById(R.id.ll_setting_title);
         tvLockTitle.setTypeface(typeFace);
         tvLockOff.setTypeface(typeFace);
         tvLockOn.setTypeface(typeFace);
 
+        rlDialogTitle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialogLock.dismiss();
+            }
+        });
         dialogLock.setContentView(viewLock);
         dialogLock.setCanceledOnTouchOutside(true);//点击外部，弹框消失
         dialogLock.setOnDismissListener(new DialogInterface.OnDismissListener() {
             @Override
             public void onDismiss(DialogInterface dialog) {   //dialog消失时触发监听
-                ObjectAnimator.ofFloat(rlMain, "scaleX", 0.92f, 1f).setDuration(500).start();
-                ObjectAnimator.ofFloat(rlMain, "scaleY", 0.92f, 1f).setDuration(500).start();
+                ofFloat(rlMain, "scaleX", 0.92f, 1f).setDuration(500).start();
+                ofFloat(rlMain, "scaleY", 0.92f, 1f).setDuration(500).start();
                 //ObjectAnimator.ofFloat(viewLock,"translationY",0,400).setDuration(500).start();
                 //ObjectAnimator.ofFloat(ivBlackFront, "alpha", 0.7f, 0f).setDuration(500).start();
 
@@ -840,7 +1058,7 @@ public class MyMainActivity extends FragmentActivity {
         });
         WindowManager.LayoutParams params = dialogLock.getWindow().getAttributes();
         params.width = width;
-        params.height = (int) (height*0.6);   //设置dialog的宽高
+        params.height = height;   //设置dialog的宽高
         Window mWindow = dialogLock.getWindow();
         mWindow.setGravity(Gravity.BOTTOM);
         mWindow.setAttributes(params);
@@ -851,23 +1069,31 @@ public class MyMainActivity extends FragmentActivity {
     private TextView tvSecurityTitle;
     private TextView tvSecurityOff;
     private TextView tvSecurityOn;
+    private RelativeLayout rlAnFang;
     private void initSecurityDialog() {
         dialogSecurity = new Dialog(this, R.style.CustomDialog);
         viewSecurity = LayoutInflater.from(this).inflate(R.layout.security_dialog, null);
         tvSecurityTitle = (TextView) viewSecurity.findViewById(R.id.tv_setting_title);
         tvSecurityOff = (TextView) viewSecurity.findViewById(R.id.tv_security_off);
         tvSecurityOn = (TextView) viewSecurity.findViewById(R.id.tv_security_on);
+        rlAnFang = (RelativeLayout) viewSecurity.findViewById(R.id.ll_anfang_title);
         tvSecurityTitle.setTypeface(typeFace);
         tvSecurityOff.setTypeface(typeFace);
         tvSecurityOn.setTypeface(typeFace);
 
+        rlAnFang.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialogSecurity.dismiss();
+            }
+        });
         dialogSecurity.setContentView(viewSecurity);
         dialogSecurity.setCanceledOnTouchOutside(true);//点击外部，弹框消失
         dialogSecurity.setOnDismissListener(new DialogInterface.OnDismissListener() {
             @Override
             public void onDismiss(DialogInterface dialog) {   //dialog消失时触发监听
-                ObjectAnimator.ofFloat(rlMain, "scaleX", 0.92f, 1f).setDuration(500).start();
-                ObjectAnimator.ofFloat(rlMain, "scaleY", 0.92f, 1f).setDuration(500).start();
+                ofFloat(rlMain, "scaleX", 0.92f, 1f).setDuration(500).start();
+                ofFloat(rlMain, "scaleY", 0.92f, 1f).setDuration(500).start();
                 //ObjectAnimator.ofFloat(viewSecurity,"translationY",0,400).setDuration(500).start();
                 //ObjectAnimator.ofFloat(ivBlackFront, "alpha", 0.7f, 0f).setDuration(500).start();
 
@@ -875,7 +1101,7 @@ public class MyMainActivity extends FragmentActivity {
         });
         WindowManager.LayoutParams params = dialogSecurity.getWindow().getAttributes();
         params.width = width;
-        params.height = (int) (height*0.6);   //设置dialog的宽高
+        params.height = height;   //设置dialog的宽高
         Window mWindow = dialogSecurity.getWindow();
         mWindow.setGravity(Gravity.BOTTOM);
         mWindow.setAttributes(params);
@@ -898,6 +1124,7 @@ public class MyMainActivity extends FragmentActivity {
     private RadioButton rbLightAll2;
     private RadioButton rbLightAll3;
 
+    private boolean isDialogLightShow = false;
     private void initLightDialog(){
         dialogLight = new Dialog(this, R.style.CustomDialog);
         viewLight = LayoutInflater.from(this).inflate(R.layout.light_dialog, null);
@@ -943,13 +1170,15 @@ public class MyMainActivity extends FragmentActivity {
         dialogLight.setOnDismissListener(new DialogInterface.OnDismissListener() {      //dialog消失事件监听
             @Override
             public void onDismiss(DialogInterface dialog) {   //dialog消失时触发监听
-                ObjectAnimator.ofFloat(rlMain, "scaleX", 0.92f, 1f).setDuration(500).start();
-                ObjectAnimator.ofFloat(rlMain, "scaleY", 0.92f, 1f).setDuration(500).start();
+                ofFloat(rlMain, "scaleX", 0.92f, 1f).setDuration(500).start();
+                ofFloat(rlMain, "scaleY", 0.92f, 1f).setDuration(500).start();
                 //消失后按钮全部设为不选中
                 rbLightAllClose.setChecked(false);
                 rbLightAll1.setChecked(false);
                 rbLightAll2.setChecked(false);
                 rbLightAll3.setChecked(false);
+                isDialogLightShow = false;
+                lightValue = new int[]{-1,-1,-1,-1,-1,-1};
             }
         });
         WindowManager.LayoutParams params = dialogLight.getWindow().getAttributes();
@@ -982,6 +1211,42 @@ public class MyMainActivity extends FragmentActivity {
         }
     }
 
+    private int position;
+    private int value;
+    private int length;
+    private int[] lightValue = new int[]{-1,-1,-1,-1,-1,-1};
+    @Subscribe
+    public void onEventMainThread(MyEventBusControlLight event){
+
+        position = event.getPosition();
+        value = event.getMsg2();
+        //length = event.getLength();
+        Log.i(TAG, "onEventMainThread: lightValueposition:"+position+"---value:"+value);
+        lightValue[position] = value;
+        Log.i(TAG, "onEventMainThread: lightValue:"+lightValue[0]+"##"+lightValue[1]+"##"+lightValue[2]+"##"
+                +lightValue[3]+"##"+lightValue[4]+"##"+lightValue[5]+"##");
+        if ((lightValue[0]==1||lightValue[0]==-1)&&(lightValue[1]==1||lightValue[1]==-1)&&(lightValue[2]==1||lightValue[2]==-1)&&(lightValue[3]==1||lightValue[3]==-1)&&
+                (lightValue[4]==1||lightValue[4]==-1)&&(lightValue[5]==1||lightValue[5]==-1)){
+            Log.i("light_hy", "onEventMainThread: 微弱");
+            rbLightAll1.setChecked(true);
+        }else if ((lightValue[0]==2||lightValue[0]==-1)&&(lightValue[1]==2||lightValue[1]==-1)&&(lightValue[2]==2||lightValue[2]==-1)&&(lightValue[3]==2||lightValue[3]==-1)&&
+                (lightValue[4]==2||lightValue[4]==-1)&&(lightValue[5]==2||lightValue[5]==-1)){
+            Log.i("light_hy", "onEventMainThread: 舒适");
+            rbLightAll2.setChecked(true);
+        }else if ((lightValue[0]==3||lightValue[0]==-1)&&(lightValue[1]==3||lightValue[1]==-1)&&(lightValue[2]==3||lightValue[2]==-1)&&(lightValue[3]==3||lightValue[3]==-1)&&
+                (lightValue[4]==3||lightValue[4]==-1)&&(lightValue[5]==3||lightValue[5]==-1)){
+            Log.i("light_hy", "onEventMainThread: 明亮");
+            rbLightAll3.setChecked(true);
+        }else if ((lightValue[0]==0||lightValue[0]==-1)&&(lightValue[1]==0||lightValue[1]==-1)&&(lightValue[2]==0||lightValue[2]==-1)&&(lightValue[3]==0||lightValue[3]==-1)&&
+                (lightValue[4]==0||lightValue[4]==-1)&&(lightValue[5]==0||lightValue[5]==-1)){
+            Log.i("light_hy", "onEventMainThread: 关闭");
+            rbLightAllClose.setChecked(true);
+        }else {
+            rgLightAll.clearCheck();
+        }
+
+    }
+
     private void controlLight(String controlProtocol, String machineName, String value, String isServerAUTO, String controlSence) {
         JSONObject CommandData = new JSONObject();
         JSONObject controlData = new JSONObject();
@@ -1004,15 +1269,18 @@ public class MyMainActivity extends FragmentActivity {
     //退出程序提示框dialog
     private Dialog dialogExit;
     private View viewExit;
+    private TextView tvExitTip;
     private TextView tvExitContent;
     private TextView tvExit;
     private TextView tvNotExit;
     private void initExitDialog(){
         dialogExit = new Dialog(this, R.style.CustomDialog);
         viewExit = LayoutInflater.from(this).inflate(R.layout.exit_dialog_layout, null);
+        tvExitTip = (TextView) viewExit.findViewById(R.id.tv_exit_tip);
         tvExitContent = (TextView) viewExit.findViewById(R.id.tv_exit_content);
         tvExit = (TextView) viewExit.findViewById(R.id.tv_exit);
         tvNotExit = (TextView) viewExit.findViewById(R.id.tv_not_exit);
+        tvExitTip.setTypeface(typeFace);
         tvExitContent.setTypeface(typeFace);
         tvExit.setTypeface(typeFace);
         tvNotExit.setTypeface(typeFace);
@@ -1064,8 +1332,8 @@ public class MyMainActivity extends FragmentActivity {
         dialogMusic.setOnDismissListener(new DialogInterface.OnDismissListener() {
             @Override
             public void onDismiss(DialogInterface dialog) {   //dialog消失时触发监听
-                ObjectAnimator.ofFloat(rlMain, "scaleX", 0.92f, 1f).setDuration(500).start();
-                ObjectAnimator.ofFloat(rlMain, "scaleY", 0.92f, 1f).setDuration(500).start();
+                ofFloat(rlMain, "scaleX", 0.92f, 1f).setDuration(500).start();
+                ofFloat(rlMain, "scaleY", 0.92f, 1f).setDuration(500).start();
                 //ObjectAnimator.ofFloat(viewSecurity,"translationY",0,400).setDuration(500).start();
                 //ObjectAnimator.ofFloat(ivBlackFront, "alpha", 0.7f, 0f).setDuration(500).start();
 
@@ -1123,35 +1391,40 @@ public class MyMainActivity extends FragmentActivity {
     //---------------------二级页面的点击事件----------------------------
     public void secondaryClick(View view){
         switch (view.getId()){
+            case R.id.tv_setting_clock:
+                setScaleAnimation(tvSettingClock);
+                break;
+            case R.id.tv_setting_help:
+                setScaleAnimation(tvSettingHelp);
+                break;
             case R.id.tv_setting_exit:
-                Toast.makeText(MyMainActivity.this, "退出程序", Toast.LENGTH_SHORT).show();
                 dialogExit.show();
                 setScaleAnimation(tvSettingExit);
                 break;
             case R.id.tv_close_door:
-                Toast.makeText(MyMainActivity.this, "关门", Toast.LENGTH_SHORT).show();
+                customCroutonUtil.makeViewGroupTopToast("关门",1000, rlDialogTitle);
                 setScaleAnimation(tvLockOff);
                 break;
             case R.id.tv_open_door:
-                Toast.makeText(MyMainActivity.this, "开门", Toast.LENGTH_SHORT).show();
+                customCroutonUtil.makeViewGroupTopToast("开门",1000, rlDialogTitle);
                 setScaleAnimation(tvLockOn);
                 break;
             case R.id.tv_security_off:
-                Toast.makeText(MyMainActivity.this, "撤防", Toast.LENGTH_SHORT).show();
+                customCroutonUtil.makeViewGroupTopToast("撤防",1000,rlAnFang);
                 setScaleAnimation(tvSecurityOff);
                 controlSecurity(protocol,"security",0,"all_close");
                 break;
             case R.id.tv_security_on:
-                Toast.makeText(MyMainActivity.this, "布防", Toast.LENGTH_SHORT).show();
+                customCroutonUtil.makeViewGroupTopToast("布防",1000, rlAnFang);
                 setScaleAnimation(tvSecurityOn);
                 controlSecurity(protocol,"security",255,"all_normal");
                 break;
             case R.id.tv_not_exit:
-                Toast.makeText(MyMainActivity.this, "不退出", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(MyMainActivity.this, "不退出", Toast.LENGTH_SHORT).show();
                 dialogExit.hide();
                 break;
             case R.id.tv_exit:
-                Toast.makeText(MyMainActivity.this, "退出该账号", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(MyMainActivity.this, "退出该账号", Toast.LENGTH_SHORT).show();
                 dialogExit.hide();
                 dialogExit.dismiss();
                 dialogSetting.dismiss();
@@ -1168,6 +1441,7 @@ public class MyMainActivity extends FragmentActivity {
                 SharedPreferences spJudgeFirst = getSharedPreferences("judgeFirstSave",MODE_PRIVATE);
                 spJudgeFirst.edit().clear().commit();      //清除自定义场景信息
                 isConnectWAN = false;
+                isConnectLAN = false;
                 if (tcpLongSocketWAN!=null){
                     tcpLongSocketWAN.close();    //关闭外网的连接
                 }
@@ -1302,7 +1576,6 @@ public class MyMainActivity extends FragmentActivity {
     @Subscribe
     public void onEventMainThread(MyEventBus event) {
         String msg = event.getmMsg();
-        //Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
         Log.i(TAG, "onEventMainThread: 接收到的json" + msg);
         //发送tcp Socket
         if (msg.length()>4) {
@@ -1322,13 +1595,13 @@ public class MyMainActivity extends FragmentActivity {
                 case SETTING_DIALOG:     //弹出设置dialog
                     initExitDialog();    //确认是否退出的三级页面
                     //ObjectAnimator.ofFloat(ivBlackFront, "alpha", 0f, 0.7f).setDuration(500).start();
-                    ObjectAnimator.ofFloat(rlMain, "scaleX", 1f, 0.92f).setDuration(500).start();
+                    ofFloat(rlMain, "scaleX", 1f, 0.92f).setDuration(500).start();
                     ObjectAnimator obj = new ObjectAnimator().ofFloat(rlMain, "scaleY", 1f, 0.92f).setDuration(500);
                     obj.addListener(new AnimatorListenerAdapter() {
                         @Override
                         public void onAnimationEnd(Animator animation) {
                             super.onAnimationEnd(animation);
-                            ObjectAnimator.ofFloat(viewSetting,"translationY",(float) (height*0.6),0).setDuration(500).start();
+                            ofFloat(viewSetting,"translationY",height,0).setDuration(500).start();
                             dialogSetting.show();
                         }
                     });
@@ -1336,13 +1609,13 @@ public class MyMainActivity extends FragmentActivity {
                     break;
                 case DOOR_LOCK_DIALOG:       //弹出门锁dialog
                     //ObjectAnimator.ofFloat(ivBlackFront, "alpha", 0f, 0.7f).setDuration(500).start();
-                    ObjectAnimator.ofFloat(rlMain, "scaleX", 1f, 0.92f).setDuration(500).start();
+                    ofFloat(rlMain, "scaleX", 1f, 0.92f).setDuration(500).start();
                     ObjectAnimator obj1 = new ObjectAnimator().ofFloat(rlMain, "scaleY", 1f, 0.92f).setDuration(500);
                     obj1.addListener(new AnimatorListenerAdapter() {
                         @Override
                         public void onAnimationEnd(Animator animation) {
                             super.onAnimationEnd(animation);
-                            ObjectAnimator.ofFloat(viewLock,"translationY",(float) (height*0.6),0).setDuration(500).start();
+                            ofFloat(viewLock,"translationY",height,0).setDuration(500).start();
                             dialogLock.show();
                         }
                     });
@@ -1350,13 +1623,13 @@ public class MyMainActivity extends FragmentActivity {
                     break;
                 case SECURITY_DIALOG:      //弹出安防dialog
                     //ObjectAnimator.ofFloat(ivBlackFront, "alpha", 0f, 0.7f).setDuration(500).start();
-                    ObjectAnimator.ofFloat(rlMain, "scaleX", 1f, 0.92f).setDuration(500).start();
+                    ofFloat(rlMain, "scaleX", 1f, 0.92f).setDuration(500).start();
                     ObjectAnimator obj2 = new ObjectAnimator().ofFloat(rlMain, "scaleY", 1f, 0.92f).setDuration(500);
                     obj2.addListener(new AnimatorListenerAdapter() {
                         @Override
                         public void onAnimationEnd(Animator animation) {
                             super.onAnimationEnd(animation);
-                            ObjectAnimator.ofFloat(viewSecurity,"translationY",(float) (height*0.6),0).setDuration(500).start();
+                            ofFloat(viewSecurity,"translationY",height,0).setDuration(500).start();
                             dialogSecurity.show();
                         }
                     });
@@ -1373,9 +1646,11 @@ public class MyMainActivity extends FragmentActivity {
                     public void onAnimationEnd(Animator animation) {
                         super.onAnimationEnd(animation);
                         dialogLight.show();
+                        isDialogLightShow = true;
                         controlLightBaseAdapter.changeLightLoopValue(10);     //设置按钮的选中
                         setDiffRoomsLight(index);       //设置不同房间灯光回路
-                        ObjectAnimator.ofFloat(viewLight,"translationY",(float) (height*0.8),0).setDuration(500).start();
+                        ObjectAnimator obj = new ObjectAnimator().ofFloat(viewLight,"translationY",(float) (height*0.8),0).setDuration(500);
+                        obj.start();
                     }
                 });
                 obj3.start();
@@ -1405,34 +1680,60 @@ public class MyMainActivity extends FragmentActivity {
     }
 
 
+    private int sleepMode = 0;    //睡眠模式状态
     View.OnClickListener mediaListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
             switch (view.getId()) {
                 case R.id.rl_music:
                     musicOkhttpGet(1,musicRecommendUrl);      //获取推荐歌曲列表
-
-                    Toast.makeText(MyMainActivity.this, "音乐", Toast.LENGTH_SHORT).show();
-                    ObjectAnimator.ofFloat(rlMain, "scaleX", 1f, 0.92f).setDuration(500).start();
+                    //Toast.makeText(MyMainActivity.this, "音乐", Toast.LENGTH_SHORT).show();
+                    ofFloat(rlMain, "scaleX", 1f, 0.92f).setDuration(500).start();
                     ObjectAnimator obj2 = new ObjectAnimator().ofFloat(rlMain, "scaleY", 1f, 0.92f).setDuration(500);
                     obj2.addListener(new AnimatorListenerAdapter() {
                         @Override
                         public void onAnimationEnd(Animator animation) {
                             super.onAnimationEnd(animation);
-                            ObjectAnimator.ofFloat(viewMusic,"translationY",(float) (height*0.8),0).setDuration(500).start();
+                            ofFloat(viewMusic,"translationY",(float) (height*0.8),0).setDuration(500).start();
                             dialogMusic.show();
                         }
                     });
                     obj2.start();
                     break;
                 case R.id.rl_media:
-                    Toast.makeText(MyMainActivity.this, "媒体", Toast.LENGTH_SHORT).show();
+                    if (sleepMode==0){
+                        customCroutonUtil.makeTopToast("开启睡眠模式",1000);
+                        ivSleepStars.setVisibility(View.VISIBLE);
+                        ObjectAnimator.ofFloat(ivSleepMoon,"translationX",0,14).setDuration(600).start();
+                        ObjectAnimator.ofFloat(ivSleepMoon,"translationY",0,14).setDuration(600).start();
+                        ObjectAnimator.ofFloat(ivSleepStars,"alpha",0,1).setDuration(600).start();
+                        sleepMode = 1;
+                    }else if (sleepMode==1){
+                        customCroutonUtil.makeTopToast("关闭睡眠模式",1000);
+                        ObjectAnimator.ofFloat(ivSleepMoon,"translationX",14,0).setDuration(600).start();
+                        ObjectAnimator.ofFloat(ivSleepMoon,"translationY",14,0).setDuration(600).start();
+                        ObjectAnimator obj = new ObjectAnimator().ofFloat(ivSleepStars,"alpha",1,0).setDuration(600);
+                        obj.addListener(new AnimatorListenerAdapter() {
+                            @Override
+                            public void onAnimationEnd(Animator animation) {
+                                super.onAnimationEnd(animation);
+                                ivSleepStars.setVisibility(View.GONE);
+                            }
+                        });
+                        obj.start();
+                        sleepMode = 0;
+                    }
+                    break;
+                case R.id.tv_button_come_home:
+                    break;
+                case R.id.tv_button_go_out:
                     break;
             }
         }
     };
 
 
+    private int pullFalg = 1;;
     private void pullMenu(MyFragment myF) {
         //自定义的下拉监听
         myF.setPullDownMenuListener(new PullDownMenuListener() {
@@ -1443,20 +1744,48 @@ public class MyMainActivity extends FragmentActivity {
                     //隐藏桌面小控件
                     rlMusic.setVisibility(View.GONE);
                     rlMedia.setVisibility(View.GONE);
+                    new Thread(){
+                        @Override
+                        public void run() {
+                            super.run();
+                            Message message = new Message();
+                            message.what = 2;
+                            handlerUI.sendMessage(message);
+                        }
+                    }.start();
                     //设置viewpager不能滑动
                     viewPager.setCanScroll(false);
+                    Log.i("hehehe", "pullDown: ------------顶部-----------");
                 } else if (b == true && isIconShow == true) {     //下拉菜单隐藏时
                     rlMusic.setVisibility(View.VISIBLE);
                     rlMedia.setVisibility(View.VISIBLE);
+                    setButtonsAnimationDisappear();       //设置主界面信息控件的消失动画
                     viewPager.setCanScroll(true);
-                } else if (b == false && isIconShow == true) {
-                    rlMusic.setVisibility(View.VISIBLE);
-                    rlMedia.setVisibility(View.VISIBLE);
-                } else if (b == true && isIconShow == false) {
-                    rlMusic.setVisibility(View.GONE);
-                    rlMedia.setVisibility(View.GONE);
+                    Log.i("hehehe", "pullDown: ------------中部-----------");
+                } else if (b == false && isIconShow == true) {             //回到初始位置
+                    if (pullFalg==2){
+                        /*Message msg = new Message();
+                        msg.what = 1;
+                        handlerUI.sendMessageDelayed(msg,200);*/
+                        Log.i("hehehe", "pullDown: ------------回到中部-----------");
+                        pullFalg = 1;
+                    }
+                } else if (b == true && isIconShow == false) {        //拉到顶
+                    pullFalg = 2;
+                    /*ObjectAnimator.ofFloat(rlMusic,"alpha",1f,0f).setDuration(200).start();
+                    ObjectAnimator obj = new ObjectAnimator().ofFloat(rlMedia,"alpha",1f,0f).setDuration(200);
+                    obj.addListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            super.onAnimationEnd(animation);*/
+                            rlMusic.setVisibility(View.GONE);
+                            rlMedia.setVisibility(View.GONE);
+                     /*   }
+                    });
+                    obj.start();
+*/
+                    Log.i("hehehe", "pullDown: -------------拉到顶----------");
                 }
-
             }
 
             @Override
@@ -1465,6 +1794,76 @@ public class MyMainActivity extends FragmentActivity {
             }
         });
     }
+
+    /*
+    *  ==========================================================
+    * */
+    private boolean isScrolling = false;
+    private int scrollLocalValue = 1;    //-1代表不确定
+    @Subscribe
+    public void onEventMainThread(MyEventBusPullMenu event){
+        //Log.i("hehehehy", "onEventMainThread:是否正在滑动: "+event.isScrolling()+"!!!!!!!!!!"+event.getScrollLocal());
+        isScrolling = event.isScrolling();
+        if (event.getScrollLocal()!=-1){            //等于-1时不赋值
+            scrollLocalValue = event.getScrollLocal();
+        }
+        //Log.i("hehehehy", "onEventMainThread:scrollLocalValue: "+scrollLocalValue);
+        if (isScrolling){
+            setButtonsAnimationDisappear();
+        }
+        if (scrollLocalValue==0){           //滑动到顶部并且滑动静止
+            if (!isScrolling){
+                new Thread(){
+                    @Override
+                    public void run() {
+                        super.run();
+                        Message message = new Message();
+                        message.what = 2;
+                        handlerUI.sendMessage(message);
+                    }
+                }.start();
+                Log.i("hehehehy", "onEventMainThread: ------------------------------滑动到顶部并且滑动静止"+isMainButtonsShow);
+            }
+        }else if (scrollLocalValue==1){     //滑动到初始位置并滑动静止
+            if (!isScrolling){
+                Log.i("hehehehy", "onEventMainThread: ------------------------------滑动到初始位置并滑动静止");
+            }
+        }
+    }
+
+    //设置主界面信息控件的出现动画
+    private boolean isMainButtonsShow = false;
+    private void setButtonsAnimationAppear(){
+        if (!isMainButtonsShow){              //桌面小控件消失的时候才会出现显示动画
+            ObjectAnimator.ofFloat(tvButtonComeHome,"alpha",0f,1f).setDuration(200).start();
+            ObjectAnimator.ofFloat(tvButtonGoOut,"alpha",0f,1f).setDuration(200).start();
+            ObjectAnimator.ofFloat(tvHouseTimeRight,"alpha",0f,1f).setDuration(200).start();
+            ObjectAnimator.ofFloat(tvHouseOwnerName,"alpha",0f,1f).setDuration(200).start();
+            ObjectAnimator.ofFloat(tvHouseTimeLeft,"alpha",0f,1f).setDuration(200).start();
+            ObjectAnimator.ofFloat(tvHouseTemp,"alpha",0f,1f).setDuration(200).start();
+            tvButtonComeHome.setVisibility(View.VISIBLE);
+            tvButtonGoOut.setVisibility(View.VISIBLE);
+            tvHouseTimeRight.setVisibility(View.VISIBLE);
+            tvHouseOwnerName.setVisibility(View.VISIBLE);
+            tvHouseTimeLeft.setVisibility(View.VISIBLE);
+            tvHouseTemp.setVisibility(View.VISIBLE);
+            isMainButtonsShow = true;
+        }
+
+    }
+
+    //设置主界面信息控件的消失动画
+    private void setButtonsAnimationDisappear(){
+        tvButtonComeHome.setVisibility(View.GONE);
+        tvButtonGoOut.setVisibility(View.GONE);
+        tvHouseTimeRight.setVisibility(View.GONE);
+        tvHouseOwnerName.setVisibility(View.GONE);
+        tvHouseTimeLeft.setVisibility(View.GONE);
+        tvHouseTemp.setVisibility(View.GONE);
+        isMainButtonsShow = false;
+    }
+
+
 
     //viewPager滑动监听
     private int roomPostion = 0;  //房间号
@@ -1484,7 +1883,7 @@ public class MyMainActivity extends FragmentActivity {
         //state状态  0：无触碰；  1：拖动；   2：松手
         @Override
         public void onPageScrollStateChanged(int state) {
-            //Log.i(TAG, "onPageScrollStateChanged: =-=-=-=-=-=-=-=" + state);
+            Log.i(TAG, "onPageScrollStateChanged: =-=-=-=-=-=-=-=" + state);
             pagerState = state;
             boolean isChange = false;
             if (state == 2) {
@@ -1492,11 +1891,14 @@ public class MyMainActivity extends FragmentActivity {
             }
 
             if (state == 1) {
-                EventBus.getDefault().post(new MyEventBus2(SCROLL_FRAGMENT_START));
+                EventBus.getDefault().post(new MyEventBus2(SCROLL_FRAGMENT_START));     //开始滑动scrollView
                 scrollViewPager();
             }
             if (state == 0) {
-                EventBus.getDefault().post(new MyEventBus2(SCROLL_FRAGMENT_END));
+                if (obj.isRunning()){
+                    obj.cancel();
+                }
+                EventBus.getDefault().post(new MyEventBus2(SCROLL_FRAGMENT_END));       //结束滑动scrollView
                 downScrollViewPager();
             }
             //onMainListener.onMainAction(pagerState);   //Activity向Fragment通信
@@ -1504,10 +1906,20 @@ public class MyMainActivity extends FragmentActivity {
     };
 
     //滑动viewpager时，控件消失
+    private ObjectAnimator obj;
     private void scrollViewPager() {
         EventBus.getDefault().post(new MyEventBus2(SCROLL_FRAGMENT_START));
-        rlMusic.setVisibility(View.GONE);
-        rlMedia.setVisibility(View.GONE);
+        ObjectAnimator.ofFloat(rlMusic,"alpha",1f,0f).setDuration(200).start();
+        obj = new ObjectAnimator().ofFloat(rlMedia,"alpha",1f,0f).setDuration(200);
+        obj.addListener(new AnimatorListenerAdapter() {
+                            @Override
+                            public void onAnimationEnd(Animator animation) {
+                                super.onAnimationEnd(animation);
+                                rlMusic.setVisibility(View.GONE);
+                                rlMedia.setVisibility(View.GONE);
+                            }
+                        });
+        obj.start();
     }
 
     //滑动结束后，控件显现
@@ -1525,19 +1937,20 @@ public class MyMainActivity extends FragmentActivity {
 
     //控件滑出显示的动画
     private void showAnimation() {
-        ObjectAnimator.ofFloat(rlMusic, "translationX", 200, -10, 0).setDuration(800).start();
-        ObjectAnimator oa1 = ObjectAnimator.ofFloat(rlMedia, "translationX", 250, -10, 0);
-        oa1.setDuration(1000);
+        ofFloat(rlMusic, "translationX", 200, -10, 0).setDuration(600).start();
+        ObjectAnimator oa1 = ofFloat(rlMedia, "translationX", 250, -10, 0);
+        oa1.setDuration(800);
         //oa1.setStartDelay(100);
         oa1.start();
-
+        ObjectAnimator.ofFloat(rlMedia,"alpha",0f,1f).setDuration(600).start();
+        ObjectAnimator.ofFloat(rlMusic,"alpha",0f,1f).setDuration(600).start();
     }
 
 
     //点击按钮缩放动画
     private void setScaleAnimation(View view){
-        ObjectAnimator.ofFloat(view,"scaleX",1f,0.8f,1f).setDuration(600).start();
-        ObjectAnimator.ofFloat(view,"scaleY",1f,0.8f,1f).setDuration(600).start();
+        ofFloat(view,"scaleX",1f,0.8f,1f).setDuration(600).start();
+        ofFloat(view,"scaleY",1f,0.8f,1f).setDuration(600).start();
     }
 
     private void controlSecurity(String controlProtocol, String machineName, int value, String controlSence) {
@@ -1563,6 +1976,7 @@ public class MyMainActivity extends FragmentActivity {
             e.printStackTrace();
         }
     }
+
 
     //音量控制命令
     private void controlVolume(double MusicVolume) {         //MusicVolume:0.000 ~ 1.000
@@ -1634,7 +2048,7 @@ public class MyMainActivity extends FragmentActivity {
     private void exit(){
         if (isExit==false){
             isExit = true;
-            Toast.makeText(MyMainActivity.this, "再按一下退出程序", Toast.LENGTH_SHORT).show();
+            customCroutonUtil.makeTopToast("再按一下退出程序",1000);
             mhandler.sendMessageDelayed(new Message(),2000);
         }else if (isExit==true){
             Intent stopIntent = new Intent(this, UDPBroadcastService.class);

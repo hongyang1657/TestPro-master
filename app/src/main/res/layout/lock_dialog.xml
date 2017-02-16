@@ -1,57 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-
-    <ImageView
-        android:id="@+id/iv_setting_blank"
-        android:padding="10dp"
-        android:visibility="invisible"
-        android:src="@mipmap/setting_title_door_3x"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-    <TextView
-        android:id="@+id/tv_setting_title"
-        android:text="智能门锁"
-        android:textColor="@color/colorWhite"
-        android:layout_toRightOf="@id/iv_setting_blank"
-        android:textSize="24sp"
-        android:gravity="bottom"
+    <RelativeLayout
+        android:id="@+id/ll_setting_title"
+        android:layout_weight="1"
+        android:clickable="true"
+        android:background="@color/colorAlpha"
         android:layout_width="match_parent"
-        android:layout_height="40dp" />
-    <TextView
-        android:id="@+id/tv_blank_setting"
-        android:background="@color/colorWhite"
-        android:layout_below="@id/tv_setting_title"
-        android:layout_width="match_parent"
-        android:layout_height="40dp" />
-    <LinearLayout
-        android:orientation="horizontal"
-        android:id="@+id/rl_setting_content"
-        android:layout_below="@id/tv_blank_setting"
-        android:paddingLeft="12dp"
-        android:background="@color/colorWhite"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="0dp">
 
         <TextView
-            android:id="@+id/tv_close_door"
-            android:layout_weight="1"
-            android:text="关门"
-            android:textColor="@color/colorText"
-            android:clickable="true"
-            android:onClick="secondaryClick"
-            android:textSize="14sp"
-            android:gravity="center_vertical"
-            android:drawablePadding="10dp"
-            android:padding="16dp"
-            android:drawableLeft="@mipmap/setting_door_close_3x"
-            android:layout_width="0dp"
+            android:id="@+id/tv_setting_title"
+            android:text="智能门锁"
+            android:drawableLeft="@mipmap/dialog_setting_mensuo"
+            android:textSize="32sp"
+            android:textColor="@color/colorWhite"
+            android:gravity="bottom"
+            android:layout_alignParentBottom="true"
+            android:paddingLeft="18dp"
+            android:paddingBottom="4dp"
+            android:drawablePadding="6dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content" />
+    </RelativeLayout>
+
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_weight="1"
+        android:id="@+id/rl_setting_content"
+        android:paddingLeft="6dp"
+        android:background="@color/colorWhite"
+        android:layout_width="match_parent"
+        android:layout_height="0dp">
+
         <TextView
             android:id="@+id/tv_open_door"
-            android:layout_weight="1"
             android:clickable="true"
             android:onClick="secondaryClick"
             android:text="开门"
@@ -59,17 +46,35 @@
             android:textSize="14sp"
             android:gravity="center_vertical"
             android:drawablePadding="10dp"
-            android:padding="16dp"
-            android:drawableLeft="@mipmap/setting_door_open_3x"
-            android:layout_width="0dp"
+            android:padding="14dp"
+            android:drawableLeft="@mipmap/setting_open_door_3x"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
+        <TextView
+            android:background="@color/colorCutOffLine2"
+            android:paddingLeft="14dp"
+            android:paddingRight="14dp"
+            android:layout_width="match_parent"
+            android:layout_height="1px" />
+        <TextView
+            android:id="@+id/tv_close_door"
+            android:text="关门"
+            android:textColor="@color/colorText"
+            android:clickable="true"
+            android:onClick="secondaryClick"
+            android:textSize="14sp"
+            android:gravity="center_vertical"
+            android:drawablePadding="10dp"
+            android:padding="14dp"
+            android:drawableLeft="@mipmap/setting_close_door_3x"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:background="@color/colorCutOffLine2"
+            android:paddingLeft="14dp"
+            android:paddingRight="14dp"
+            android:layout_width="match_parent"
+            android:layout_height="1px" />
     </LinearLayout>
 
-    <ImageView
-        android:id="@+id/iv_setting"
-        android:padding="10dp"
-        android:src="@mipmap/setting_title_door_3x"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-
-</RelativeLayout>
+</LinearLayout>

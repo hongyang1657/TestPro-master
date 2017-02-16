@@ -77,7 +77,7 @@
                 android:text="未定义1"
                 android:layout_weight="0.95"
                 android:textColor="@color/colorText"
-                android:paddingLeft="10dp"
+                android:paddingLeft="6dp"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content" />
             <ImageView
@@ -87,7 +87,7 @@
                 android:layout_height="wrap_content" />
         </LinearLayout>
         <TextView
-            android:background="@color/colorLoginBack"
+            android:background="@color/colorCutOffLine2"
             android:layout_width="match_parent"
             android:layout_height="1px" />
         <LinearLayout
@@ -110,7 +110,7 @@
                 android:text="未定义1"
                 android:layout_weight="1"
                 android:textColor="@color/colorText"
-                android:paddingLeft="10dp"
+                android:paddingLeft="6dp"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content" />
             <ImageView
@@ -120,7 +120,7 @@
                 android:layout_height="wrap_content" />
         </LinearLayout>
         <TextView
-            android:background="@color/colorLoginBack"
+            android:background="@color/colorCutOffLine2"
             android:layout_width="match_parent"
             android:layout_height="1px" />
         <LinearLayout
@@ -143,7 +143,7 @@
                 android:text="未定义1"
                 android:layout_weight="1"
                 android:textColor="@color/colorText"
-                android:paddingLeft="10dp"
+                android:paddingLeft="6dp"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content" />
             <ImageView
@@ -153,7 +153,7 @@
                 android:layout_height="wrap_content" />
         </LinearLayout>
         <TextView
-            android:background="@color/colorLoginBack"
+            android:background="@color/colorCutOffLine2"
             android:layout_width="match_parent"
             android:layout_height="1px" />
         <LinearLayout
@@ -176,7 +176,7 @@
                 android:text="未定义1"
                 android:layout_weight="1"
                 android:textColor="@color/colorText"
-                android:paddingLeft="10dp"
+                android:paddingLeft="6dp"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content" />
             <ImageView
@@ -186,7 +186,7 @@
                 android:layout_height="wrap_content" />
         </LinearLayout>
         <TextView
-            android:background="@color/colorLoginBack"
+            android:background="@color/colorCutOffLine2"
             android:layout_width="match_parent"
             android:layout_height="1px" />
     </LinearLayout>

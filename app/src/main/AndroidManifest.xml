@@ -63,6 +63,7 @@
         <activity android:name=".activity.custom_scene_activity.CustomSceneSecondActivity"/>
         <activity android:name=".activity.custom_scene_activity.CustomSceneSelectIconActivity"/>
         <activity android:name=".activity.custom_scene_activity.CustomSceneLightActivity"/>
+        <activity android:name=".activity.custom_scene_activity.CustomSceneACActivity"/>
 
 <!--service-->
         <service android:name=".service.UDPBroadcastService"/>

@@ -13,6 +13,7 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import com.byids.hy.testpro.MyEventBus;
+import com.byids.hy.testpro.MyEventBusControlLight;
 import com.byids.hy.testpro.R;
 import com.byids.hy.testpro.utils.CommandJsonUtils;
 
@@ -96,13 +97,16 @@ public class ControlLightBaseAdapter extends BaseAdapter{
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 switch (checkedId){
                     case R.id.rb_control_light_channel_x_close:
-
+                        EventBus.getDefault().post(new MyEventBusControlLight(position,0,lightLoopNameList.length));
                         break;
                     case R.id.rb_control_light_channel_x_1:
+                        EventBus.getDefault().post(new MyEventBusControlLight(position,1,lightLoopNameList.length));
                         break;
                     case R.id.rb_control_light_channel_x_2:
+                        EventBus.getDefault().post(new MyEventBusControlLight(position,2,lightLoopNameList.length));
                         break;
                     case R.id.rb_control_light_channel_x_3:
+                        EventBus.getDefault().post(new MyEventBusControlLight(position,3,lightLoopNameList.length));
                         break;
                     default:
                         break;

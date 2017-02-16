@@ -50,7 +50,7 @@ public class UDPBroadcastService extends Service{
                     //Log.i(TAG, "run: --------------开始循环发送udp-------------"+isUdpThreadOn);
                     udpSocket.sendEncryptUdp();
                     try {
-                        sleep(2000);
+                        sleep(1000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -85,19 +85,21 @@ public class UDPBroadcastService extends Service{
         private boolean isSendUDPOn = true;
 
         public String getHostIp(){
-            if (ip.equals("192.168.10.220")){                    //这里做判断是为了屏蔽拜爱展厅的主机（192.168.10.220）
+            /*if (ip.equals("192.168.10.220")){                    //这里做判断是为了屏蔽拜爱展厅的主机（192.168.10.220）
                 return "";
             }else {
                 return ip;
-            }
+            }*/
+            return ip;
         }
 
         public String getUdpCheck(){
-            if (ip.equals("192.168.10.220")){                    //这里做判断是为了屏蔽拜爱展厅的主机（192.168.10.220）
+            /*if (ip.equals("192.168.10.220")){                    //这里做判断是为了屏蔽拜爱展厅的主机（192.168.10.220）
                 return "";
             }else {
                 return udpCheck;
-            }
+            }*/
+            return udpCheck;
         }
 
         public void startSendUDP(){

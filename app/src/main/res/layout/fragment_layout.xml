@@ -85,7 +85,7 @@
             <ImageView
                 android:id="@+id/id_iv"
                 android:layout_below="@id/linear_menu"
-                android:src="@mipmap/bg_img_2"
+                android:src="@mipmap/back_1"
                 android:scaleType="centerCrop"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
@@ -94,11 +94,16 @@
         </RelativeLayout>
     </com.byids.hy.testpro.View.MyCustomScrollView>
 
+
+
     <com.byids.hy.testpro.View.MyPullUpScrollView
         android:id="@+id/scroll_pull_up"
         android:scrollbars="none"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true">
 
         <LinearLayout
             android:id="@+id/linear_pull_up_scroll"
@@ -302,14 +307,35 @@
         android:layout_height="wrap_content">
 
         <ImageView
-            android:id="@+id/iv_home_icon"
-            android:src="@mipmap/green_home_3x"
+            android:id="@+id/iv_home_icon_red"
+            android:src="@mipmap/red_home_3x"
             android:paddingTop="12dp"
             android:paddingBottom="12dp"
             android:paddingRight="30dp"
             android:paddingLeft="30dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
+        <ImageView
+            android:id="@+id/iv_home_icon_yellow"
+            android:src="@mipmap/yellow_home_3x"
+            android:visibility="gone"
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp"
+            android:paddingRight="30dp"
+            android:paddingLeft="30dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <ImageView
+            android:id="@+id/iv_home_icon"
+            android:src="@mipmap/green_home_3x"
+            android:paddingTop="12dp"
+            android:visibility="gone"
+            android:paddingBottom="12dp"
+            android:paddingRight="30dp"
+            android:paddingLeft="30dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
         <TextView
             android:id="@+id/tv_room_name"
             android:text="客厅"
@@ -317,18 +343,17 @@
             android:textSize="26sp"
             android:alpha="0"
             android:gravity="center"
-            android:layout_alignBottom="@id/iv_home_icon"
-            android:layout_alignTop="@id/iv_home_icon"
-            android:layout_alignRight="@id/iv_home_icon"
-            android:layout_alignLeft="@id/iv_home_icon"
+            android:layout_alignBottom="@id/iv_home_icon_red"
+            android:layout_alignTop="@id/iv_home_icon_red"
+            android:layout_alignRight="@id/iv_home_icon_red"
+            android:layout_alignLeft="@id/iv_home_icon_red"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
-        <ImageView
+        <!--<ImageView
             android:id="@+id/iv_state_light"
             android:layout_margin="4dp"
             android:src="#00000000"
             android:layout_width="10dp"
-            android:layout_height="10dp" />
+            android:layout_height="10dp" />-->
     </RelativeLayout>
-
 </RelativeLayout>

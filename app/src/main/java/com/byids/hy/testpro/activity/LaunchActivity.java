@@ -9,6 +9,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
@@ -48,7 +49,7 @@ import okhttp3.RequestBody;
 public class LaunchActivity extends BaseActivity{
 
     private static final String TAG = "hy_launch_activity";
-    private static final int LAUNCH_DELAY = 3000;
+    private static final int LAUNCH_DELAY = 2000;
     private ImageView ivLaunch;
 
     public static final int DEFAULT_PORT = 57816;//端口号
@@ -80,6 +81,7 @@ public class LaunchActivity extends BaseActivity{
     private AllJsonData allJsonData;
 
     private boolean stopRec = false;
+    private boolean isStacked = true;
 
     //外网登陆
     private Handler handler = new Handler(){
@@ -129,6 +131,7 @@ public class LaunchActivity extends BaseActivity{
                             Bundle bundle = new Bundle();
                             bundle.putSerializable("commandData",allJsonData.getCommandData());
                             intentByLAN.putExtras(bundle);
+                            isStacked = false;
                             startActivity(intentByLAN);
                             finish();
                         }
@@ -169,10 +172,14 @@ public class LaunchActivity extends BaseActivity{
                     intentByWAN.putExtra("isByWANLogin",true);
                     intentByWAN.putExtra("isFirstLogin",false);
                     intentByWAN.putExtra("needWANConnect",true);       //是否需要外网来尝试连接
+                    isStacked = false;
                     startActivity(intentByWAN);
                     finish();
                     break;
-
+                case 4:
+                    finish();
+                    System.exit(0);
+                    break;
             }
         }
     };
@@ -210,8 +217,11 @@ public class LaunchActivity extends BaseActivity{
         Log.i("result", "onCreate: --------------本机ip地址--------------"+phoneIP);
 
         if (!isConnect){     //没联网时
-            Toast.makeText(this, "请检查网络是否打开", Toast.LENGTH_SHORT).show();
+            Toast.makeText(LaunchActivity.this, "请检查网络是否打开", Toast.LENGTH_LONG).show();
             Log.i(TAG, "onCreate: ----请检查网络是否打开-----");
+            Message message = new Message();
+            message.what = 4;
+            handler.sendMessageDelayed(message,5000);
             return;
         }else {
             //手机网络可用时
@@ -273,7 +283,6 @@ public class LaunchActivity extends BaseActivity{
             @Override
             public void run() {
                 //获取主机ip
-
                 if (udpBinder!=null){
                     ip = udpBinder.getHostIp();
                     udpCheck = udpBinder.getUdpCheck();
@@ -292,6 +301,7 @@ public class LaunchActivity extends BaseActivity{
                     Intent intent = new Intent(LaunchActivity.this,NewLoginActivity.class);
                     intent.putExtra("ip",ip);       //                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          `// 后台udp广播获取主机ip，如果能获取，表示可以本地内网连接，如果没能获取，走外网连接
                     Log.i(TAG, "run: --------------获取到主机ip没：-------------"+ip);
+                    isStacked = false;
                     startActivity(intent);
                     finish();
                 }else{          //非第一次登陆
@@ -309,6 +319,16 @@ public class LaunchActivity extends BaseActivity{
                 }
             }
         },LAUNCH_DELAY);
+        
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (isStacked){
+                    Log.i(TAG, "run: ----------------启动页卡住了，尝试外网登陆-----------------");
+                    secondLoginWAN();    //外网http获取房间信息
+                }
+            }
+        },10000);
     }
 
     //开启service，后台发送udp广播
@@ -504,6 +524,14 @@ public class LaunchActivity extends BaseActivity{
         }.start();
     }
 
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode==event.KEYCODE_BACK){
+            System.exit(0);
+            return false;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
 
     //------------------内网第二次登陆直接跳转主界面---------------------
     /*private void oldSecondLoginLAN(){

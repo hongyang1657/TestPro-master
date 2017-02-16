@@ -16,6 +16,7 @@
     <color name="colorLoginBack">#f2f2f2</color>
     <color name="colorAlphaBlack1">#cc000000</color>
     <color name="colorAlphaBlack">#99000000</color>
+    <color name="colorAlphaBlackLow">#69000000</color>
     <color name="colorAlpha">#00000000</color>
     <color name="colorCutOffLine">#c7c7c7</color>
     <color name="colorCutOffLine2">#dbdbdb</color>

@@ -1,9 +1,10 @@
 package com.byids.hy.testpro.activity.custom_scene_activity;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -21,6 +22,7 @@ import android.widget.TextView;
 import com.byids.hy.testpro.MyEventBus;
 import com.byids.hy.testpro.R;
 import com.byids.hy.testpro.View.MyEventBusLight;
+import com.byids.hy.testpro.activity.BaseActivity;
 import com.byids.hy.testpro.adapter.CustomLightBaseAdapter;
 import com.byids.hy.testpro.customSceneBean.DetailCustomScene;
 import com.byids.hy.testpro.customSceneBean.LightDetail;
@@ -44,7 +46,7 @@ import butterknife.OnClick;
  * Created by gqgz2 on 2016/12/19.
  */
 
-public class CustomSceneLightActivity extends Activity {
+public class CustomSceneLightActivity extends BaseActivity {
 
     @BindView(R.id.iv_custom_light_back)
     ImageView ivCustomLightBack;
@@ -88,6 +90,18 @@ public class CustomSceneLightActivity extends Activity {
     private LoopLight loopLight = new LoopLight();
     private List<LoopLight> loopLightArray = new ArrayList<>();
     private DetailCustomScene detailCustomScene;
+
+    private Handler handler = new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what){
+                case 1:             //关全部灯
+                    controlLight(protocol,"light","0","0","all");
+                    break;
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -200,23 +214,16 @@ public class CustomSceneLightActivity extends Activity {
                     isCloseAllLight = false;
                     adapter.turnAllSwitch(true);
                     rbCustomLightChannelAll1.setChecked(true);
-                    /*switch (currentRbNum){
-                        case 1:
-                            rbCustomLightChannelAll1.setChecked(true);
-                            break;
-                        case 2:
-                            rbCustomLightChannelAll2.setChecked(true);
-                            break;
-                        case 3:
-                            rbCustomLightChannelAll3.setChecked(true);
-                            break;
-                    }*/
                 }else {
                     isSWChecked = false;
                     isCloseAllLight = true;
                     //各回路灯光全关
                     adapter.turnAllSwitch(false);
                     rgCustomLightChannelAll.clearCheck();
+                    Message message = new Message();
+                    message.what = 1;
+                    handler.sendMessageDelayed(message,100);
+
                 }
             }
         });
@@ -294,7 +301,6 @@ public class CustomSceneLightActivity extends Activity {
             switch (rgCustomLightChannelAll.getCheckedRadioButtonId()){
                 case R.id.rb_custom_light_channel_all_1:
                     lightDetail.setAllLight(1);
-                    Log.i("light_hy", "saveLightValue: "+lightDetail.getAllLight());
                     break;
                 case R.id.rb_custom_light_channel_all_2:
                     lightDetail.setAllLight(2);
@@ -371,8 +377,16 @@ public class CustomSceneLightActivity extends Activity {
         position = event.getPosition();
         value = event.getMsg2();
         length = event.getLength();
-        Log.i("light_hy", "onEventMainThread,position: "+position+"----value:"+value+"------length:"+length);
-
+        Log.i("light_hy_hy", "onEventMainThread,position: "+position+"----value:"+value+"------length:"+length);
+        if (value==11||value==1){
+            controlLight(protocol,"light","30","0",""+(position+1));
+        }else if (value==0||value==10){
+            controlLight(protocol,"light","0","0",""+(position+1));
+        }else if (value==2){
+            controlLight(protocol,"light","60","0",""+(position+1));
+        }else if (value==3){
+            controlLight(protocol,"light","100","0",""+(position+1));
+        }
         switch (position){
             case 0:
                 lightValue1 = value;
@@ -413,9 +427,9 @@ public class CustomSceneLightActivity extends Activity {
             default:
                 break;
         }
-        for (int i=0;i<lightValueList.size();i++){
+        /*for (int i=0;i<lightValueList.size();i++){
             Log.i("light_hy", "onEventMainThread:lightValueList: "+lightValueList.get(i));
-        }
+        }*/
 
         Log.i("light_hy", "---lightValue1-6:"+lightValue1+"---:"+lightValue2+"---:"+lightValue3+"---:"+lightValue4+"---:"+lightValue5+"---:"+lightValue6);
         if ((lightValue1==1||lightValue1==0)&&(lightValue2==1||lightValue2==0)&&(lightValue3==1||lightValue3==0)&&(lightValue4==1||lightValue4==0)&&

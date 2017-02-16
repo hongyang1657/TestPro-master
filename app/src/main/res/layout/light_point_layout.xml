@@ -29,7 +29,9 @@
     <ImageView
         android:id="@+id/iv_light_point_ex04"
         android:layout_toRightOf="@id/iv_light_point_ex05"
-        android:src="@mipmap/huanggang_3x"
+        android:src="@mipmap/light_scale_5"
+        android:layout_alignTop="@id/iv_light_point_ex08"
+        android:layout_alignBottom="@id/iv_light_point_ex08"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
     <ImageView
@@ -53,7 +55,9 @@
     <ImageView
         android:id="@+id/iv_light_point_ex1"
         android:layout_toRightOf="@id/iv_light_point_ex01"
-        android:src="@mipmap/huanggang_3x"
+        android:src="@mipmap/light_scale_5"
+        android:layout_alignTop="@id/iv_light_point_ex08"
+        android:layout_alignBottom="@id/iv_light_point_ex08"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
     <ImageView
@@ -77,7 +81,9 @@
     <ImageView
         android:id="@+id/iv_light_point_ex5"
         android:layout_toRightOf="@id/iv_light_point_ex4"
-        android:src="@mipmap/huanggang_3x"
+        android:src="@mipmap/light_scale_5"
+        android:layout_alignTop="@id/iv_light_point_ex08"
+        android:layout_alignBottom="@id/iv_light_point_ex08"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
     <ImageView
@@ -101,7 +107,9 @@
     <ImageView
         android:id="@+id/iv_light_point_ex9"
         android:layout_toRightOf="@id/iv_light_point_ex8"
-        android:src="@mipmap/huanggang_3x"
+        android:src="@mipmap/light_scale_5"
+        android:layout_alignTop="@id/iv_light_point_ex08"
+        android:layout_alignBottom="@id/iv_light_point_ex08"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
     <ImageView
@@ -125,7 +133,9 @@
     <ImageView
         android:id="@+id/iv_light_point3"
         android:layout_toRightOf="@id/iv_light_point2"
-        android:src="@mipmap/huanggang_3x"
+        android:src="@mipmap/light_scale_5"
+        android:layout_alignTop="@id/iv_light_point_ex08"
+        android:layout_alignBottom="@id/iv_light_point_ex08"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
     <ImageView
@@ -149,7 +159,9 @@
     <ImageView
         android:id="@+id/iv_light_point7"
         android:layout_toRightOf="@id/iv_light_point6"
-        android:src="@mipmap/huanggang_3x"
+        android:src="@mipmap/light_scale_5"
+        android:layout_alignTop="@id/iv_light_point_ex08"
+        android:layout_alignBottom="@id/iv_light_point_ex08"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
     <ImageView
@@ -173,7 +185,9 @@
     <ImageView
         android:id="@+id/iv_light_point11"
         android:layout_toRightOf="@id/iv_light_point10"
-        android:src="@mipmap/huanggang_3x"
+        android:src="@mipmap/light_scale_5"
+        android:layout_alignTop="@id/iv_light_point_ex08"
+        android:layout_alignBottom="@id/iv_light_point_ex08"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
     <ImageView
@@ -197,7 +211,9 @@
     <ImageView
         android:id="@+id/iv_light_point15"
         android:layout_toRightOf="@id/iv_light_point14"
-        android:src="@mipmap/huanggang_3x"
+        android:src="@mipmap/light_scale_5"
+        android:layout_alignTop="@id/iv_light_point_ex08"
+        android:layout_alignBottom="@id/iv_light_point_ex08"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
     <ImageView
@@ -221,7 +237,9 @@
     <ImageView
         android:id="@+id/iv_light_point19"
         android:layout_toRightOf="@id/iv_light_point18"
-        android:src="@mipmap/huanggang_3x"
+        android:src="@mipmap/light_scale_5"
+        android:layout_alignTop="@id/iv_light_point_ex08"
+        android:layout_alignBottom="@id/iv_light_point_ex08"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
     <ImageView
@@ -245,7 +263,9 @@
     <ImageView
         android:id="@+id/iv_light_point23"
         android:layout_toRightOf="@id/iv_light_point22"
-        android:src="@mipmap/huanggang_3x"
+        android:src="@mipmap/light_scale_5"
+        android:layout_alignTop="@id/iv_light_point_ex08"
+        android:layout_alignBottom="@id/iv_light_point_ex08"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
     <ImageView
@@ -269,7 +289,9 @@
     <ImageView
         android:id="@+id/iv_light_point27"
         android:layout_toRightOf="@id/iv_light_point26"
-        android:src="@mipmap/huanggang_3x"
+        android:src="@mipmap/light_scale_5"
+        android:layout_alignTop="@id/iv_light_point_ex08"
+        android:layout_alignBottom="@id/iv_light_point_ex08"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
     <ImageView
@@ -293,7 +315,9 @@
     <ImageView
         android:id="@+id/iv_light_point31"
         android:layout_toRightOf="@id/iv_light_point30"
-        android:src="@mipmap/huanggang_3x"
+        android:src="@mipmap/light_scale_5"
+        android:layout_alignTop="@id/iv_light_point_ex08"
+        android:layout_alignBottom="@id/iv_light_point_ex08"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
     <ImageView
@@ -317,7 +341,9 @@
     <ImageView
         android:id="@+id/iv_light_point35"
         android:layout_toRightOf="@id/iv_light_point34"
-        android:src="@mipmap/huanggang_3x"
+        android:src="@mipmap/light_scale_5"
+        android:layout_alignTop="@id/iv_light_point_ex08"
+        android:layout_alignBottom="@id/iv_light_point_ex08"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
     <ImageView
@@ -341,7 +367,9 @@
     <ImageView
         android:id="@+id/iv_light_point39"
         android:layout_toRightOf="@id/iv_light_point38"
-        android:src="@mipmap/huanggang_3x"
+        android:src="@mipmap/light_scale_5"
+        android:layout_alignTop="@id/iv_light_point_ex08"
+        android:layout_alignBottom="@id/iv_light_point_ex08"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
     <ImageView
@@ -365,7 +393,9 @@
     <ImageView
         android:id="@+id/iv_light_point43"
         android:layout_toRightOf="@id/iv_light_point42"
-        android:src="@mipmap/huanggang_3x"
+        android:src="@mipmap/light_scale_5"
+        android:layout_alignTop="@id/iv_light_point_ex08"
+        android:layout_alignBottom="@id/iv_light_point_ex08"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
     <ImageView
@@ -389,7 +419,9 @@
     <ImageView
         android:id="@+id/iv_light_point47"
         android:layout_toRightOf="@id/iv_light_point46"
-        android:src="@mipmap/huanggang_3x"
+        android:src="@mipmap/light_scale_5"
+        android:layout_alignTop="@id/iv_light_point_ex08"
+        android:layout_alignBottom="@id/iv_light_point_ex08"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
     <ImageView
@@ -413,7 +445,9 @@
     <ImageView
         android:id="@+id/iv_light_point51"
         android:layout_toRightOf="@id/iv_light_point50"
-        android:src="@mipmap/huanggang_3x"
+        android:src="@mipmap/light_scale_5"
+        android:layout_alignTop="@id/iv_light_point_ex08"
+        android:layout_alignBottom="@id/iv_light_point_ex08"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
     <ImageView
@@ -437,7 +471,9 @@
     <ImageView
         android:id="@+id/iv_light_point55"
         android:layout_toRightOf="@id/iv_light_point54"
-        android:src="@mipmap/huanggang_3x"
+        android:src="@mipmap/light_scale_5"
+        android:layout_alignTop="@id/iv_light_point_ex08"
+        android:layout_alignBottom="@id/iv_light_point_ex08"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
     <ImageView
@@ -461,7 +497,9 @@
     <ImageView
         android:id="@+id/iv_light_point59"
         android:layout_toRightOf="@id/iv_light_point58"
-        android:src="@mipmap/huanggang_3x"
+        android:src="@mipmap/light_scale_5"
+        android:layout_alignTop="@id/iv_light_point_ex08"
+        android:layout_alignBottom="@id/iv_light_point_ex08"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 

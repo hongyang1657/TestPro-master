@@ -7,7 +7,7 @@
     <TextView
         android:id="@+id/tv_custom_name_title"
         android:text="请输入名称"
-        android:padding="16dp"
+        android:padding="12dp"
         android:gravity="center"
         android:textColor="@color/colorWhite"
         android:textSize="20sp"

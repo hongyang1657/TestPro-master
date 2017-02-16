@@ -5,18 +5,28 @@
     android:layout_height="match_parent">
 
     <TextView
-        android:background="@color/colorBule"
+        android:id="@+id/tv_exit_tip"
+        android:text="提示"
+        android:padding="12dp"
+        android:gravity="center"
+        android:textColor="@color/colorWhite"
+        android:textSize="20sp"
+        android:background="@drawable/custom_name_title"
         android:layout_width="match_parent"
-        android:layout_height="40dp" />
+        android:layout_height="wrap_content" />
     <TextView
         android:id="@+id/tv_exit_content"
-        android:text="是否退出当前账号"
+        android:text="确定退出当前账号吗？"
         android:textSize="20sp"
-        android:padding="10dp"
+        android:padding="20dp"
         android:gravity="center"
         android:background="@color/colorWhite"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
+    <TextView
+        android:background="@color/colorText"
+        android:layout_width="match_parent"
+        android:layout_height="1px" />
     <LinearLayout
         android:weightSum="2"
         android:orientation="horizontal"
@@ -24,24 +34,30 @@
         android:layout_height="wrap_content">
         <TextView
             android:id="@+id/tv_not_exit"
-            android:text="否"
+            android:text="取消"
+            android:textColor="@color/colorText"
             android:clickable="true"
             android:onClick="secondaryClick"
-            android:background="@color/colorWhite"
-            android:textSize="20sp"
-            android:padding="10dp"
+            android:background="@drawable/custom_name_cancel"
+            android:textSize="16sp"
+            android:padding="14dp"
             android:gravity="center"
             android:layout_weight="1"
             android:layout_width="0dp"
             android:layout_height="wrap_content" />
         <TextView
+            android:background="@color/colorText"
+            android:layout_width="1px"
+            android:layout_height="match_parent" />
+        <TextView
             android:id="@+id/tv_exit"
-            android:text="是"
+            android:text="确定"
             android:clickable="true"
             android:onClick="secondaryClick"
-            android:background="@color/colorBule"
-            android:textSize="20sp"
-            android:padding="10dp"
+            android:background="@drawable/custom_name_enter"
+            android:textColor="@color/colorTextActive"
+            android:textSize="16sp"
+            android:padding="14dp"
             android:gravity="center"
             android:layout_weight="1"
             android:layout_width="0dp"

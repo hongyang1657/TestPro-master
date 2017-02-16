@@ -1,12 +1,10 @@
 package com.byids.hy.testpro.activity.custom_scene_activity;
 
-import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -21,6 +19,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import com.byids.hy.testpro.R;
+import com.byids.hy.testpro.activity.BaseActivity;
 import com.byids.hy.testpro.customSceneBean.AllCustomScene;
 import com.byids.hy.testpro.customSceneBean.DetailCustomScene;
 import com.byids.hy.testpro.customSceneBean.LightDetail;
@@ -40,7 +39,7 @@ import butterknife.OnClick;
  * Created by gqgz2 on 2016/12/15.
  */
 
-public class CustomSceneSecondActivity extends Activity {
+public class CustomSceneSecondActivity extends BaseActivity {
 
     @BindView(R.id.iv_custom_back_second)
     ImageView ivCustomBackSecond;
@@ -231,7 +230,6 @@ public class CustomSceneSecondActivity extends Activity {
                 //本地自定义场景的信息
                 List<DetailCustomScene> array = new ArrayList<>();
                 DetailCustomScene dcs = new DetailCustomScene();
-                Log.i("bean_hy", "onClick:bean_hy "+lightDetail);
                 dcs.setLightDetail(lightDetail);
                 dcs.setSceneIconIndex(iconNum);
                 dcs.setSceneName(saveName);
@@ -287,6 +285,8 @@ public class CustomSceneSecondActivity extends Activity {
             case R.id.ll_custom_second_music:
                 break;
             case R.id.ll_custom_second_ac:
+                Intent intentToAc = new Intent(this,CustomSceneACActivity.class);
+                startActivity(intentToAc);
                 break;
         }
     }

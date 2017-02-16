@@ -91,7 +91,7 @@
                 android:layout_height="wrap_content" />
         </LinearLayout>
         <TextView
-            android:background="@color/colorLoginBack"
+            android:background="@color/colorCutOffLine2"
             android:layout_width="match_parent"
             android:layout_height="1px" />
         <LinearLayout
@@ -129,7 +129,7 @@
                 android:layout_height="wrap_content" />
         </LinearLayout>
         <TextView
-            android:background="@color/colorLoginBack"
+            android:background="@color/colorCutOffLine2"
             android:layout_width="match_parent"
             android:layout_height="1px" />
         <LinearLayout
@@ -167,7 +167,7 @@
                 android:layout_height="wrap_content" />
         </LinearLayout>
         <TextView
-            android:background="@color/colorLoginBack"
+            android:background="@color/colorCutOffLine2"
             android:layout_width="match_parent"
             android:layout_height="1px" />
         <LinearLayout
@@ -196,7 +196,7 @@
                 android:layout_height="wrap_content" />
         </LinearLayout>
         <TextView
-            android:background="@color/colorLoginBack"
+            android:background="@color/colorCutOffLine2"
             android:layout_width="match_parent"
             android:layout_height="1px" />
         <LinearLayout
@@ -234,7 +234,7 @@
                 android:layout_height="wrap_content" />
         </LinearLayout>
         <TextView
-            android:background="@color/colorLoginBack"
+            android:background="@color/colorCutOffLine2"
             android:layout_width="match_parent"
             android:layout_height="1px" />
         <LinearLayout
@@ -263,7 +263,7 @@
                 android:layout_height="wrap_content" />
         </LinearLayout>
         <TextView
-            android:background="@color/colorLoginBack"
+            android:background="@color/colorCutOffLine2"
             android:layout_width="match_parent"
             android:layout_height="1px" />
         <LinearLayout
@@ -294,7 +294,7 @@
                 android:layout_height="wrap_content" />
         </LinearLayout>
         <TextView
-            android:background="@color/colorLoginBack"
+            android:background="@color/colorCutOffLine2"
             android:layout_width="match_parent"
             android:layout_height="1px" />
     </LinearLayout>
