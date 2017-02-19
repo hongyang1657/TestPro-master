@@ -15,6 +15,7 @@
         <TextView
             android:id="@+id/tv_setting_title"
             android:text="安防"
+            android:clickable="true"
             android:drawableLeft="@mipmap/dialog_setting_bufang"
             android:textSize="32sp"
             android:textColor="@color/colorWhite"
@@ -26,7 +27,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
     </RelativeLayout>
-    
 
     <LinearLayout
         android:layout_weight="1"

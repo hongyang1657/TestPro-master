@@ -7,6 +7,7 @@
     <TextView
         android:id="@+id/tv_light_title"
         android:text="灯光"
+        android:clickable="true"
         android:textSize="32sp"
         android:layout_gravity="center"
         android:drawableLeft="@mipmap/dialog_custom_light"

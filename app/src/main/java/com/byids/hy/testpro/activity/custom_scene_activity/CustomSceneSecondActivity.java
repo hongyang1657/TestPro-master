@@ -327,7 +327,7 @@ public class CustomSceneSecondActivity extends BaseActivity {
                     saveName = etCustomName.getText().toString().trim();
                     tvCustomTitleSecond.setText(saveName);
                     ivCompileDone1.setVisibility(View.VISIBLE);
-                    tvCustomBianji1.setVisibility(View.GONE);
+                    //tvCustomBianji1.setVisibility(View.GONE);
                     dialogCustomName.hide();
                     break;
             }
@@ -341,7 +341,7 @@ public class CustomSceneSecondActivity extends BaseActivity {
             case REQUEST_CODE_LIGHT:
                 if (data.getBooleanExtra("isSave",false)){
                     ivCompileDone3.setVisibility(View.VISIBLE);
-                    tvCustomBianji3.setVisibility(View.GONE);
+                    //tvCustomBianji3.setVisibility(View.GONE);
                     lightDetail = (LightDetail) data.getSerializableExtra("lightDetail");
 
                 }else {
@@ -350,7 +350,7 @@ public class CustomSceneSecondActivity extends BaseActivity {
                 break;
             case REQUEST_CODE_ICON:
                 if (data.getIntExtra("customIconNum",-1)!=-1){
-                    tvCustomBianji2.setVisibility(View.GONE);
+                    //tvCustomBianji2.setVisibility(View.GONE);
                     ivCompileDone2.setVisibility(View.VISIBLE);
                     iconNum = data.getIntExtra("customIconNum",0);
                 }else {

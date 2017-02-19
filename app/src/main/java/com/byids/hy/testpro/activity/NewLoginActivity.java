@@ -208,6 +208,12 @@ public class NewLoginActivity extends BaseActivity{
             unbindService(connection);
         }
         setContentView(R.layout.view_null);
+        if (runningTimeDialog!=null){
+            runningTimeDialog = null;
+        }if (commandData!=null){
+            commandData = null;
+        }
+
     }
 
     private void initView(){

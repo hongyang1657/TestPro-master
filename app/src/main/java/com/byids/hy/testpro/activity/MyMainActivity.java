@@ -382,6 +382,9 @@ public class MyMainActivity extends FragmentActivity {
         EventBus.getDefault().register(this);
         reciveIntent();
         initView();    //初始化界面，布局
+
+        int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
+        Log.e("TAG", "Max memory is(程序允许占用的最大内存):" + maxMemory + "KB");
         //startTcpService();
 
     }
@@ -472,14 +475,46 @@ public class MyMainActivity extends FragmentActivity {
         if (dialogExit!=null){
             dialogExit.hide();
             dialogExit = null;
-        }
-        if (dialogSetting!=null){
+        }if (dialogSetting!=null){
             dialogSetting.hide();
-            //dialogSetting.dismiss();
             dialogSetting = null;
+        }if (dialogLight!=null){
+            dialogLight = null;
+        }if (dialogLock!=null){
+            dialogLock = null;
+        }if (dialogMusic!=null){
+            dialogMusic = null;
+        }if (dialogSecurity!=null){
+            dialogSecurity = null;
+        }if (dialogSwitchRoom!=null){
+            dialogSwitchRoom = null;
+        }if (appConnection!=null){
+            appConnection = null;
+        }if (appConnectionWAN!=null){
+            appConnectionWAN = null;
+        }if (viewPager!=null){
+            viewPager = null;
+        }if (myFragment1!=null){
+            myFragment1 = null;
+        }if (commandData!=null){
+            commandData = null;
+        }if (tcplongSocket!=null){
+            tcplongSocket = null;
+        }if (connectTCP!=null){
+            connectTCP = null;
+        }if (tcpLongSocketWAN!=null){
+            tcpLongSocketWAN = null;
+        }if (customCroutonUtil!=null){
+            customCroutonUtil = null;
+        }if (handler!=null){
+            handler = null;
+        }if (handlerUI!=null){
+            handlerUI = null;
+        }if (mhandler!=null){
+            mhandler = null;
         }
-        //System.exit(0);          //确定该Activity销毁时就是程序退出时，才能调用该方法来关闭整个应用
         unbindService(connection);
+        System.gc();
     }
 
 
@@ -940,6 +975,16 @@ public class MyMainActivity extends FragmentActivity {
             @Override
             public void onClick(View v) {
                 dialogSwitchRoom.hide();
+                rlMusic.setVisibility(View.VISIBLE);
+                rlMedia.setVisibility(View.VISIBLE);
+            }
+        });
+        dialogSwitchRoom.setOnDismissListener(new DialogInterface.OnDismissListener() {          //
+            @Override
+            public void onDismiss(DialogInterface dialog) {
+                EventBus.getDefault().post(new MyEventBus2("101"));
+                rlMusic.setVisibility(View.VISIBLE);
+                rlMedia.setVisibility(View.VISIBLE);
             }
         });
         adapterRoomName = new RoomNameBaseAdapter(this, roomNameList);
@@ -1006,8 +1051,8 @@ public class MyMainActivity extends FragmentActivity {
         dialogSetting.setOnDismissListener(new DialogInterface.OnDismissListener() {
             @Override
             public void onDismiss(DialogInterface dialog) {   //dialog消失时触发监听
-                ofFloat(rlMain, "scaleX", 0.92f, 1f).setDuration(500).start();
-                ofFloat(rlMain, "scaleY", 0.92f, 1f).setDuration(500).start();
+                ofFloat(rlMain, "scaleX", 0.92f, 1f).setDuration(400).start();
+                ofFloat(rlMain, "scaleY", 0.92f, 1f).setDuration(400).start();
                 //ObjectAnimator.ofFloat(viewSetting,"translationY",0,400).setDuration(500).start();
                 //ObjectAnimator.ofFloat(ivBlackFront, "alpha", 0.7f, 0f).setDuration(500).start();
 
@@ -1049,8 +1094,8 @@ public class MyMainActivity extends FragmentActivity {
         dialogLock.setOnDismissListener(new DialogInterface.OnDismissListener() {
             @Override
             public void onDismiss(DialogInterface dialog) {   //dialog消失时触发监听
-                ofFloat(rlMain, "scaleX", 0.92f, 1f).setDuration(500).start();
-                ofFloat(rlMain, "scaleY", 0.92f, 1f).setDuration(500).start();
+                ofFloat(rlMain, "scaleX", 0.92f, 1f).setDuration(400).start();
+                ofFloat(rlMain, "scaleY", 0.92f, 1f).setDuration(400).start();
                 //ObjectAnimator.ofFloat(viewLock,"translationY",0,400).setDuration(500).start();
                 //ObjectAnimator.ofFloat(ivBlackFront, "alpha", 0.7f, 0f).setDuration(500).start();
 
@@ -1092,8 +1137,8 @@ public class MyMainActivity extends FragmentActivity {
         dialogSecurity.setOnDismissListener(new DialogInterface.OnDismissListener() {
             @Override
             public void onDismiss(DialogInterface dialog) {   //dialog消失时触发监听
-                ofFloat(rlMain, "scaleX", 0.92f, 1f).setDuration(500).start();
-                ofFloat(rlMain, "scaleY", 0.92f, 1f).setDuration(500).start();
+                ofFloat(rlMain, "scaleX", 0.92f, 1f).setDuration(400).start();
+                ofFloat(rlMain, "scaleY", 0.92f, 1f).setDuration(400).start();
                 //ObjectAnimator.ofFloat(viewSecurity,"translationY",0,400).setDuration(500).start();
                 //ObjectAnimator.ofFloat(ivBlackFront, "alpha", 0.7f, 0f).setDuration(500).start();
 
@@ -1136,7 +1181,12 @@ public class MyMainActivity extends FragmentActivity {
         rbLightAll1 = (RadioButton) viewLight.findViewById(R.id.rb_control_light_channel_all_1);
         rbLightAll2 = (RadioButton) viewLight.findViewById(R.id.rb_control_light_channel_all_2);
         rbLightAll3 = (RadioButton) viewLight.findViewById(R.id.rb_control_light_channel_all_3);
-
+        tvLightTitle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialogLight.dismiss();
+            }
+        });
         tvLightTitle.setTypeface(typeFace);
         tvLightAll.setTypeface(typeFace);
         rbLightAllClose.setTypeface(typeFace);
@@ -1170,8 +1220,11 @@ public class MyMainActivity extends FragmentActivity {
         dialogLight.setOnDismissListener(new DialogInterface.OnDismissListener() {      //dialog消失事件监听
             @Override
             public void onDismiss(DialogInterface dialog) {   //dialog消失时触发监听
-                ofFloat(rlMain, "scaleX", 0.92f, 1f).setDuration(500).start();
-                ofFloat(rlMain, "scaleY", 0.92f, 1f).setDuration(500).start();
+                ofFloat(rlMain, "scaleX", 0.92f, 1f).setDuration(400).start();
+                ofFloat(rlMain, "scaleY", 0.92f, 1f).setDuration(400).start();
+                EventBus.getDefault().post(new MyEventBus2("101"));
+                rlMusic.setVisibility(View.VISIBLE);
+                rlMedia.setVisibility(View.VISIBLE);
                 //消失后按钮全部设为不选中
                 rbLightAllClose.setChecked(false);
                 rbLightAll1.setChecked(false);
@@ -1193,7 +1246,7 @@ public class MyMainActivity extends FragmentActivity {
     public void allLightClick(View v){
         switch (v.getId()){
             case R.id.rb_control_light_channel_all_close:
-                controlLightBaseAdapter.changeLightLoopValue(0);
+                controlLightBaseAdapter.changeLightLoopValue(0);     //关闭所有回路灯
                 controlLight(protocol,"light","0","0","all");
                 break;
             case R.id.rb_control_light_channel_all_1:
@@ -1332,11 +1385,12 @@ public class MyMainActivity extends FragmentActivity {
         dialogMusic.setOnDismissListener(new DialogInterface.OnDismissListener() {
             @Override
             public void onDismiss(DialogInterface dialog) {   //dialog消失时触发监听
-                ofFloat(rlMain, "scaleX", 0.92f, 1f).setDuration(500).start();
-                ofFloat(rlMain, "scaleY", 0.92f, 1f).setDuration(500).start();
+                ofFloat(rlMain, "scaleX", 0.92f, 1f).setDuration(400).start();
+                ofFloat(rlMain, "scaleY", 0.92f, 1f).setDuration(400).start();
                 //ObjectAnimator.ofFloat(viewSecurity,"translationY",0,400).setDuration(500).start();
                 //ObjectAnimator.ofFloat(ivBlackFront, "alpha", 0.7f, 0f).setDuration(500).start();
-
+                rlMusic.setVisibility(View.VISIBLE);
+                rlMedia.setVisibility(View.VISIBLE);
             }
         });
         WindowManager.LayoutParams params = dialogMusic.getWindow().getAttributes();
@@ -1591,17 +1645,21 @@ public class MyMainActivity extends FragmentActivity {
             switch (msg) {
                 case SWITCH_ROOM_DIALOG:     //选择房间dialog
                     dialogSwitchRoom.show();
+                    EventBus.getDefault().post(new MyEventBus2("100"));
+                    getWindow().setFlags(WindowManager.LayoutParams.FLAG_BLUR_BEHIND, WindowManager.LayoutParams.FLAG_BLUR_BEHIND); //背景模糊
+                    rlMusic.setVisibility(View.INVISIBLE);
+                    rlMedia.setVisibility(View.INVISIBLE);
                     break;
                 case SETTING_DIALOG:     //弹出设置dialog
                     initExitDialog();    //确认是否退出的三级页面
                     //ObjectAnimator.ofFloat(ivBlackFront, "alpha", 0f, 0.7f).setDuration(500).start();
-                    ofFloat(rlMain, "scaleX", 1f, 0.92f).setDuration(500).start();
-                    ObjectAnimator obj = new ObjectAnimator().ofFloat(rlMain, "scaleY", 1f, 0.92f).setDuration(500);
+                    ofFloat(rlMain, "scaleX", 1f, 0.92f).setDuration(400).start();
+                    ObjectAnimator obj = new ObjectAnimator().ofFloat(rlMain, "scaleY", 1f, 0.92f).setDuration(400);
                     obj.addListener(new AnimatorListenerAdapter() {
                         @Override
                         public void onAnimationEnd(Animator animation) {
                             super.onAnimationEnd(animation);
-                            ofFloat(viewSetting,"translationY",height,0).setDuration(500).start();
+                            ofFloat(viewSetting,"translationY",height,0).setDuration(400).start();
                             dialogSetting.show();
                         }
                     });
@@ -1609,13 +1667,13 @@ public class MyMainActivity extends FragmentActivity {
                     break;
                 case DOOR_LOCK_DIALOG:       //弹出门锁dialog
                     //ObjectAnimator.ofFloat(ivBlackFront, "alpha", 0f, 0.7f).setDuration(500).start();
-                    ofFloat(rlMain, "scaleX", 1f, 0.92f).setDuration(500).start();
-                    ObjectAnimator obj1 = new ObjectAnimator().ofFloat(rlMain, "scaleY", 1f, 0.92f).setDuration(500);
+                    ofFloat(rlMain, "scaleX", 1f, 0.92f).setDuration(400).start();
+                    ObjectAnimator obj1 = new ObjectAnimator().ofFloat(rlMain, "scaleY", 1f, 0.92f).setDuration(400);
                     obj1.addListener(new AnimatorListenerAdapter() {
                         @Override
                         public void onAnimationEnd(Animator animation) {
                             super.onAnimationEnd(animation);
-                            ofFloat(viewLock,"translationY",height,0).setDuration(500).start();
+                            ofFloat(viewLock,"translationY",height,0).setDuration(400).start();
                             dialogLock.show();
                         }
                     });
@@ -1623,13 +1681,13 @@ public class MyMainActivity extends FragmentActivity {
                     break;
                 case SECURITY_DIALOG:      //弹出安防dialog
                     //ObjectAnimator.ofFloat(ivBlackFront, "alpha", 0f, 0.7f).setDuration(500).start();
-                    ofFloat(rlMain, "scaleX", 1f, 0.92f).setDuration(500).start();
-                    ObjectAnimator obj2 = new ObjectAnimator().ofFloat(rlMain, "scaleY", 1f, 0.92f).setDuration(500);
+                    ofFloat(rlMain, "scaleX", 1f, 0.92f).setDuration(400).start();
+                    ObjectAnimator obj2 = new ObjectAnimator().ofFloat(rlMain, "scaleY", 1f, 0.92f).setDuration(400);
                     obj2.addListener(new AnimatorListenerAdapter() {
                         @Override
                         public void onAnimationEnd(Animator animation) {
                             super.onAnimationEnd(animation);
-                            ofFloat(viewSecurity,"translationY",height,0).setDuration(500).start();
+                            ofFloat(viewSecurity,"translationY",height,0).setDuration(400).start();
                             dialogSecurity.show();
                         }
                     });
@@ -1639,15 +1697,25 @@ public class MyMainActivity extends FragmentActivity {
             }
             if (msg.substring(0,1).equals("7")){         //灯光控制不同回路dialog
                 final String index = msg.substring(1,2);
-                ObjectAnimator.ofFloat(rlMain, "scaleX", 1f, 0.92f).setDuration(500).start();
-                ObjectAnimator obj3 = new ObjectAnimator().ofFloat(rlMain, "scaleY", 1f, 0.92f).setDuration(500);
+                ObjectAnimator.ofFloat(rlMain, "scaleX", 1f, 0.92f).setDuration(400).start();
+                ObjectAnimator obj3 = new ObjectAnimator().ofFloat(rlMain, "scaleY", 1f, 0.92f).setDuration(400);
                 obj3.addListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
                         super.onAnimationEnd(animation);
                         dialogLight.show();
+                        Handler handler = new Handler();
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                rlMusic.setVisibility(View.INVISIBLE);
+                                rlMedia.setVisibility(View.INVISIBLE);
+                                EventBus.getDefault().post(new MyEventBus2("100"));
+                            }
+                        },500);
                         isDialogLightShow = true;
-                        controlLightBaseAdapter.changeLightLoopValue(10);     //设置按钮的选中
+                        controlLightBaseAdapter.changeLightLoopValue(0);  //初始化按钮点击选中
+                        //controlLightBaseAdapter.changeLightLoopValue(10);     //设置按钮的选中
                         setDiffRoomsLight(index);       //设置不同房间灯光回路
                         ObjectAnimator obj = new ObjectAnimator().ofFloat(viewLight,"translationY",(float) (height*0.8),0).setDuration(500);
                         obj.start();
@@ -1688,14 +1756,16 @@ public class MyMainActivity extends FragmentActivity {
                 case R.id.rl_music:
                     musicOkhttpGet(1,musicRecommendUrl);      //获取推荐歌曲列表
                     //Toast.makeText(MyMainActivity.this, "音乐", Toast.LENGTH_SHORT).show();
-                    ofFloat(rlMain, "scaleX", 1f, 0.92f).setDuration(500).start();
-                    ObjectAnimator obj2 = new ObjectAnimator().ofFloat(rlMain, "scaleY", 1f, 0.92f).setDuration(500);
+                    ofFloat(rlMain, "scaleX", 1f, 0.92f).setDuration(400).start();
+                    ObjectAnimator obj2 = new ObjectAnimator().ofFloat(rlMain, "scaleY", 1f, 0.92f).setDuration(400);
                     obj2.addListener(new AnimatorListenerAdapter() {
                         @Override
                         public void onAnimationEnd(Animator animation) {
                             super.onAnimationEnd(animation);
                             ofFloat(viewMusic,"translationY",(float) (height*0.8),0).setDuration(500).start();
                             dialogMusic.show();
+                            rlMusic.setVisibility(View.INVISIBLE);
+                            rlMedia.setVisibility(View.INVISIBLE);
                         }
                     });
                     obj2.start();

@@ -410,6 +410,8 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                 }
             };
 
+
+
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
@@ -433,6 +435,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                     if (mScrollY>(btHeight_X3*4/5)&&mScrollY<=btHeight_X3){
                         scrollToBottom();        //滑动到隐藏头
                         isHeadShown = false;
+                        isCanScroll = false;
                         pullDown(true,true);
                         new Thread(){
                             @Override
@@ -440,6 +443,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                                 super.run();
                                 try {
                                     sleep(800);
+                                    isCanScroll = true;
                                     EventBus.getDefault().post(new MyEventBusPullMenu(false,1));
                                 } catch (InterruptedException e) {
                                     e.printStackTrace();
@@ -450,13 +454,15 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                     }else if(mScrollY<=(btHeight_X3*4/5)){
                         scrollToTop();           //滑动到显示头
                         isHeadShown = true;
+                        isCanScroll = false;
                         pullDown(false,false);
                         new Thread(){
                             @Override
                             public void run() {
                                 super.run();
                                 try {
-                                    sleep(600);
+                                    sleep(800);
+                                    isCanScroll = true;
                                     EventBus.getDefault().post(new MyEventBusPullMenu(false,0));
                                 } catch (InterruptedException e) {
                                     e.printStackTrace();
@@ -468,6 +474,19 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                 }else if (isInitPosition==false){        //弹簧效果
                     if(mScrollY<btHeight_X3){
                         scrollToBottom();        //滑动到隐藏头
+                        isCanScroll = false;
+                        new Thread(){
+                            @Override
+                            public void run() {
+                                super.run();
+                                try {
+                                    sleep(600);
+                                    isCanScroll = true;
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }.start();
                         isHeadShown = false;
                         pullDown(true,true);
                     }
@@ -662,6 +681,29 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
     public void onDestroy() {
         super.onDestroy();
         EventBus.getDefault().unregister(this);  //反注册EventBus
+        if (bitmapBack!=null&&!bitmapBack.isRecycled()){
+            bitmapBack.recycle();
+            bitmapBack = null;
+        }if (view!=null){
+            view = null;
+        }if (llLight!=null){
+            llLight = null;
+        }if (llChuanglian!=null){
+            llChuanglian = null;
+        }if (ivBackGround!=null){
+            ivBackGround = null;
+        }if (ivBackGroundTrans!=null){
+            ivBackGroundTrans = null;
+        }if (scrollView!=null){
+            scrollView = null;
+        }if (commandData!=null){
+            commandData = null;
+        }if (svPullUpMenu!=null){
+            svPullUpMenu = null;
+        }if (linearPullUpScroll!=null){
+            linearPullUpScroll = null;
+        }
+        System.gc();
         Log.e("fragment_shunxu", "onDestroy");
     }
 
@@ -1144,12 +1186,12 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
 
     //--------------------------------接受activity传来的消息---------------------------------------
     private int ConnectState = 0;      //连接的状态：0.断开连接 1.内网连接 2.外网连接
+
+    private static final String DIALOG_SHOW = "100";       //点击弹出dialog,桌面控件隐藏
+    private static final String DIALOG_DISMISS = "101";     //dialog消失后，控件重新出现
     @Subscribe
     public void onEventMainThread(MyEventBus2 event) {
-        /*if (msg=="jiankong"){
-            Intent intent = new Intent(MyMainActivity.this,EzCameraActivity.class);
-            startActivity(intent);
-        }*/
+
         switch (event.getmMsg()){
             case SCROLL_FRAGMENT_START:          //开始切换viewpager页面
                 //Log.i(TAG, "onEventMainThread: --------------onEventMainThread收到了消息--------------"+event.getmMsg());
@@ -1165,7 +1207,6 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                 if (!isHeadShown){
                     homeButtonSetVisableAnimator();
                 }
-
                 break;
             case "11":
                 Log.i(TAG, "onEventMainThread: ------————————————————————————————————————————————————————————---内网连接---------");
@@ -1185,6 +1226,12 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                 Message message = new Message();
                 message.what = 2;
                 handler.sendMessage(message);         //断开连接后更新ui
+                break;
+            case DIALOG_SHOW:
+                btPullMenu.setVisibility(View.INVISIBLE);
+                break;
+            case DIALOG_DISMISS:
+                btPullMenu.setVisibility(View.VISIBLE);
                 break;
         }
     }
@@ -1206,8 +1253,16 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
             case "4":
                 sendSceneControlData(roomIndex,3);      //发送场景的控制命令
                 break;
+            case DIALOG_SHOW:
+
+                break;
+            case DIALOG_DISMISS:
+
+                break;
         }
     }
+
+
 
     //------------------------连接状态灯的动画--------------------------------
     //断开连接时的动画
@@ -1301,7 +1356,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                     setScaleAnimation(rlLight);
                     clickLightSwitch();
                     //scrollView滚回到初始位置
-                    svPullUpMenu.smoothScrollToSlow(0,btHeight_X3,1000);
+                    svPullUpMenu.smoothScrollToSlow(0,btHeight_X3,600);
                     flag = true;
                     pullDown(true,true);
                     break;
@@ -2078,12 +2133,13 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         BGPThread.start();
     }
 
+    private Bitmap bitmapBack;
     private void initBackPicture(){
 
-        Bitmap bitmap = BitmapFactory.decodeResource(getResources(),backList[randomNum]);
+        bitmapBack = BitmapFactory.decodeResource(getResources(),backList[randomNum]);
         //Bitmap bitmap = readBitMap(getActivity(),backList[randomNum]);
-        Log.i("bitmap", "initBackPicture: bitmap"+bitmap);
-        ivBackGround.setImageBitmap(bitmap);
+        Log.i("bitmap", "initBackPicture: bitmap"+bitmapBack);
+        ivBackGround.setImageBitmap(bitmapBack);
     }
 
 
@@ -2263,6 +2319,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                 case R.id.rl_room_name:
                     if (scrollY==0){
                         svPullUpMenu.smoothScrollToSlow(0,btHeight_X3,600);          //回到初始位置
+                        isCanScroll = false;                    //动画的这段时间设置scrollView不能滑动
                         flag = true;
                         pullDown(true,true);
                         new Thread(){
@@ -2271,6 +2328,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                                 super.run();
                                 try {
                                     sleep(700);
+                                    isCanScroll = true;                    //动画结束后scrollView才能滑动
                                     EventBus.getDefault().post(new MyEventBusPullMenu(false,1));
                                 } catch (InterruptedException e) {
                                     e.printStackTrace();
@@ -2322,56 +2380,82 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
             if (scrollY<btHeight_X3){
                 rlRoomName.setAlpha(1f);
                 ivHomeIcon.setAlpha(1f);
+                ivHomeIconYellow.setAlpha(1f);
+                ivHomeIconRed.setAlpha(1f);
                 tvRoomNameTop.setAlpha(0f);
                 //pullDown(false,true);
             }else if (scrollY<hideHeight && scrollY>=btHeight_X3){
                 rlRoomName.setAlpha(1f);
                 ivHomeIcon.setAlpha(1f);
+                ivHomeIconYellow.setAlpha(1f);
+                ivHomeIconRed.setAlpha(1f);
                 tvRoomNameTop.setAlpha(0f);
                 pullDown(false,true);
             }else if (scrollY>=hideHeight && scrollY<hideHeight+10){
                 rlRoomName.setAlpha(0.9f);
                 ivHomeIcon.setAlpha(0.9f);
+                ivHomeIconYellow.setAlpha(0.9f);
+                ivHomeIconRed.setAlpha(0.9f);
                 tvRoomNameTop.setAlpha(0.1f);
             }else if (scrollY>=hideHeight+10 && scrollY<hideHeight+20){
                 rlRoomName.setAlpha(0.8f);
                 ivHomeIcon.setAlpha(0.8f);
+                ivHomeIconYellow.setAlpha(0.8f);
+                ivHomeIconRed.setAlpha(0.8f);
                 tvRoomNameTop.setAlpha(0.2f);
             }else if (scrollY>=hideHeight+20 && scrollY<hideHeight+30){
                 rlRoomName.setAlpha(0.7f);
                 ivHomeIcon.setAlpha(0.7f);
+                ivHomeIconYellow.setAlpha(0.7f);
+                ivHomeIconRed.setAlpha(0.7f);
                 tvRoomNameTop.setAlpha(0.3f);
             }else if (scrollY>=hideHeight+30 && scrollY<hideHeight+40){
                 rlRoomName.setAlpha(0.6f);
                 ivHomeIcon.setAlpha(0.6f);
+                ivHomeIconYellow.setAlpha(0.6f);
+                ivHomeIconRed.setAlpha(0.6f);
                 tvRoomNameTop.setAlpha(0.4f);
             }else if (scrollY>=hideHeight+40 && scrollY<hideHeight+50){
                 rlRoomName.setAlpha(0.5f);
                 ivHomeIcon.setAlpha(0.5f);
+                ivHomeIconYellow.setAlpha(0.5f);
+                ivHomeIconRed.setAlpha(0.5f);
                 tvRoomNameTop.setAlpha(0.5f);
             }else if (scrollY>=hideHeight+50 && scrollY<hideHeight+60){
                 rlRoomName.setAlpha(0.4f);
                 ivHomeIcon.setAlpha(0.4f);
+                ivHomeIconYellow.setAlpha(0.4f);
+                ivHomeIconRed.setAlpha(0.4f);
                 tvRoomNameTop.setAlpha(0.6f);
             }else if (scrollY>=hideHeight+60 && scrollY<hideHeight+70){
                 rlRoomName.setAlpha(0.3f);
                 ivHomeIcon.setAlpha(0.3f);
+                ivHomeIconYellow.setAlpha(0.3f);
+                ivHomeIconRed.setAlpha(0.3f);
                 tvRoomNameTop.setAlpha(0.7f);
             }else if (scrollY>=hideHeight+70 && scrollY<hideHeight+80){
                 rlRoomName.setAlpha(0.2f);
                 ivHomeIcon.setAlpha(0.2f);
+                ivHomeIconYellow.setAlpha(0.2f);
+                ivHomeIconRed.setAlpha(0.2f);
                 tvRoomNameTop.setAlpha(0.8f);
             }else if (scrollY>=hideHeight+80 && scrollY<hideHeight+90){
                 rlRoomName.setAlpha(0.1f);
                 ivHomeIcon.setAlpha(0.1f);
+                ivHomeIconYellow.setAlpha(0.1f);
+                ivHomeIconRed.setAlpha(0.1f);
                 tvRoomNameTop.setAlpha(0.9f);
             }else if (scrollY>=hideHeight+90 && scrollY<hideHeight+100){
                 rlRoomName.setAlpha(0.05f);
                 ivHomeIcon.setAlpha(0.05f);
+                ivHomeIconYellow.setAlpha(0.05f);
+                ivHomeIconRed.setAlpha(0.05f);
                 tvRoomNameTop.setAlpha(0.95f);
             }else if (scrollY>=hideHeight+100){
                 rlRoomName.setAlpha(0f);
                 ivHomeIcon.setAlpha(0f);
+                ivHomeIconYellow.setAlpha(0f);
+                ivHomeIconRed.setAlpha(0f);
                 tvRoomNameTop.setAlpha(1f);
                 pullDown(true,false);
             }
@@ -2419,7 +2503,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
             //homeButtonSetGoneAnimator();
             //弹出菜单     smoothScroll
             if (flag==true){
-                svPullUpMenu.smoothScrollToSlow(0,-btHeight_X3,1600);
+                svPullUpMenu.smoothScrollToSlow(0,-btHeight_X3,1000);
                 flag = false;
                 pullDown(false,false);
                 new Thread(){
@@ -2427,8 +2511,9 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
                     public void run() {
                         super.run();
                         try {
-                            sleep(600);
+                            sleep(800);
                             EventBus.getDefault().post(new MyEventBusPullMenu(false,0));
+                            sleep(300);
                             isCanScroll = true;
                         } catch (InterruptedException e) {
                             e.printStackTrace();
@@ -2478,6 +2563,7 @@ public class MyFragment extends Fragment implements PullUpMenuListener,GestureDe
         //Log.i("scroll_animation", "scrollToBottom: ==============能显示动画吗");
         isInitPosition = true;
         svPullUpMenu.smoothScrollToSlow(0,btHeight_X3,400);
+
         //svPullUpMenu.smoothScrollTo(0,btHeight_X3);
         flag = true;
         btPullMenu.setVisibility(View.VISIBLE);
