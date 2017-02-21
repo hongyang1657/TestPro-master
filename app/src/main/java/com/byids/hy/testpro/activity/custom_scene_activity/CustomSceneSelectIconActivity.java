@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -70,6 +71,12 @@ public class CustomSceneSelectIconActivity extends BaseActivity {
         initView();
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+    }
+
     private void initView() {
         typeFace = Typeface.createFromAsset(getAssets(), "fonts/xiyuanti.ttf");
         tvCustomIconTitle.setTypeface(typeFace);
@@ -77,7 +84,7 @@ public class CustomSceneSelectIconActivity extends BaseActivity {
         iconNum = getIntent().getIntExtra("iconNum",0);
 
         adapter = new CustomIconBaseAdapter(this,iconResList,iconResListSelect);
-        gvSelectIcon.setAdapter(adapter);
+        adapter.changeIconColor(iconNum);
         gvSelectIcon.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -85,8 +92,14 @@ public class CustomSceneSelectIconActivity extends BaseActivity {
                 iconPosition = position;
             }
         });
-
-        adapter.changeIconColor(iconNum);
+        gvSelectIcon.setAdapter(adapter);
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                adapter.notifyDataSetChanged();
+            }
+        },100);
     }
 
     @OnClick({R.id.iv_custom_icon_back, R.id.tv_custom_selecter_icon_save})

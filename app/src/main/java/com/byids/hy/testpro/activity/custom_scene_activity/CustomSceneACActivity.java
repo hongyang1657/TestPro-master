@@ -1,5 +1,6 @@
 package com.byids.hy.testpro.activity.custom_scene_activity;
 
+import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.util.Log;
@@ -72,9 +73,15 @@ public class CustomSceneACActivity extends BaseActivity {
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.iv_custom_ac_back:
+                Intent intent = new Intent();
+                intent.putExtra("customIconNum",-1);
+                setResult(1,intent);
                 finish();
                 break;
             case R.id.tv_custom_ac_save:
+                Intent intent1 = new Intent();
+                intent1.putExtra("customIconNum",1);
+                setResult(1,intent1);
                 finish();
                 break;
             case R.id.rb_custom_ac_auto:
