@@ -85,6 +85,7 @@ import static android.animation.ObjectAnimator.ofFloat;
 import static java.lang.Integer.parseInt;
 
 /**
+ * 2017.2.22 最后一天提交
  * 主界面：
  * 第一次登陆通过外网获取房间信息后
  * Created by hy on 2016/8/15.
