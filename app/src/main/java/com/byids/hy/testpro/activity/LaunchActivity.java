@@ -346,8 +346,7 @@ public class LaunchActivity extends BaseActivity{
     private void secondLoginLAN(){
         SharedPreferences spToken = getSharedPreferences("user_token",MODE_PRIVATE);
         saveToken = spToken.getString("token","");
-        //ip = "192.168.10.167";                    //指定连接的主机，以后删除
-        //ip = "192.168.3.16";
+
         connectTcp = new ConnectTcp();
         tcplongSocket = new TcpLongSocket(connectTcp);
         tcplongSocket.startConnect(ip, DEFAULT_PORT);

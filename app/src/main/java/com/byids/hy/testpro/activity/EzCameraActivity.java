@@ -300,6 +300,7 @@ public class EzCameraActivity extends BaseActivity{
                     }
                     break;
                 default:
+
                     break;
             }
         }

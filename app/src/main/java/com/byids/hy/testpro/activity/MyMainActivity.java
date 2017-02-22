@@ -1391,6 +1391,7 @@ public class MyMainActivity extends FragmentActivity {
                 //ObjectAnimator.ofFloat(ivBlackFront, "alpha", 0.7f, 0f).setDuration(500).start();
                 rlMusic.setVisibility(View.VISIBLE);
                 rlMedia.setVisibility(View.VISIBLE);
+                EventBus.getDefault().post(new MyEventBus2("101"));
             }
         });
         WindowManager.LayoutParams params = dialogMusic.getWindow().getAttributes();
@@ -1522,7 +1523,7 @@ public class MyMainActivity extends FragmentActivity {
     private String musicTopTypeSoar = "soar";      //排行榜类型 soar 飙升
 
     private String musicRecommendUrl = "http://115.29.97.189:11912/recomm/music";        //推荐歌曲url    http://115.29.97.189:11912/
-    private String musicRecommendPlayListUrl = "http://115.29.97.189:11912/recomm/playlist";       //推荐歌单url
+    private String musicRecommendPlayList23Url = "http://115.29.97.189:11912/recomm/playlist";       //推荐歌单url
     private String musicDetailSongUrl = "http://115.29.97.189:11912/detail/song/"+musicId;        //根据歌曲id，获取歌曲信息url
     private String musicTopListUrlNew = "http://115.29.97.189:11912/toplist/"+musicTopTypeNew;         //排行榜类型, new: 新歌, hot: 热歌, origin: 原创, soar: 飙升
     private String musicTopListUrlHot = "http://115.29.97.189:11912/toplist/"+musicTopTypeHot;
@@ -1766,6 +1767,7 @@ public class MyMainActivity extends FragmentActivity {
                             dialogMusic.show();
                             rlMusic.setVisibility(View.INVISIBLE);
                             rlMedia.setVisibility(View.INVISIBLE);
+                            EventBus.getDefault().post(new MyEventBus2("100"));
                         }
                     });
                     obj2.start();

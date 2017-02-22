@@ -105,7 +105,7 @@ public class UDPSocket {
             for (int i=0;i<3;i++){
                 try {
                     udpSocket.receive(receiveData);
-                    //udpSocket.receive(receiveData);            //我的天，写几次就是用来区分同一个端口下的不同设备！！！神奇的代码。。。。。。
+                    //udpSocket.receive(receiveData);            //写几次就是用来区分同一个端口下的不同设备
                 } catch (Exception e) {
                     Log.e(LOG_TAG, e.toString());
                     udpSocket.close();
